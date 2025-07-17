@@ -18,19 +18,42 @@
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="A new Flutter project.">
+  <meta name="description" content="A vocabulary learning app with spaced repetition.">
 
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="app">
+  <meta name="apple-mobile-web-app-title" content="Vocab Learner">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png"/>
+  <link href="https://db.onlinewebfonts.com/c/359daf377c374b65e821b9f218fc91ef?family=Google+Sans+Flex" rel="stylesheet">
 
-  <title>app</title>
+  <title>Vocabulary</title>
   <link rel="manifest" href="manifest.json">
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-storage-compat.js"></script>
+  
+  <script>
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyDwu-WnKDBzKEGSAM8LOFzVQpaKEIbB-WI",
+      authDomain: "flash-card-22d3c.firebaseapp.com",
+      projectId: "flash-card-22d3c",
+      storageBucket: "flash-card-22d3c.firebasestorage.app",
+      messagingSenderId: "709370489781",
+      appId: "1:709370489781:web:15c15fdf7f41b9fd2687fc",
+      measurementId: "G-5NTNZXT6E7"
+    };
+    
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+  </script>
 </head>
 <body>
   <script src="flutter_bootstrap.js" async></script>

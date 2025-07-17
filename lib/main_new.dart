@@ -40,7 +40,7 @@ class VocabLearnerApp extends StatelessWidget {
             elevation: 0,
           ),
           cardTheme: CardThemeData(
-            elevation: 2,
+            elevation: 1,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
@@ -66,7 +66,7 @@ class VocabLearnerApp extends StatelessWidget {
             elevation: 0,
           ),
           cardTheme: CardThemeData(
-            elevation: 2,
+            elevation: 1,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),

@@ -71,7 +71,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 
                 // Welcome text
                 Text(
-                  'Join Vocab Learner',
+                  'Join Vocabulary',
                   textAlign: TextAlign.center,
                   style: theme.textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.bold,
@@ -91,10 +91,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 // Display Name field
                 TextFormField(
                   controller: _displayNameController,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Display Name',
-                    prefixIcon: Icon(Icons.person),
-                    border: OutlineInputBorder(),
+                    prefixIcon: const Icon(Icons.person_outlined),
+                    fillColor: theme.colorScheme.surfaceContainerHighest,
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -112,10 +112,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 TextFormField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Email',
-                    prefixIcon: Icon(Icons.email),
-                    border: OutlineInputBorder(),
+                    prefixIcon: const Icon(Icons.email_outlined),
+                    fillColor: theme.colorScheme.surfaceContainerHighest,
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -135,10 +135,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   obscureText: _obscurePassword,
                   decoration: InputDecoration(
                     labelText: 'Password',
-                    prefixIcon: const Icon(Icons.lock),
+                    prefixIcon: const Icon(Icons.lock_outlined),
                     suffixIcon: IconButton(
                       icon: Icon(
-                        _obscurePassword ? Icons.visibility : Icons.visibility_off,
+                        _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
                       ),
                       onPressed: () {
                         setState(() {
@@ -146,7 +146,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         });
                       },
                     ),
-                    border: const OutlineInputBorder(),
+                    fillColor: theme.colorScheme.surfaceContainerHighest,
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -166,10 +166,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   obscureText: _obscureConfirmPassword,
                   decoration: InputDecoration(
                     labelText: 'Confirm Password',
-                    prefixIcon: const Icon(Icons.lock_outline),
+                    prefixIcon: const Icon(Icons.lock_outlined),
                     suffixIcon: IconButton(
                       icon: Icon(
-                        _obscureConfirmPassword ? Icons.visibility : Icons.visibility_off,
+                        _obscureConfirmPassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
                       ),
                       onPressed: () {
                         setState(() {
@@ -177,7 +177,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         });
                       },
                     ),
-                    border: const OutlineInputBorder(),
+                    fillColor: theme.colorScheme.surfaceContainerHighest,
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -194,20 +194,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 // Register Button
                 Consumer<AuthProvider>(
                   builder: (context, authProvider, _) {
-                    return ElevatedButton(
+                    return FilledButton(
                       onPressed: authProvider.isLoading ? null : _register,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: theme.colorScheme.primary,
-                        foregroundColor: theme.colorScheme.onPrimary,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                      ),
                       child: authProvider.isLoading
                           ? const SizedBox(
                               height: 20,
                               width: 20,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                               ),
                             )
                           : const Text(

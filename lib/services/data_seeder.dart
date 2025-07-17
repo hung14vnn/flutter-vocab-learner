@@ -141,6 +141,8 @@ class VocabDataSeeder {
           difficulty: wordData['difficulty'],
           synonyms: List<String>.from(wordData['synonyms']),
           partOfSpeech: wordData['partOfSpeech'],
+          state: WordState.newWordState,
+          due: now.add(Duration(days: 7)), // Set due date 7 days from
           createdAt: now,
           updatedAt: now,
         );

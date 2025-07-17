@@ -9,6 +9,8 @@ class VocabWord {
   final String difficulty; // beginner, intermediate, advanced
   final List<String> synonyms;
   final String partOfSpeech;
+  final WordState state; // new, learning, mastered
+  final DateTime due;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -23,6 +25,8 @@ class VocabWord {
     required this.difficulty,
     this.synonyms = const [],
     required this.partOfSpeech,
+    this.state = WordState.newWordState,
+    required this.due,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -40,6 +44,11 @@ class VocabWord {
       difficulty: map['difficulty'] ?? 'beginner',
       synonyms: List<String>.from(map['synonyms'] ?? []),
       partOfSpeech: map['partOfSpeech'] ?? '',
+      state: WordState.values.firstWhere(
+        (state) => state.value == (map['state'] ?? WordState.newWordState.value),
+        orElse: () => WordState.newWordState,
+      ),
+      due: DateTime.fromMillisecondsSinceEpoch(map['due'] ?? 0),
       createdAt: DateTime.fromMillisecondsSinceEpoch(map['createdAt'] ?? 0),
       updatedAt: DateTime.fromMillisecondsSinceEpoch(map['updatedAt'] ?? 0),
     );
@@ -72,6 +81,8 @@ class VocabWord {
     String? difficulty,
     List<String>? synonyms,
     String? partOfSpeech,
+    WordState? state,
+    DateTime? due,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -86,8 +97,29 @@ class VocabWord {
       difficulty: difficulty ?? this.difficulty,
       synonyms: synonyms ?? this.synonyms,
       partOfSpeech: partOfSpeech ?? this.partOfSpeech,
+      state: state ?? this.state,
+      due: due ?? this.due,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
   }
+}
+
+class WordState {
+  static const String newWord = 'new';
+  static const String learning = 'learning';
+  static const String mastered = 'mastered';
+
+  final String value;
+
+  const WordState._(this.value);
+
+  static const WordState newWordState = WordState._(newWord);
+  static const WordState learningState = WordState._(learning);
+  static const WordState masteredState = WordState._(mastered);
+
+  static const List<WordState> values = [newWordState, learningState, masteredState];
+
+  @override
+  String toString() => value;
 }

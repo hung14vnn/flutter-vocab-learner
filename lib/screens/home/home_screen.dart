@@ -27,29 +27,32 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: _screens[_currentIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        currentIndex: _currentIndex,
-        onTap: (index) {
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _currentIndex,
+        onDestinationSelected: (index) {
           setState(() {
             _currentIndex = index;
           });
         },
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
+        destinations: const [
+          NavigationDestination(
+            icon: Icon(Icons.home_outlined),
+            selectedIcon: Icon(Icons.home),
             label: 'Home',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.book),
+          NavigationDestination(
+            icon: Icon(Icons.book_outlined),
+            selectedIcon: Icon(Icons.book),
             label: 'Vocabulary',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.quiz),
+          NavigationDestination(
+            icon: Icon(Icons.quiz_outlined),
+            selectedIcon: Icon(Icons.quiz),
             label: 'Practice',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
+          NavigationDestination(
+            icon: Icon(Icons.person_outlined),
+            selectedIcon: Icon(Icons.person),
             label: 'Profile',
           ),
         ],
@@ -64,10 +67,10 @@ class HomeTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Vocab Learner'),
+        title: const Text('Vocabulary'),
         actions: [
           Consumer<AuthProvider>(
             builder: (context, authProvider, _) {
@@ -75,8 +78,10 @@ class HomeTab extends StatelessWidget {
                 padding: const EdgeInsets.only(right: 16.0),
                 child: Center(
                   child: Text(
-                    'Hello, ${authProvider.appUser?.displayName ?? 'User'}!',
-                    style: theme.textTheme.bodyMedium,
+                    '${renderGreetingBasedOnTime()}, ${authProvider.appUser?.displayName.split(" ").first ?? "User"}!',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               );
@@ -141,9 +146,10 @@ class HomeTab extends StatelessWidget {
                             Expanded(
                               child: _StatCard(
                                 title: 'Accuracy',
-                                value: '${(progressProvider.averageAccuracy * 100).toStringAsFixed(1)}%',
+                                value:
+                                    '${(progressProvider.averageAccuracy * 100).toStringAsFixed(1)}%',
                                 icon: Icons.track_changes,
-                                color: Colors.purple,
+                                color: Color(0xFFE2E0F9),
                               ),
                             ),
                           ],
@@ -152,9 +158,9 @@ class HomeTab extends StatelessWidget {
                     ),
                   ),
                 ),
-                
+
                 const SizedBox(height: 20),
-                
+
                 // Quick Actions
                 Text(
                   'Quick Actions',
@@ -163,7 +169,7 @@ class HomeTab extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 12),
-                
+
                 Row(
                   children: [
                     Expanded(
@@ -176,7 +182,9 @@ class HomeTab extends StatelessWidget {
                           // Simple navigation message
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
-                              content: Text('Navigate to Practice tab to start practicing!'),
+                              content: Text(
+                                'Navigate to Practice tab to start practicing!',
+                              ),
                             ),
                           );
                         },
@@ -193,7 +201,9 @@ class HomeTab extends StatelessWidget {
                           // Navigate to vocabulary screen
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
-                              content: Text('Navigate to Vocabulary tab to browse words!'),
+                              content: Text(
+                                'Navigate to Vocabulary tab to browse words!',
+                              ),
                             ),
                           );
                         },
@@ -201,9 +211,9 @@ class HomeTab extends StatelessWidget {
                     ),
                   ],
                 ),
-                
+
                 const SizedBox(height: 20),
-                
+
                 // Recent Activity
                 Text(
                   'Recent Activity',
@@ -212,7 +222,7 @@ class HomeTab extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 12),
-                
+
                 Expanded(
                   child: Card(
                     child: progressProvider.userProgress.isEmpty
@@ -242,19 +252,20 @@ class HomeTab extends StatelessWidget {
                           )
                         : ListView.builder(
                             padding: const EdgeInsets.all(16.0),
-                            itemCount: progressProvider.userProgress.length > 5 
-                                ? 5 
+                            itemCount: progressProvider.userProgress.length > 5
+                                ? 5
                                 : progressProvider.userProgress.length,
                             itemBuilder: (context, index) {
-                              final progress = progressProvider.userProgress[index];
+                              final progress =
+                                  progressProvider.userProgress[index];
                               return ListTile(
                                 leading: CircleAvatar(
-                                  backgroundColor: progress.isLearned 
-                                      ? Colors.green 
+                                  backgroundColor: progress.isLearned
+                                      ? Colors.green
                                       : Colors.orange,
                                   child: Icon(
-                                    progress.isLearned 
-                                        ? Icons.check 
+                                    progress.isLearned
+                                        ? Icons.check
                                         : Icons.schedule,
                                     color: Colors.white,
                                     size: 20,
@@ -265,10 +276,12 @@ class HomeTab extends StatelessWidget {
                                   'Accuracy: ${(progress.accuracy * 100).toStringAsFixed(1)}%',
                                 ),
                                 trailing: Text(
-                                  progress.isLearned ? 'Learned' : 'In Progress',
+                                  progress.isLearned
+                                      ? 'Learned'
+                                      : 'In Progress',
                                   style: TextStyle(
-                                    color: progress.isLearned 
-                                        ? Colors.green 
+                                    color: progress.isLearned
+                                        ? Colors.green
                                         : Colors.orange,
                                     fontWeight: FontWeight.w500,
                                   ),
@@ -284,6 +297,17 @@ class HomeTab extends StatelessWidget {
         },
       ),
     );
+  }
+
+  String renderGreetingBasedOnTime() {
+    final hour = DateTime.now().hour;
+    if (hour < 12) {
+      return 'Good Morning';
+    } else if (hour < 17) {
+      return 'Good Afternoon';
+    } else {
+      return 'Good Evening';
+    }
   }
 }
 
@@ -324,10 +348,7 @@ class _StatCard extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             title,
-            style: const TextStyle(
-              fontSize: 12,
-              color: Colors.grey,
-            ),
+            style: const TextStyle(fontSize: 12, color: Colors.grey),
             textAlign: TextAlign.center,
           ),
         ],
@@ -378,10 +399,7 @@ class _ActionCard extends StatelessWidget {
               const SizedBox(height: 4),
               Text(
                 subtitle,
-                style: const TextStyle(
-                  color: Colors.grey,
-                  fontSize: 12,
-                ),
+                style: const TextStyle(color: Colors.grey, fontSize: 12),
                 textAlign: TextAlign.center,
               ),
             ],

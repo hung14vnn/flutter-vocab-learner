@@ -45,7 +45,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Scaffold(
       body: SafeArea(
         child: Padding(
@@ -57,14 +57,21 @@ class _LoginScreenState extends State<LoginScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 // App Logo and Title
-                Icon(
-                  Icons.school,
-                  size: 80,
-                  color: theme.colorScheme.primary,
+                Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primaryContainer,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.school_outlined,
+                    size: 48,
+                    color: theme.colorScheme.onPrimaryContainer,
+                  ),
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'Vocab Learner',
+                  'Vocabulary',
                   textAlign: TextAlign.center,
                   style: theme.textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.bold,
@@ -85,10 +92,12 @@ class _LoginScreenState extends State<LoginScreen> {
                 TextFormField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Email',
-                    prefixIcon: Icon(Icons.email),
-                    border: OutlineInputBorder(),
+                    prefixIcon: const Icon(Icons.email_outlined),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -108,10 +117,15 @@ class _LoginScreenState extends State<LoginScreen> {
                   obscureText: _obscurePassword,
                   decoration: InputDecoration(
                     labelText: 'Password',
-                    prefixIcon: const Icon(Icons.lock),
+                    prefixIcon: const Icon(Icons.lock_outlined),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
                     suffixIcon: IconButton(
                       icon: Icon(
-                        _obscurePassword ? Icons.visibility : Icons.visibility_off,
+                        _obscurePassword
+                            ? Icons.visibility_outlined
+                            : Icons.visibility_off_outlined,
                       ),
                       onPressed: () {
                         setState(() {
@@ -119,7 +133,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         });
                       },
                     ),
-                    border: const OutlineInputBorder(),
+                    fillColor: theme.colorScheme.surfaceContainerHighest,
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -136,25 +150,23 @@ class _LoginScreenState extends State<LoginScreen> {
                 // Sign In Button
                 Consumer<AuthProvider>(
                   builder: (context, authProvider, _) {
-                    return ElevatedButton(
+                    return FilledButton(
                       onPressed: authProvider.isLoading ? null : _signIn,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: theme.colorScheme.primary,
-                        foregroundColor: theme.colorScheme.onPrimary,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                      ),
                       child: authProvider.isLoading
                           ? const SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                              ),
+                              height: 24,
+                              width: 24,
+                              child: CircularProgressIndicator(strokeWidth: 2),
                             )
-                          : const Text(
-                              'Sign In',
-                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                          : SizedBox(
+                              height: 24,
+                              child: const Text(
+                                'Sign In',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
                             ),
                     );
                   },
@@ -190,7 +202,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   void _showForgotPasswordDialog() {
     final emailController = TextEditingController();
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -198,14 +210,19 @@ class _LoginScreenState extends State<LoginScreen> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('Enter your email address to receive a password reset link.'),
+            const Text(
+              'Enter your email address to receive a password reset link.',
+            ),
             const SizedBox(height: 16),
             TextField(
               controller: emailController,
               keyboardType: TextInputType.emailAddress,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Email',
-                border: OutlineInputBorder(),
+                prefixIcon: const Icon(Icons.email_outlined),
+                fillColor: Theme.of(
+                  context,
+                ).colorScheme.surfaceContainerHighest,
               ),
             ),
           ],
@@ -215,20 +232,26 @@ class _LoginScreenState extends State<LoginScreen> {
             onPressed: () => Navigator.of(context).pop(),
             child: const Text('Cancel'),
           ),
-          ElevatedButton(
+          FilledButton(
             onPressed: () async {
               if (emailController.text.isNotEmpty) {
-                final authProvider = Provider.of<AuthProvider>(context, listen: false);
-                final success = await authProvider.resetPassword(emailController.text.trim());
-                
+                final authProvider = Provider.of<AuthProvider>(
+                  context,
+                  listen: false,
+                );
+                final success = await authProvider.resetPassword(
+                  emailController.text.trim(),
+                );
+
                 if (context.mounted) {
                   Navigator.of(context).pop();
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(
-                        success 
+                        success
                             ? 'Password reset email sent!'
-                            : authProvider.errorMessage ?? 'Failed to send reset email',
+                            : authProvider.errorMessage ??
+                                  'Failed to send reset email',
                       ),
                       backgroundColor: success ? Colors.green : Colors.red,
                     ),
