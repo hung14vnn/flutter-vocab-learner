@@ -12,7 +12,7 @@ class VocabDataSeeder {
       'pronunciation': '/əˈbʌndənt/',
       'examples': [
         'The region has abundant natural resources.',
-        'There was abundant evidence of his guilt.'
+        'There was abundant evidence of his guilt.',
       ],
       'difficulty': 'intermediate',
       'synonyms': ['plentiful', 'copious', 'ample'],
@@ -24,7 +24,7 @@ class VocabDataSeeder {
       'pronunciation': '/bɪˈnevələnt/',
       'examples': [
         'He was a benevolent dictator.',
-        'The organization relies on benevolent donations.'
+        'The organization relies on benevolent donations.',
       ],
       'difficulty': 'advanced',
       'synonyms': ['kind', 'generous', 'charitable'],
@@ -36,7 +36,7 @@ class VocabDataSeeder {
       'pronunciation': '/ˈkruːʃəl/',
       'examples': [
         'It is crucial that we arrive on time.',
-        'This is a crucial moment in the negotiations.'
+        'This is a crucial moment in the negotiations.',
       ],
       'difficulty': 'intermediate',
       'synonyms': ['critical', 'vital', 'essential'],
@@ -44,11 +44,12 @@ class VocabDataSeeder {
     },
     {
       'word': 'diligent',
-      'definition': 'Having or showing care and conscientiousness in one\'s work or duties',
+      'definition':
+          'Having or showing care and conscientiousness in one\'s work or duties',
       'pronunciation': '/ˈdɪlɪdʒənt/',
       'examples': [
         'She was a diligent student.',
-        'His diligent efforts paid off.'
+        'His diligent efforts paid off.',
       ],
       'difficulty': 'intermediate',
       'synonyms': ['hardworking', 'industrious', 'careful'],
@@ -60,7 +61,7 @@ class VocabDataSeeder {
       'pronunciation': '/ˈeləkwənt/',
       'examples': [
         'She gave an eloquent speech.',
-        'His eloquent words moved the audience.'
+        'His eloquent words moved the audience.',
       ],
       'difficulty': 'advanced',
       'synonyms': ['articulate', 'fluent', 'persuasive'],
@@ -72,7 +73,7 @@ class VocabDataSeeder {
       'pronunciation': '/ˈfrɪvələs/',
       'examples': [
         'She considered his comment frivolous.',
-        'The court dismissed the frivolous lawsuit.'
+        'The court dismissed the frivolous lawsuit.',
       ],
       'difficulty': 'advanced',
       'synonyms': ['trivial', 'superficial', 'silly'],
@@ -84,7 +85,7 @@ class VocabDataSeeder {
       'pronunciation': '/ˈdʒenərəs/',
       'examples': [
         'She was generous with her time.',
-        'He made a generous donation to charity.'
+        'He made a generous donation to charity.',
       ],
       'difficulty': 'beginner',
       'synonyms': ['kind', 'giving', 'benevolent'],
@@ -92,11 +93,12 @@ class VocabDataSeeder {
     },
     {
       'word': 'humble',
-      'definition': 'Having or showing a modest or low estimate of one\'s importance',
+      'definition':
+          'Having or showing a modest or low estimate of one\'s importance',
       'pronunciation': '/ˈhʌmbəl/',
       'examples': [
         'Despite his success, he remained humble.',
-        'She came from humble beginnings.'
+        'She came from humble beginnings.',
       ],
       'difficulty': 'beginner',
       'synonyms': ['modest', 'unassuming', 'meek'],
@@ -108,7 +110,7 @@ class VocabDataSeeder {
       'pronunciation': '/ˈɪnəveɪtɪv/',
       'examples': [
         'The company is known for its innovative products.',
-        'She has an innovative approach to teaching.'
+        'She has an innovative approach to teaching.',
       ],
       'difficulty': 'intermediate',
       'synonyms': ['creative', 'original', 'inventive'],
@@ -120,7 +122,7 @@ class VocabDataSeeder {
       'pronunciation': '/ˈdʒuːbɪlənt/',
       'examples': [
         'The team was jubilant after their victory.',
-        'She felt jubilant about her promotion.'
+        'She felt jubilant about her promotion.',
       ],
       'difficulty': 'advanced',
       'synonyms': ['elated', 'ecstatic', 'overjoyed'],
@@ -128,12 +130,13 @@ class VocabDataSeeder {
     },
   ];
 
-  static Future<void> seedVocabularyData() async {
+  static Future<void> seedVocabularyData(String userId) async {
     try {
       List<VocabWord> words = _sampleWords.map((wordData) {
         DateTime now = DateTime.now();
         return VocabWord(
           id: '', // Will be assigned by Firestore
+          userId: userId, // Use the provided userId
           word: wordData['word'],
           definition: wordData['definition'],
           pronunciation: wordData['pronunciation'],
@@ -156,10 +159,13 @@ class VocabDataSeeder {
     }
   }
 
-  static Future<bool> shouldSeedData() async {
+  static Future<bool> shouldSeedData(String userId) async {
     try {
-      // Check if we already have words in the database
-      List<VocabWord> existingWords = await _vocabService.getRandomWords(1);
+      // Check if we already have words in the database for this user
+      List<VocabWord> existingWords = await _vocabService.getRandomWords(
+        userId,
+        1,
+      );
       return existingWords.isEmpty;
     } catch (e) {
       debugPrint('Error checking existing data: $e');

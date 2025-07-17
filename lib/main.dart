@@ -23,7 +23,13 @@ class VocabLearnerApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
-        ChangeNotifierProvider(create: (_) => VocabProvider()),
+        ChangeNotifierProxyProvider<AuthProvider, VocabProvider>(
+          create: (_) => VocabProvider(),
+          update: (_, authProvider, vocabProvider) {
+            vocabProvider?.setUserId(authProvider.user?.uid);
+            return vocabProvider!;
+          },
+        ),
         ChangeNotifierProvider(create: (_) => ProgressProvider()),
       ],
       child: MaterialApp(
@@ -64,7 +70,9 @@ class VocabLearnerApp extends StatelessWidget {
             seedColor: Colors.indigo,
             brightness: Brightness.dark,
           ),
-          textTheme: GoogleFonts.plusJakartaSansTextTheme(ThemeData.dark().textTheme),
+          textTheme: GoogleFonts.plusJakartaSansTextTheme(
+            ThemeData.dark().textTheme,
+          ),
           useMaterial3: true,
           appBarTheme: const AppBarTheme(centerTitle: true, elevation: 0),
           cardTheme: CardThemeData(

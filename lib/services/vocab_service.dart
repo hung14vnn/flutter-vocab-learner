@@ -5,58 +5,70 @@ class VocabService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final String _collection = 'vocab_words';
 
-  // Get all vocabulary words
-  Stream<List<VocabWord>> getAllWords() {
+  // Get all vocabulary words for a specific user
+  Stream<List<VocabWord>> getAllWords(String userId) {
     return _firestore
         .collection(_collection)
-        .orderBy('createdAt', descending: true)
+        .where('userId', isEqualTo: userId)
         .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) => VocabWord.fromFirestore(
-                doc.data(), doc.id))
-            .toList());
+        .map((snapshot) {
+          List<VocabWord> words = snapshot.docs
+              .map((doc) => VocabWord.fromFirestore(doc.data(), doc.id))
+              .toList();
+          // Sort in memory by createdAt descending
+          words.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+          return words;
+        });
   }
 
-  // Get words by difficulty
-  Stream<List<VocabWord>> getWordsByDifficulty(String difficulty) {
+  // Get words by difficulty for a specific user
+  Stream<List<VocabWord>> getWordsByDifficulty(
+    String userId,
+    String difficulty,
+  ) {
     return _firestore
         .collection(_collection)
+        .where('userId', isEqualTo: userId)
         .where('difficulty', isEqualTo: difficulty)
-        .orderBy('createdAt', descending: true)
         .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) => VocabWord.fromFirestore(
-                doc.data(), doc.id))
-            .toList());
+        .map((snapshot) {
+          List<VocabWord> words = snapshot.docs
+              .map((doc) => VocabWord.fromFirestore(doc.data(), doc.id))
+              .toList();
+          // Sort in memory by createdAt descending
+          words.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+          return words;
+        });
   }
 
-  // Search words
-  Future<List<VocabWord>> searchWords(String query) async {
+  // Search words for a specific user
+  Future<List<VocabWord>> searchWords(String userId, String query) async {
     try {
       // Note: This is a basic search. For more advanced search,
       // consider using Algolia or similar service
       QuerySnapshot snapshot = await _firestore
           .collection(_collection)
+          .where('userId', isEqualTo: userId)
           .where('word', isGreaterThanOrEqualTo: query.toLowerCase())
           .where('word', isLessThanOrEqualTo: '${query.toLowerCase()}\uf8ff')
           .limit(20)
           .get();
 
       return snapshot.docs
-          .map((doc) => VocabWord.fromFirestore(
-              doc.data(), doc.id))
+          .map((doc) => VocabWord.fromFirestore(doc.data(), doc.id))
           .toList();
     } catch (e) {
       throw Exception('Failed to search words: $e');
     }
   }
 
-  // Get random words for practice
-  Future<List<VocabWord>> getRandomWords(int count) async {
+  // Get random words for practice for a specific user
+  Future<List<VocabWord>> getRandomWords(String userId, int count) async {
     try {
       // Get random words (simplified approach)
       QuerySnapshot snapshot = await _firestore
           .collection(_collection)
+          .where('userId', isEqualTo: userId)
           .limit(count * 2) // Get more than needed
           .get();
 
@@ -82,7 +94,9 @@ class VocabService {
 
       if (doc.exists && doc.data() != null) {
         return VocabWord.fromFirestore(
-            doc.data() as Map<String, dynamic>, doc.id);
+          doc.data() as Map<String, dynamic>,
+          doc.id,
+        );
       }
       return null;
     } catch (e) {
@@ -96,7 +110,7 @@ class VocabService {
       DocumentReference docRef = await _firestore
           .collection(_collection)
           .add(word.toFirestore());
-      
+
       return docRef.id;
     } catch (e) {
       throw Exception('Failed to add word: $e');
@@ -118,10 +132,7 @@ class VocabService {
   // Delete word (admin function)
   Future<void> deleteWord(String wordId) async {
     try {
-      await _firestore
-          .collection(_collection)
-          .doc(wordId)
-          .delete();
+      await _firestore.collection(_collection).doc(wordId).delete();
     } catch (e) {
       throw Exception('Failed to delete word: $e');
     }
@@ -134,21 +145,23 @@ class VocabService {
         .where('partOfSpeech', isEqualTo: partOfSpeech)
         .orderBy('word')
         .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) => VocabWord.fromFirestore(doc.data(), doc.id))
-            .toList());
+        .map(
+          (snapshot) => snapshot.docs
+              .map((doc) => VocabWord.fromFirestore(doc.data(), doc.id))
+              .toList(),
+        );
   }
 
   // Batch add words (admin function)
   Future<void> batchAddWords(List<VocabWord> words) async {
     try {
       WriteBatch batch = _firestore.batch();
-      
+
       for (VocabWord word in words) {
         DocumentReference docRef = _firestore.collection(_collection).doc();
         batch.set(docRef, word.toFirestore());
       }
-      
+
       await batch.commit();
     } catch (e) {
       throw Exception('Failed to batch add words: $e');

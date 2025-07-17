@@ -4,7 +4,7 @@ import '../services/vocab_service.dart';
 
 class VocabProvider with ChangeNotifier {
   final VocabService _vocabService = VocabService();
-  
+
   List<VocabWord> _allWords = [];
   List<VocabWord> _filteredWords = [];
   bool _isLoading = false;
@@ -12,6 +12,7 @@ class VocabProvider with ChangeNotifier {
   String _selectedDifficulty = 'all';
   String _selectedPartOfSpeech = 'all';
   String _searchQuery = '';
+  String? _currentUserId;
 
   List<VocabWord> get allWords => _allWords;
   List<VocabWord> get filteredWords => _filteredWords;
@@ -20,41 +21,61 @@ class VocabProvider with ChangeNotifier {
   String get selectedDifficulty => _selectedDifficulty;
   String get selectedPartOfSpeech => _selectedPartOfSpeech;
   String get searchQuery => _searchQuery;
+  String? get currentUserId =>
+      _currentUserId; // Added a getter for currentUserId
 
-  VocabProvider() {
-    _loadAllWords();
+  VocabProvider();
+
+  void setUserId(String? userId) {
+    if (_currentUserId != userId) {
+      _currentUserId = userId;
+      if (userId != null) {
+        _loadAllWords();
+      } else {
+        _allWords = [];
+        _filteredWords = [];
+        notifyListeners();
+      }
+    }
   }
 
   void _loadAllWords() {
+    if (_currentUserId == null) return;
+
     _setLoading(true);
-    _vocabService.getAllWords().listen(
-      (words) {
-        _allWords = words;
-        _applyFilters();
-        _setLoading(false);
-      },
-      onError: (error) {
-        _errorMessage = 'Failed to load vocabulary: $error';
-        _setLoading(false);
-      },
-    );
+    _vocabService
+        .getAllWords(_currentUserId!)
+        .listen(
+          (words) {
+            _allWords = words;
+            _applyFilters();
+            _setLoading(false);
+          },
+          onError: (error) {
+            _errorMessage = 'Failed to load vocabulary: $error';
+            _setLoading(false);
+          },
+        );
   }
 
   void _applyFilters() {
     _filteredWords = _allWords.where((word) {
-      bool matchesDifficulty = _selectedDifficulty == 'all' || 
+      bool matchesDifficulty =
+          _selectedDifficulty == 'all' ||
           word.difficulty == _selectedDifficulty;
-      
-      bool matchesPartOfSpeech = _selectedPartOfSpeech == 'all' || 
+
+      bool matchesPartOfSpeech =
+          _selectedPartOfSpeech == 'all' ||
           word.partOfSpeech == _selectedPartOfSpeech;
-      
-      bool matchesSearch = _searchQuery.isEmpty ||
+
+      bool matchesSearch =
+          _searchQuery.isEmpty ||
           word.word.toLowerCase().contains(_searchQuery.toLowerCase()) ||
           word.definition.toLowerCase().contains(_searchQuery.toLowerCase());
-      
+
       return matchesDifficulty && matchesPartOfSpeech && matchesSearch;
     }).toList();
-    
+
     notifyListeners();
   }
 
@@ -74,8 +95,9 @@ class VocabProvider with ChangeNotifier {
   }
 
   Future<List<VocabWord>> getRandomWords(int count) async {
+    if (_currentUserId == null) return [];
     try {
-      return await _vocabService.getRandomWords(count);
+      return await _vocabService.getRandomWords(_currentUserId!, count);
     } catch (e) {
       _errorMessage = 'Failed to get random words: $e';
       notifyListeners();
@@ -94,8 +116,9 @@ class VocabProvider with ChangeNotifier {
   }
 
   Future<List<VocabWord>> searchWords(String query) async {
+    if (_currentUserId == null) return [];
     try {
-      return await _vocabService.searchWords(query);
+      return await _vocabService.searchWords(_currentUserId!, query);
     } catch (e) {
       _errorMessage = 'Failed to search words: $e';
       notifyListeners();
@@ -107,6 +130,8 @@ class VocabProvider with ChangeNotifier {
   Future<bool> addWord(VocabWord word) async {
     try {
       await _vocabService.addWord(word);
+      // Note: The word will be automatically added to _allWords through the stream listener
+      // So we don't need to manually add it to the local list
       return true;
     } catch (e) {
       _errorMessage = 'Failed to add word: $e';
@@ -147,8 +172,13 @@ class VocabProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  List<String> get availableDifficulties => ['all', 'beginner', 'intermediate', 'advanced'];
-  
+  List<String> get availableDifficulties => [
+    'all',
+    'beginner',
+    'intermediate',
+    'advanced',
+  ];
+
   List<String> get availablePartsOfSpeech {
     Set<String> partsOfSpeech = {'all'};
     for (var word in _allWords) {

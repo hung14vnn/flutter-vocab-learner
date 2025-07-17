@@ -1,5 +1,6 @@
 class VocabWord {
   final String id;
+  final String userId; // The user who created this word
   final String word;
   final String definition;
   final String? pronunciation;
@@ -16,6 +17,7 @@ class VocabWord {
 
   VocabWord({
     required this.id,
+    required this.userId,
     required this.word,
     required this.definition,
     this.pronunciation,
@@ -35,6 +37,7 @@ class VocabWord {
     final Map<String, dynamic> map = data as Map<String, dynamic>;
     return VocabWord(
       id: id,
+      userId: map['userId'] ?? '',
       word: map['word'] ?? '',
       definition: map['definition'] ?? '',
       pronunciation: map['pronunciation'],
@@ -45,7 +48,8 @@ class VocabWord {
       synonyms: List<String>.from(map['synonyms'] ?? []),
       partOfSpeech: map['partOfSpeech'] ?? '',
       state: WordState.values.firstWhere(
-        (state) => state.value == (map['state'] ?? WordState.newWordState.value),
+        (state) =>
+            state.value == (map['state'] ?? WordState.newWordState.value),
         orElse: () => WordState.newWordState,
       ),
       due: DateTime.fromMillisecondsSinceEpoch(map['due'] ?? 0),
@@ -56,6 +60,7 @@ class VocabWord {
 
   Map<String, dynamic> toFirestore() {
     return {
+      'userId': userId,
       'word': word,
       'definition': definition,
       'pronunciation': pronunciation,
@@ -65,6 +70,8 @@ class VocabWord {
       'difficulty': difficulty,
       'synonyms': synonyms,
       'partOfSpeech': partOfSpeech,
+      'state': state.value,
+      'due': due.millisecondsSinceEpoch,
       'createdAt': createdAt.millisecondsSinceEpoch,
       'updatedAt': updatedAt.millisecondsSinceEpoch,
     };
@@ -72,6 +79,7 @@ class VocabWord {
 
   VocabWord copyWith({
     String? id,
+    String? userId,
     String? word,
     String? definition,
     String? pronunciation,
@@ -88,6 +96,7 @@ class VocabWord {
   }) {
     return VocabWord(
       id: id ?? this.id,
+      userId: userId ?? this.userId,
       word: word ?? this.word,
       definition: definition ?? this.definition,
       pronunciation: pronunciation ?? this.pronunciation,
@@ -118,7 +127,11 @@ class WordState {
   static const WordState learningState = WordState._(learning);
   static const WordState masteredState = WordState._(mastered);
 
-  static const List<WordState> values = [newWordState, learningState, masteredState];
+  static const List<WordState> values = [
+    newWordState,
+    learningState,
+    masteredState,
+  ];
 
   @override
   String toString() => value;
