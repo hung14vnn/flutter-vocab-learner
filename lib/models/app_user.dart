@@ -2,6 +2,7 @@ class AppUser {
   final String id;
   final String email;
   final String displayName;
+  final String? language;
   final String? photoUrl;
   final DateTime createdAt;
   final DateTime lastLoginAt;
@@ -15,6 +16,7 @@ class AppUser {
     required this.id,
     required this.email,
     required this.displayName,
+    this.language,
     this.photoUrl,
     required this.createdAt,
     required this.lastLoginAt,
@@ -32,6 +34,7 @@ class AppUser {
       email: map['email'] ?? '',
       displayName: map['displayName'] ?? '',
       photoUrl: map['photoUrl'],
+      language: map['language'],
       createdAt: DateTime.fromMillisecondsSinceEpoch(map['createdAt'] ?? 0),
       lastLoginAt: DateTime.fromMillisecondsSinceEpoch(map['lastLoginAt'] ?? 0),
       preferences: Map<String, dynamic>.from(map['preferences'] ?? {}),
@@ -49,6 +52,7 @@ class AppUser {
       'email': email,
       'displayName': displayName,
       'photoUrl': photoUrl,
+      'language': language,
       'createdAt': createdAt.millisecondsSinceEpoch,
       'lastLoginAt': lastLoginAt.millisecondsSinceEpoch,
       'preferences': preferences,
@@ -64,6 +68,7 @@ class AppUser {
     String? email,
     String? displayName,
     String? photoUrl,
+    String? language,
     DateTime? createdAt,
     DateTime? lastLoginAt,
     Map<String, dynamic>? preferences,
@@ -77,6 +82,7 @@ class AppUser {
       email: email ?? this.email,
       displayName: displayName ?? this.displayName,
       photoUrl: photoUrl ?? this.photoUrl,
+      language: language ?? this.language,
       createdAt: createdAt ?? this.createdAt,
       lastLoginAt: lastLoginAt ?? this.lastLoginAt,
       preferences: preferences ?? this.preferences,

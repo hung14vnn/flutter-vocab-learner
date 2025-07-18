@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:vocab_learner/utils/guid_generator.dart';
 import '../../providers/vocab_provider.dart';
+import '../../providers/auth_provider.dart';
 import '../../models/vocab_word.dart';
 import '../../services/ai_service.dart';
 
@@ -522,9 +523,14 @@ class _VocabListScreenState extends State<VocabListScreen> {
     );
 
     try {
+      // Get user's language from auth provider
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final userLanguage = authProvider.appUser?.language;
+      
       final analysis = await AIService.analyzeWord(
         word: word,
         partOfSpeech: partOfSpeech,
+        userLanguage: userLanguage,
       );
 
       // Close loading dialog

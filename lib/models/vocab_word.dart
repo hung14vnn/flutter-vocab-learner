@@ -3,6 +3,7 @@ class VocabWord {
   final String userId; // The user who created this word
   final String word;
   final String definition;
+  final String? definitionInUserLanguage; // Optional field for definition in user's language
   final String? pronunciation;
   final String? audioUrl;
   final String? imageUrl;
@@ -20,6 +21,7 @@ class VocabWord {
     required this.userId,
     required this.word,
     required this.definition,
+    this.definitionInUserLanguage,
     this.pronunciation,
     this.audioUrl,
     this.imageUrl,
@@ -40,6 +42,7 @@ class VocabWord {
       userId: map['userId'] ?? '',
       word: map['word'] ?? '',
       definition: map['definition'] ?? '',
+      definitionInUserLanguage: map['definitionInUserLanguage'],
       pronunciation: map['pronunciation'],
       audioUrl: map['audioUrl'],
       imageUrl: map['imageUrl'],
@@ -63,6 +66,7 @@ class VocabWord {
       'userId': userId,
       'word': word,
       'definition': definition,
+      'definitionInUserLanguage': definitionInUserLanguage,
       'pronunciation': pronunciation,
       'audioUrl': audioUrl,
       'imageUrl': imageUrl,
@@ -82,6 +86,7 @@ class VocabWord {
     String? userId,
     String? word,
     String? definition,
+    String? definitionInUserLanguage,
     String? pronunciation,
     String? audioUrl,
     String? imageUrl,
@@ -99,6 +104,7 @@ class VocabWord {
       userId: userId ?? this.userId,
       word: word ?? this.word,
       definition: definition ?? this.definition,
+      definitionInUserLanguage: definitionInUserLanguage ?? this.definitionInUserLanguage,
       pronunciation: pronunciation ?? this.pronunciation,
       audioUrl: audioUrl ?? this.audioUrl,
       imageUrl: imageUrl ?? this.imageUrl,

@@ -40,7 +40,6 @@ class VocabLearnerApp extends StatelessWidget {
             seedColor: Colors.indigo,
             brightness: Brightness.light,
           ),
-          textTheme: GoogleFonts.plusJakartaSansTextTheme(),
           useMaterial3: true,
           appBarTheme: const AppBarTheme(centerTitle: true, elevation: 0),
           cardTheme: CardThemeData(
@@ -69,9 +68,6 @@ class VocabLearnerApp extends StatelessWidget {
           colorScheme: ColorScheme.fromSeed(
             seedColor: Colors.indigo,
             brightness: Brightness.dark,
-          ),
-          textTheme: GoogleFonts.plusJakartaSansTextTheme(
-            ThemeData.dark().textTheme,
           ),
           useMaterial3: true,
           appBarTheme: const AppBarTheme(centerTitle: true, elevation: 0),
