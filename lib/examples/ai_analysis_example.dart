@@ -20,10 +20,13 @@ class ExampleUsage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Current User Language: ${authProvider.appUser?.language ?? "Not set"}'),
+                Text(
+                  'Current User Language: ${authProvider.appUser?.language ?? "Not set"}',
+                ),
                 const SizedBox(height: 20),
                 ElevatedButton(
-                  onPressed: () => _demonstrateAIAnalysis(context, authProvider),
+                  onPressed: () =>
+                      _demonstrateAIAnalysis(context, authProvider),
                   child: const Text('Analyze Word "Beautiful"'),
                 ),
               ],
@@ -34,11 +37,14 @@ class ExampleUsage extends StatelessWidget {
     );
   }
 
-  Future<void> _demonstrateAIAnalysis(BuildContext context, AuthProvider authProvider) async {
+  Future<void> _demonstrateAIAnalysis(
+    BuildContext context,
+    AuthProvider authProvider,
+  ) async {
     try {
       // Get user's language preference
       final userLanguage = authProvider.appUser?.language;
-      
+
       // Analyze the word with user's language
       final analysis = await AIService.analyzeWord(
         word: 'beautiful',
@@ -59,7 +65,10 @@ class ExampleUsage extends StatelessWidget {
                 children: [
                   _buildResultItem('Definition', analysis.definition),
                   if (analysis.definitionInUserLanguage != null)
-                    _buildResultItem('Definition in ${userLanguage}', analysis.definitionInUserLanguage!),
+                    _buildResultItem(
+                      'Definition in $userLanguage',
+                      analysis.definitionInUserLanguage!,
+                    ),
                   _buildResultItem('Pronunciation', analysis.pronunciation),
                   _buildResultItem('Examples', analysis.examples.join('\n')),
                   _buildResultItem('Synonyms', analysis.synonyms.join(', ')),
@@ -79,10 +88,7 @@ class ExampleUsage extends StatelessWidget {
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: $e'),
-            backgroundColor: Colors.red,
-          ),
+          SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
         );
       }
     }
@@ -94,10 +100,7 @@ class ExampleUsage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            label,
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
+          Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
           const SizedBox(height: 4),
           Text(value),
         ],

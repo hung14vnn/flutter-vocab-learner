@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../providers/auth_provider.dart';
 import '../../providers/progress_provider.dart';
 import '../vocab/vocab_list_screen.dart';
 import '../practice/practice_screen.dart';
@@ -15,6 +14,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
+  late PageController _pageController;
 
   final List<Widget> _screens = const [
     HomeTab(),
@@ -24,15 +24,40 @@ class _HomeScreenState extends State<HomeScreen> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    _pageController = PageController(initialPage: _currentIndex);
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _screens[_currentIndex],
+      body: PageView(
+        controller: _pageController,
+        onPageChanged: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+        },
+        children: _screens,
+      ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _currentIndex,
         onDestinationSelected: (index) {
           setState(() {
             _currentIndex = index;
           });
+          _pageController.animateToPage(
+            index,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOutSine,
+          );
         },
         destinations: const [
           NavigationDestination(
@@ -69,26 +94,7 @@ class HomeTab extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Vocabulary'),
-        actions: [
-          Consumer<AuthProvider>(
-            builder: (context, authProvider, _) {
-              return Padding(
-                padding: const EdgeInsets.only(right: 16.0),
-                child: Center(
-                  child: Text(
-                    '${renderGreetingBasedOnTime()}, ${authProvider.appUser?.displayName.split(" ").first ?? "User"}!',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              );
-            },
-          ),
-        ],
-      ),
+      appBar: AppBar(title: const Text('Vocabulary')),
       body: Consumer<ProgressProvider>(
         builder: (context, progressProvider, _) {
           return Padding(
@@ -109,7 +115,7 @@ class HomeTab extends StatelessWidget {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 14),
                         Row(
                           children: [
                             Expanded(
@@ -120,7 +126,7 @@ class HomeTab extends StatelessWidget {
                                 color: Colors.green,
                               ),
                             ),
-                            const SizedBox(width: 12),
+                            const SizedBox(width: 10),
                             Expanded(
                               child: _StatCard(
                                 title: 'In Progress',
@@ -131,7 +137,7 @@ class HomeTab extends StatelessWidget {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 10),
                         Row(
                           children: [
                             Expanded(
@@ -142,7 +148,7 @@ class HomeTab extends StatelessWidget {
                                 color: Colors.blue,
                               ),
                             ),
-                            const SizedBox(width: 12),
+                            const SizedBox(width: 10),
                             Expanded(
                               child: _StatCard(
                                 title: 'Accuracy',
@@ -228,20 +234,20 @@ class HomeTab extends StatelessWidget {
                     child: progressProvider.userProgress.isEmpty
                         ? const Center(
                             child: Padding(
-                              padding: EdgeInsets.all(20.0),
+                              padding: EdgeInsets.all(16.0),
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Icon(
                                     Icons.emoji_events,
-                                    size: 64,
+                                    size: 48,
                                     color: Colors.grey,
                                   ),
-                                  SizedBox(height: 16),
+                                  SizedBox(height: 10),
                                   Text(
                                     'Start learning to see your progress here!',
                                     style: TextStyle(
-                                      fontSize: 16,
+                                      fontSize: 12,
                                       color: Colors.grey,
                                     ),
                                     textAlign: TextAlign.center,
@@ -297,17 +303,6 @@ class HomeTab extends StatelessWidget {
         },
       ),
     );
-  }
-
-  String renderGreetingBasedOnTime() {
-    final hour = DateTime.now().hour;
-    if (hour < 12) {
-      return 'Good Morning';
-    } else if (hour < 17) {
-      return 'Good Afternoon';
-    } else {
-      return 'Good Evening';
-    }
   }
 }
 

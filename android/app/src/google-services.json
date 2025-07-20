@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "709370489781",
+    "project_id": "flash-card-22d3c",
+    "storage_bucket": "flash-card-22d3c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:709370489781:android:5304281e911469d52687fc",
+        "android_client_info": {
+          "package_name": "com.example.vocablearner.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB37TQkILTYwCKL4A8yogtwKMmjEeCbIYI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

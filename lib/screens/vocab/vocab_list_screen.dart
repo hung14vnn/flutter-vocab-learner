@@ -1,5 +1,4 @@
 // ignore_for_file: use_build_context_synchronously
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:vocab_learner/utils/guid_generator.dart';
@@ -7,6 +6,7 @@ import '../../providers/vocab_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../models/vocab_word.dart';
 import '../../services/ai_service.dart';
+import '../../widgets/vocab_word_card.dart';
 
 class VocabListScreen extends StatefulWidget {
   const VocabListScreen({super.key});
@@ -173,6 +173,7 @@ class _VocabListScreenState extends State<VocabListScreen> {
     final definitionController = TextEditingController();
     final pronunciationController = TextEditingController();
     final exampleController = TextEditingController();
+    final nativeDefinitionController = TextEditingController();
     final synonymsController = TextEditingController();
     String selectedDifficulty = 'beginner';
     String selectedPartOfSpeech = 'noun';
@@ -256,6 +257,7 @@ class _VocabListScreenState extends State<VocabListScreen> {
                           wordController.text.trim(),
                           selectedPartOfSpeech,
                           definitionController,
+                          nativeDefinitionController,
                           pronunciationController,
                           exampleController,
                           synonymsController,
@@ -282,6 +284,16 @@ class _VocabListScreenState extends State<VocabListScreen> {
                     border: OutlineInputBorder(),
                   ),
                   maxLines: 3,
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: nativeDefinitionController,
+                  decoration: const InputDecoration(
+                    labelText: 'Native language definition (optional)',
+                    border: OutlineInputBorder(),
+                    hintText: 'Enter a definition or use AI to generate...',
+                  ),
+                  maxLines: 2,
                 ),
                 const SizedBox(height: 12),
                 TextField(
@@ -410,6 +422,10 @@ class _VocabListScreenState extends State<VocabListScreen> {
                     pronunciation: pronunciationController.text.trim().isEmpty
                         ? null
                         : pronunciationController.text.trim(),
+                    definitionInUserLanguage:
+                        nativeDefinitionController.text.trim().isEmpty
+                        ? null
+                        : nativeDefinitionController.text.trim(),
                     examples: exampleController.text.trim().isEmpty
                         ? []
                         : [exampleController.text.trim()],
@@ -485,6 +501,7 @@ class _VocabListScreenState extends State<VocabListScreen> {
     String word,
     String partOfSpeech,
     TextEditingController definitionController,
+    TextEditingController nativeDefinitionController,
     TextEditingController pronunciationController,
     TextEditingController exampleController,
     TextEditingController synonymsController,
@@ -526,7 +543,7 @@ class _VocabListScreenState extends State<VocabListScreen> {
       // Get user's language from auth provider
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       final userLanguage = authProvider.appUser?.language;
-      
+
       final analysis = await AIService.analyzeWord(
         word: word,
         partOfSpeech: partOfSpeech,
@@ -539,6 +556,8 @@ class _VocabListScreenState extends State<VocabListScreen> {
       if (mounted) {
         // Fill in all the form fields with AI-generated data
         definitionController.text = analysis.definition;
+        nativeDefinitionController.text =
+            analysis.definitionInUserLanguage ?? '';
         pronunciationController.text = analysis.pronunciation;
         exampleController.text = analysis.examples.join('\n');
         synonymsController.text = analysis.synonyms.join(', ');
@@ -778,7 +797,7 @@ class _VocabListScreenState extends State<VocabListScreen> {
                   itemCount: vocabProvider.filteredWords.length,
                   itemBuilder: (context, index) {
                     final word = vocabProvider.filteredWords[index];
-                    return _VocabWordCard(word: word);
+                    return VocabWordCard(word: word);
                   },
                 ),
               ),
@@ -800,221 +819,4 @@ class _VocabListScreenState extends State<VocabListScreen> {
   }
 }
 
-class _VocabWordCard extends StatelessWidget {
-  final VocabWord word;
-
-  const _VocabWordCard({required this.word});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Card(
-      margin: const EdgeInsets.only(bottom: 8.0),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: () {
-          _showWordDetails(context, word);
-        },
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      word.word,
-                      style: theme.textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  _DifficultyChip(difficulty: word.difficulty),
-                ],
-              ),
-              const SizedBox(height: 4),
-              Text(
-                word.partOfSpeech,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.primary,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                word.definition,
-                style: theme.textTheme.bodyMedium,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-              if (word.examples.isNotEmpty) ...[
-                const SizedBox(height: 8),
-                _buildExampleText(word.examples.first, theme),
-              ],
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  _StateChip(state: word.state),
-                  const Spacer(),
-                  _buildPronunciationButton(context, word.pronunciation),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  // Extracted method to build the example text widget
-  Widget _buildExampleText(String example, ThemeData theme) {
-    return Text(
-      '"$example"',
-      style: theme.textTheme.bodySmall?.copyWith(
-        fontStyle: FontStyle.italic,
-        color: Colors.grey.shade600,
-      ),
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
-    );
-  }
-
-  // Extracted method to build the pronunciation button
-  Widget _buildPronunciationButton(
-    BuildContext context,
-    String? pronunciation,
-  ) {
-    if (pronunciation == null) return const SizedBox.shrink();
-
-    return IconButton(
-      icon: const Icon(Icons.volume_up, size: 20),
-      onPressed: () {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Audio playback coming soon!')),
-        );
-      },
-    );
-  }
-
-  void _showWordDetails(BuildContext context, VocabWord word) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(word.word),
-        content: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('Part of Speech: ${word.partOfSpeech}'),
-              const SizedBox(height: 8),
-              Text('Definition: ${word.definition}'),
-              if (word.pronunciation != null) ...[
-                const SizedBox(height: 8),
-                Text('Pronunciation: ${word.pronunciation}'),
-              ],
-              if (word.examples.isNotEmpty) ...[
-                const SizedBox(height: 8),
-                const Text('Examples:'),
-                ...word.examples.map(
-                  (example) => Padding(
-                    padding: const EdgeInsets.only(left: 8.0, top: 4.0),
-                    child: Text('• $example'),
-                  ),
-                ),
-              ],
-              if (word.synonyms.isNotEmpty) ...[
-                const SizedBox(height: 8),
-                Text('Synonyms: ${word.synonyms.join(', ')}'),
-              ],
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Close'),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _DifficultyChip extends StatelessWidget {
-  final String difficulty;
-
-  const _DifficultyChip({required this.difficulty});
-
-  @override
-  Widget build(BuildContext context) {
-    Color color;
-    switch (difficulty.toLowerCase()) {
-      case 'beginner':
-        color = Colors.green;
-        break;
-      case 'intermediate':
-        color = Colors.orange;
-        break;
-      case 'advanced':
-        color = Colors.red;
-        break;
-      default:
-        color = Colors.grey;
-    }
-
-    return Chip(
-      label: Text(
-        difficulty.toUpperCase(),
-        style: const TextStyle(
-          fontSize: 10,
-          fontWeight: FontWeight.bold,
-          color: Colors.white,
-        ),
-      ),
-      backgroundColor: color,
-      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-    );
-  }
-}
-
-class _StateChip extends StatelessWidget {
-  final WordState state;
-
-  const _StateChip({required this.state});
-
-  @override
-  Widget build(BuildContext context) {
-    Color color;
-    String text;
-
-    if (state == WordState.newWordState) {
-      color = Colors.blue;
-      text = 'NEW';
-    } else if (state == WordState.learningState) {
-      color = Colors.orange;
-      text = 'LEARNING';
-    } else if (state == WordState.masteredState) {
-      color = Colors.green;
-      text = 'MASTERED';
-    } else {
-      color = Colors.grey;
-      text = 'UNKNOWN';
-    }
-
-    return Chip(
-      label: Text(
-        text,
-        style: const TextStyle(
-          fontSize: 10,
-          fontWeight: FontWeight.bold,
-          color: Colors.white,
-        ),
-      ),
-      backgroundColor: color,
-      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-    );
-  }
-}
+// ...existing code...

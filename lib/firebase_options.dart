@@ -51,38 +51,39 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyBGR8iQ2ZwgF7RnE5QpF-OJnJv8PHkGXQs',
-    appId: '1:709370489781:android:0ee6a8a5c3a9efca2687fc',
+    apiKey: 'AIzaSyB37TQkILTYwCKL4A8yogtwKMmjEeCbIYI',
+    appId: '1:709370489781:android:5304281e911469d52687fc',
     messagingSenderId: '709370489781',
     projectId: 'flash-card-22d3c',
     storageBucket: 'flash-card-22d3c.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyAY7-Y7tQCMH0pZmHd6H9J8n4OJ9QXvN4I',
-    appId: '1:709370489781:ios:0ee6a8a5c3a9efca2687fc',
+    apiKey: 'AIzaSyCzgSj3anbLXT480kWSaHAjRv4bgHFhMAQ',
+    appId: '1:709370489781:ios:a06865de8386b5d72687fc',
     messagingSenderId: '709370489781',
     projectId: 'flash-card-22d3c',
     storageBucket: 'flash-card-22d3c.firebasestorage.app',
-    iosBundleId: 'com.example.vocablearner',
+    iosBundleId: 'com.example.vocablearner.app',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyAY7-Y7tQCMH0pZmHd6H9J8n4OJ9QXvN4I',
-    appId: '1:709370489781:ios:0ee6a8a5c3a9efca2687fc',
+    apiKey: 'AIzaSyCzgSj3anbLXT480kWSaHAjRv4bgHFhMAQ',
+    appId: '1:709370489781:ios:a06865de8386b5d72687fc',
     messagingSenderId: '709370489781',
     projectId: 'flash-card-22d3c',
     storageBucket: 'flash-card-22d3c.firebasestorage.app',
-    iosBundleId: 'com.example.vocablearner',
+    iosBundleId: 'com.example.vocablearner.app',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
     apiKey: 'AIzaSyDwu-WnKDBzKEGSAM8LOFzVQpaKEIbB-WI',
-    appId: '1:709370489781:web:15c15fdf7f41b9fd2687fc',
+    appId: '1:709370489781:web:6fa67d790bc6ce9e2687fc',
     messagingSenderId: '709370489781',
     projectId: 'flash-card-22d3c',
     authDomain: 'flash-card-22d3c.firebaseapp.com',
     storageBucket: 'flash-card-22d3c.firebasestorage.app',
-    measurementId: 'G-5NTNZXT6E7',
+    measurementId: 'G-JBH8ENYV8W',
   );
+
 }

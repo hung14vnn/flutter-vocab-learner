@@ -93,6 +93,37 @@ Create the following collections:
 - `vocab_words`: Vocabulary database
 - `user_progress`: Individual progress tracking
 
+## OpenAI API Setup
+
+This app uses OpenAI's GPT model for intelligent word analysis. To enable AI features:
+
+1. Get an API key from [OpenAI Platform](https://platform.openai.com/account/api-keys)
+2. Set up the API key using one of these methods:
+
+### Method 1: Environment Variable (Recommended)
+Set the environment variable before running the app:
+```bash
+# Windows (PowerShell)
+$env:OPENAI_API_KEY="your_api_key_here"
+flutter run
+
+# Windows (Command Prompt)
+set OPENAI_API_KEY=your_api_key_here
+flutter run
+
+# macOS/Linux
+export OPENAI_API_KEY="your_api_key_here"
+flutter run
+```
+
+### Method 2: Hardcode in Development
+For development only, update `lib/services/ai_service.dart`:
+```dart
+static const String _hardcodedApiKey = 'your_api_key_here';
+```
+
+⚠️ **Warning**: Never commit API keys to version control. Use environment variables for production.
+
 ### Security Rules
 Example Firestore security rules:
 ```javascript
