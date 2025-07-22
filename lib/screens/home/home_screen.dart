@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/progress_provider.dart';
+import '../../providers/auth_provider.dart';
 import '../vocab/vocab_list_screen.dart';
 import '../practice/practice_screen.dart';
 import '../profile/profile_screen.dart';
@@ -92,9 +93,10 @@ class HomeTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final userName = Provider.of<AuthProvider>(context).appUser?.displayName ?? 'User';
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Vocabulary')),
+      appBar: AppBar(title: Text('${renderGreetingBasedOnTime()}, ${userName.split(" ").first}!')),
       body: Consumer<ProgressProvider>(
         builder: (context, progressProvider, _) {
           return Padding(
@@ -303,6 +305,17 @@ class HomeTab extends StatelessWidget {
         },
       ),
     );
+  }
+
+  String renderGreetingBasedOnTime() {
+    final hour = DateTime.now().hour;
+    if (hour < 12) {
+      return 'Good Morning';
+    } else if (hour < 17) {
+      return 'Good Afternoon';
+    } else {
+      return 'Good Evening';
+    }
   }
 }
 

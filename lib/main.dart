@@ -7,6 +7,7 @@ import 'providers/auth_provider.dart';
 import 'providers/vocab_provider.dart';
 import 'providers/progress_provider.dart';
 import 'screens/auth_wrapper.dart';
+import 'package:vocab_learner/screens/practice/flashcards/flashcards_game_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -94,6 +95,10 @@ class VocabLearnerApp extends StatelessWidget {
         ),
         themeMode: ThemeMode.system,
         home: const AuthWrapper(),
+        routes: {
+          '/flashcards': (context) => const FlashcardsGameScreen(),
+          // ...other routes...
+        },
       ),
     );
   }

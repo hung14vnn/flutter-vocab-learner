@@ -10,12 +10,18 @@ class AuthProvider with ChangeNotifier {
   AppUser? _appUser;
   bool _isLoading = false;
   String? _errorMessage;
+  String? _userApiKey;
 
   User? get user => _user;
   AppUser? get appUser => _appUser;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   bool get isAuthenticated => _user != null;
+  String? get userApiKey => _userApiKey;
+  void setUserApiKey(String apiKey) {
+    _userApiKey = apiKey;
+    notifyListeners();
+  }
 
   AuthProvider() {
     _initializeAuth();

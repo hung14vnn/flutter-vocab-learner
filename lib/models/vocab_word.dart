@@ -123,6 +123,7 @@ class VocabWord {
 class WordState {
   static const String newWord = 'new';
   static const String learning = 'learning';
+  static const String reviewed = 'reviewed';
   static const String mastered = 'mastered';
 
   final String value;
@@ -131,11 +132,13 @@ class WordState {
 
   static const WordState newWordState = WordState._(newWord);
   static const WordState learningState = WordState._(learning);
+  static const WordState reviewedState = WordState._(reviewed);
   static const WordState masteredState = WordState._(mastered);
 
   static const List<WordState> values = [
     newWordState,
     learningState,
+    reviewedState,
     masteredState,
   ];
 

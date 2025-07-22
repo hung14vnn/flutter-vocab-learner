@@ -5,6 +5,8 @@ class WordAnalysis {
   final List<String> examples;
   final List<String> synonyms;
   final String difficulty;
+  final String partOfSpeech;
+  final String? fixedWord;
 
   const WordAnalysis({
     required this.definition,
@@ -13,6 +15,8 @@ class WordAnalysis {
     required this.examples,
     required this.synonyms,
     required this.difficulty,
+    required this.partOfSpeech,
+    this.fixedWord,
   });
 
   factory WordAnalysis.fromJson(Map<String, dynamic> json) {
@@ -23,6 +27,8 @@ class WordAnalysis {
       examples: List<String>.from(json['examples'] ?? []),
       synonyms: List<String>.from(json['synonyms'] ?? []),
       difficulty: json['difficulty'] ?? 'beginner',
+      partOfSpeech: json['partOfSpeech'] ?? 'noun',
+      fixedWord: json['fixedWord'],
     );
   }
 
@@ -34,11 +40,13 @@ class WordAnalysis {
       'examples': examples,
       'synonyms': synonyms,
       'difficulty': difficulty,
+      'partOfSpeech': partOfSpeech,
+      'fixedWord': fixedWord,
     };
   }
 
   @override
   String toString() {
-    return 'WordAnalysis{definition: $definition, definitionInUserLanguage: $definitionInUserLanguage, pronunciation: $pronunciation, examples: $examples, synonyms: $synonyms, difficulty: $difficulty}';
+    return 'WordAnalysis{definition: $definition, definitionInUserLanguage: $definitionInUserLanguage, pronunciation: $pronunciation, examples: $examples, synonyms: $synonyms, difficulty: $difficulty, partOfSpeech: $partOfSpeech ${fixedWord != null ? ', fixedWord: $fixedWord' : ''}}';
   }
 }

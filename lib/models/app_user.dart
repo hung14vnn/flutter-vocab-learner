@@ -11,6 +11,9 @@ class AppUser {
   final int currentStreak;
   final int longestStreak;
   final DateTime? lastStudyDate;
+  final String? modelVersion;
+  final String? modelName;
+  final String? apiKey;
 
   AppUser({
     required this.id,
@@ -25,6 +28,9 @@ class AppUser {
     this.currentStreak = 0,
     this.longestStreak = 0,
     this.lastStudyDate,
+    this.modelVersion,
+    this.modelName,
+    this.apiKey,
   });
 
   factory AppUser.fromFirestore(Object? data, String id) {
@@ -44,6 +50,9 @@ class AppUser {
       lastStudyDate: map['lastStudyDate'] != null
           ? DateTime.fromMillisecondsSinceEpoch(map['lastStudyDate'])
           : null,
+      modelVersion: map['modelVersion'],
+      modelName: map['modelName'],
+      apiKey: map['apiKey'],
     );
   }
 
@@ -60,6 +69,9 @@ class AppUser {
       'currentStreak': currentStreak,
       'longestStreak': longestStreak,
       'lastStudyDate': lastStudyDate?.millisecondsSinceEpoch,
+      'modelVersion': modelVersion,
+      'modelName': modelName,
+      'apiKey': apiKey,
     };
   }
 
@@ -76,6 +88,9 @@ class AppUser {
     int? currentStreak,
     int? longestStreak,
     DateTime? lastStudyDate,
+    String? modelVersion,
+    String? modelName,
+    String? apiKey,
   }) {
     return AppUser(
       id: id ?? this.id,
@@ -90,6 +105,9 @@ class AppUser {
       currentStreak: currentStreak ?? this.currentStreak,
       longestStreak: longestStreak ?? this.longestStreak,
       lastStudyDate: lastStudyDate ?? this.lastStudyDate,
+      modelVersion: modelVersion ?? this.modelVersion,
+      modelName: modelName ?? this.modelName,
+      apiKey: apiKey ?? this.apiKey,
     );
   }
 }

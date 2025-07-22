@@ -48,7 +48,8 @@ class ExampleUsage extends StatelessWidget {
       // Analyze the word with user's language
       final analysis = await AIService.analyzeWord(
         word: 'beautiful',
-        partOfSpeech: 'adjective',
+        apiKey: authProvider.userApiKey ?? '',
+        modelName: authProvider.appUser?.modelName ?? 'gemini-1.5-flash',
         userLanguage: userLanguage,
       );
 

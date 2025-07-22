@@ -16,6 +16,13 @@ class VocabListScreen extends StatefulWidget {
 }
 
 class _VocabListScreenState extends State<VocabListScreen> {
+  late AuthProvider authProvider;
+  @override
+  void initState() {
+    super.initState();
+    authProvider = Provider.of<AuthProvider>(context, listen: false);
+  }
+
   void _showAddWordOptions(BuildContext context, VocabProvider vocabProvider) {
     showDialog(
       context: context,
@@ -255,12 +262,17 @@ class _VocabListScreenState extends State<VocabListScreen> {
                         }
                         await _analyzeWordWithAI(
                           wordController.text.trim(),
-                          selectedPartOfSpeech,
+                          (partOfSpeech) {
+                            setState(() {
+                              selectedPartOfSpeech = partOfSpeech;
+                            });
+                          },
                           definitionController,
                           nativeDefinitionController,
                           pronunciationController,
                           exampleController,
                           synonymsController,
+                          wordController,
                           (difficulty) {
                             setState(() {
                               selectedDifficulty = difficulty;
@@ -435,6 +447,12 @@ class _VocabListScreenState extends State<VocabListScreen> {
                     due: now.add(const Duration(days: 1)), // Due tomorrow
                     createdAt: now,
                     updatedAt: now,
+                    synonyms: synonymsController.text.trim().isEmpty
+                        ? []
+                        : synonymsController.text
+                              .split(',')
+                              .map((s) => s.trim())
+                              .toList(),
                   );
 
                   // Show loading indicator
@@ -499,12 +517,13 @@ class _VocabListScreenState extends State<VocabListScreen> {
   /// Analyzes a word using AI and fills in all the form fields
   Future<void> _analyzeWordWithAI(
     String word,
-    String partOfSpeech,
+    Function(String) partOfSpeechCallback,
     TextEditingController definitionController,
     TextEditingController nativeDefinitionController,
     TextEditingController pronunciationController,
     TextEditingController exampleController,
     TextEditingController synonymsController,
+    TextEditingController wordController,
     Function(String) onDifficultyChanged,
   ) async {
     if (word.isEmpty) {
@@ -540,13 +559,15 @@ class _VocabListScreenState extends State<VocabListScreen> {
     );
 
     try {
-      // Get user's language from auth provider
-      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      // Get user's language and API key from auth provider
       final userLanguage = authProvider.appUser?.language;
+      final apiKey = authProvider.appUser?.apiKey ?? '';
+      final model = authProvider.appUser?.modelVersion ?? 'gemini-1.5-flash';
 
       final analysis = await AIService.analyzeWord(
         word: word,
-        partOfSpeech: partOfSpeech,
+        apiKey: apiKey,
+        modelName: model,
         userLanguage: userLanguage,
       );
 
@@ -561,7 +582,11 @@ class _VocabListScreenState extends State<VocabListScreen> {
         pronunciationController.text = analysis.pronunciation;
         exampleController.text = analysis.examples.join('\n');
         synonymsController.text = analysis.synonyms.join(', ');
+        if (analysis.fixedWord != null) {
+          wordController.text = analysis.fixedWord!;
+        }
         onDifficultyChanged(analysis.difficulty);
+        partOfSpeechCallback(analysis.partOfSpeech);
 
         // Show success dialog
         showDialog(
@@ -760,6 +785,14 @@ class _VocabListScreenState extends State<VocabListScreen> {
                             value: 'adverb',
                             child: Text('Adverb'),
                           ),
+                          DropdownMenuItem(
+                            value: 'preposition',
+                            child: Text('Preposition'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'conjunction',
+                            child: Text('Conjunction'),
+                          ),
                         ],
                         onChanged: (value) {
                           if (value != null) {
@@ -818,5 +851,3 @@ class _VocabListScreenState extends State<VocabListScreen> {
     );
   }
 }
-
-// ...existing code...
