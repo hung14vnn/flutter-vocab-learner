@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:vocab_learner/consts/app_consts.dart';
+import 'package:vocab_learner/utils/guid_generator.dart';
 import '../../../models/vocab_word.dart';
 import '../../../providers/vocab_provider.dart';
 import '../../../providers/auth_provider.dart';
@@ -11,6 +13,7 @@ import '../../../widgets/flashcard_settings_dialog.dart';
 import '../../../widgets/achievement_widget.dart';
 
 enum GameMode { definition, word, mixed }
+
 enum CardSide { front, back }
 
 class FlashcardsGameScreen extends StatefulWidget {
@@ -34,8 +37,9 @@ class _FlashcardsGameScreenState extends State<FlashcardsGameScreen>
   bool _showAnswer = false;
   int _correctAnswers = 0;
   int _totalAnswers = 0;
+  final List<Map<String, bool>> _answeredWords = [];
   final ProgressService _progressService = ProgressService();
-  
+
   // Settings
   int _numberOfCards = 20;
   String _difficultyFilter = 'all';
@@ -63,20 +67,20 @@ class _FlashcardsGameScreenState extends State<FlashcardsGameScreen>
       CurvedAnimation(parent: _flipController, curve: Curves.easeOutCubic),
     );
 
-    _slideAnimation = Tween<Offset>(
-      begin: Offset.zero,
-      end: const Offset(1.5, 0),
-    ).animate(CurvedAnimation(parent: _slideController, curve: Curves.easeInOut));
+    _slideAnimation =
+        Tween<Offset>(begin: Offset.zero, end: const Offset(1.5, 0)).animate(
+          CurvedAnimation(parent: _slideController, curve: Curves.easeInOut),
+        );
   }
 
   Future<void> _loadGameWords() async {
     final vocabProvider = Provider.of<VocabProvider>(context, listen: false);
-    
+
     setState(() => _isLoading = true);
-    
+
     try {
       List<VocabWord> words;
-      
+
       // Apply difficulty filter
       if (_difficultyFilter == 'all') {
         words = await vocabProvider.getRandomWords(_numberOfCards);
@@ -86,7 +90,7 @@ class _FlashcardsGameScreenState extends State<FlashcardsGameScreen>
         final filteredWords = vocabProvider.filteredWords
             .where((word) => word.difficulty == _difficultyFilter)
             .toList();
-        
+
         if (filteredWords.length >= _numberOfCards) {
           filteredWords.shuffle();
           words = filteredWords.take(_numberOfCards).toList();
@@ -94,7 +98,7 @@ class _FlashcardsGameScreenState extends State<FlashcardsGameScreen>
           words = filteredWords;
         }
       }
-      
+
       setState(() {
         _gameWords = words;
         _isLoading = false;
@@ -104,25 +108,25 @@ class _FlashcardsGameScreenState extends State<FlashcardsGameScreen>
     } catch (e) {
       setState(() => _isLoading = false);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to load words: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Failed to load words: $e')));
       }
     }
   }
 
   void _flipCard() {
     if (_flipController.isAnimating) return;
-    
+
     // Play flip sound and haptic feedback
     if (_enableSound) {
       SoundFeedbackWidget.playFlipSound();
     }
-    
+
     setState(() {
       _showAnswer = !_showAnswer;
     });
-    
+
     if (_flipController.value == 0) {
       _flipController.forward();
     } else {
@@ -148,7 +152,7 @@ class _FlashcardsGameScreenState extends State<FlashcardsGameScreen>
         SoundFeedbackWidget.playIncorrectSound();
       }
     }
-    
+
     // Show visual feedback overlay
     if (mounted) {
       SoundFeedbackWidget.showVisualFeedback(context, isCorrect);
@@ -159,7 +163,7 @@ class _FlashcardsGameScreenState extends State<FlashcardsGameScreen>
 
     // Animate slide out
     await _slideController.forward();
-    
+
     // Update state
     setState(() {
       _currentIndex++;
@@ -183,75 +187,227 @@ class _FlashcardsGameScreenState extends State<FlashcardsGameScreen>
   }
 
   Future<void> _updateProgress(bool isCorrect) async {
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final userId = authProvider.user?.uid;
-    if (userId == null) return;
-
     final currentWord = _gameWords[_currentIndex];
-    
+
     try {
-      await _progressService.recordPracticeSession(userId, currentWord.id, isCorrect);
+      // Update answered words
+      _answeredWords.add({currentWord.id: isCorrect});
     } catch (e) {
       debugPrint('Error updating progress: $e');
     }
   }
 
-  void _showGameComplete() {
+  Future<void> _showGameComplete() async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final userId = authProvider.user?.uid;
+    final accuracy = _totalAnswers > 0
+        ? ((_correctAnswers / _totalAnswers) * 100)
+        : 0.0;
+    await _progressService.recordPracticeSession(
+      GuidGenerator.generateGuid(),
+      userId ?? '',
+      _answeredWords,
+    );
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        title: const Text('🎉 Game Complete!'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'Score: $_correctAnswers/$_totalAnswers',
-              style: Theme.of(context).textTheme.headlineSmall,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        contentPadding: EdgeInsets.zero,
+        content: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [Colors.blue.shade50, Colors.white],
             ),
-            const SizedBox(height: 10),
-            Text(
-              'Accuracy: ${_totalAnswers > 0 ? ((_correctAnswers / _totalAnswers) * 100).toStringAsFixed(1) : 0}%',
-              style: Theme.of(context).textTheme.bodyLarge,
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Trophy/Success Icon
+                Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    color: Colors.amber.shade100,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.emoji_events,
+                    size: 50,
+                    color: Colors.amber.shade700,
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // Title
+                Text(
+                  'Game Complete!',
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey.shade800,
+                  ),
+                ),
+                const SizedBox(height: 8),
+
+                // Motivational message based on performance
+                Text(
+                  _getPerformanceMessage(accuracy),
+                  textAlign: TextAlign.center,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.copyWith(color: Colors.grey.shade600),
+                ),
+                const SizedBox(height: 24),
+
+                // Score Card
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.shade200,
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      // Score
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Score:',
+                            style: Theme.of(context).textTheme.titleMedium
+                                ?.copyWith(color: Colors.grey.shade700),
+                          ),
+                          Text(
+                            '$_correctAnswers/$_totalAnswers',
+                            style: Theme.of(context).textTheme.titleLarge
+                                ?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.blue.shade700,
+                                ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+
+                      // Accuracy with progress bar
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Accuracy:',
+                            style: Theme.of(context).textTheme.titleMedium
+                                ?.copyWith(color: Colors.grey.shade700),
+                          ),
+                          Text(
+                            '${accuracy.toStringAsFixed(1)}%',
+                            style: Theme.of(context).textTheme.titleLarge
+                                ?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: _getAccuracyColor(accuracy),
+                                ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+
+                      // Progress bar
+                      LinearProgressIndicator(
+                        value: accuracy / 100,
+                        backgroundColor: Colors.grey.shade200,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          _getAccuracyColor(accuracy),
+                        ),
+                        minHeight: 8,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 20),
+                // Action buttons
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          Navigator.of(context).pop();
+                        },
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          side: BorderSide(color: Colors.grey.shade400),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        child: const Text('Exit'),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          _resetGame();
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue.shade600,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          elevation: 2,
+                        ),
+                        child: const Text('Play Again'),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
-            const SizedBox(height: 20),
-            _buildScoreEmoji(),
-          ],
+          ),
         ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              Navigator.of(context).pop();
-            },
-            child: const Text('Exit'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              _resetGame();
-            },
-            child: const Text('Play Again'),
-          ),
-        ],
       ),
     );
   }
 
-  Widget _buildScoreEmoji() {
-    final accuracy = _totalAnswers > 0 ? (_correctAnswers / _totalAnswers) * 100 : 0;
-    
+  // Helper method to get performance message
+  String _getPerformanceMessage(double accuracy) {
     if (accuracy >= 90) {
-      return const Text('🌟 Excellent!', style: TextStyle(fontSize: 24));
+      return 'Outstanding! 🏆';
+    } else if (accuracy >= 80) {
+      return 'Excellent work! 👏';
     } else if (accuracy >= 70) {
-      return const Text('😊 Good job!', style: TextStyle(fontSize: 24));
-    } else if (accuracy >= 50) {
-      return const Text('📚 Keep practicing!', style: TextStyle(fontSize: 24));
+      return 'Good job! 💪';
+    } else if (accuracy >= 60) {
+      return 'Nice effort! 📈';
     } else {
-      return const Text('💪 You can do better!', style: TextStyle(fontSize: 24));
+      return 'Keep trying! 🌟';
+    }
+  }
+
+  // Helper method to get accuracy color
+  Color _getAccuracyColor(double accuracy) {
+    if (accuracy >= 90) {
+      return pastelGreen;
+    } else if (accuracy >= 80) {
+      return pastelBlue;
+    } else if (accuracy >= 70) {
+      return pastelOrange;
+    } else {
+      return pastelRed;
     }
   }
 
@@ -329,17 +485,16 @@ class _FlashcardsGameScreenState extends State<FlashcardsGameScreen>
               ),
             ],
           ),
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _resetGame,
-          ),
+          IconButton(icon: const Icon(Icons.refresh), onPressed: _resetGame),
         ],
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(
+              child: CircularProgressIndicator(color: Color(0xFFB39DDB)),
+            )
           : _gameWords.isEmpty
-              ? _buildEmptyState()
-              : _buildGameContent(),
+          ? _buildEmptyState()
+          : _buildGameContent(),
     );
   }
 
@@ -348,7 +503,7 @@ class _FlashcardsGameScreenState extends State<FlashcardsGameScreen>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.quiz, size: 64, color: Colors.grey),
+          Icon(Icons.quiz, size: 64, color: pastelBlue),
           const SizedBox(height: 16),
           const Text(
             'No words available for practice',
@@ -369,9 +524,7 @@ class _FlashcardsGameScreenState extends State<FlashcardsGameScreen>
       children: [
         _buildProgressIndicator(),
         _buildGameModeIndicator(),
-        Expanded(
-          child: _buildFlashcard(),
-        ),
+        Expanded(child: _buildFlashcard()),
         _buildControls(),
       ],
     );
@@ -441,8 +594,8 @@ class _FlashcardsGameScreenState extends State<FlashcardsGameScreen>
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: _showAnswer
-                      ? [Colors.green[50]!, Colors.green[100]!]
-                      : [Colors.blue[50]!, Colors.blue[100]!],
+                      ? [pastelGreen, Color(0xFFA5D6A7)]
+                      : [pastelBlue, Color(0xFF81D4FA)],
                 ),
               ),
               child: Stack(
@@ -458,7 +611,11 @@ class _FlashcardsGameScreenState extends State<FlashcardsGameScreen>
                     animation: _flipAnimation,
                     builder: (context, child) {
                       return Transform.translate(
-                        offset: Offset(MediaQuery.of(context).size.width * (1 - _flipAnimation.value), 0),
+                        offset: Offset(
+                          MediaQuery.of(context).size.width *
+                              (1 - _flipAnimation.value),
+                          0,
+                        ),
                         child: Opacity(
                           opacity: _flipAnimation.value,
                           child: _buildBackCard(_gameWords[_currentIndex]),
@@ -478,7 +635,7 @@ class _FlashcardsGameScreenState extends State<FlashcardsGameScreen>
   Widget _buildFrontCard(VocabWord word) {
     String content;
     String hint;
-    
+
     switch (_gameMode) {
       case GameMode.definition:
         content = word.definition;
@@ -491,7 +648,9 @@ class _FlashcardsGameScreenState extends State<FlashcardsGameScreen>
       case GameMode.mixed:
         final isDefinitionFirst = _currentIndex.isEven;
         content = isDefinitionFirst ? word.definition : word.word;
-        hint = isDefinitionFirst ? 'What word is this?' : 'What does this word mean?';
+        hint = isDefinitionFirst
+            ? 'What word is this?'
+            : 'What does this word mean?';
         break;
     }
 
@@ -500,17 +659,13 @@ class _FlashcardsGameScreenState extends State<FlashcardsGameScreen>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.quiz,
-            size: 32,
-            color: Colors.blue[600],
-          ),
+          Icon(Icons.quiz, size: 32, color: Color(0xFF0288D1)),
           const SizedBox(height: 24),
           Text(
             hint,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              color: Colors.grey[600],
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(color: Colors.grey[600]),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 32),
@@ -518,7 +673,7 @@ class _FlashcardsGameScreenState extends State<FlashcardsGameScreen>
             content,
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
               fontWeight: FontWeight.bold,
-              color: Colors.blue[700],
+              color: Color(0xFF1976D2),
             ),
             textAlign: TextAlign.center,
           ),
@@ -541,7 +696,7 @@ class _FlashcardsGameScreenState extends State<FlashcardsGameScreen>
 
   Widget _buildBackCard(VocabWord word) {
     String answer;
-    
+
     switch (_gameMode) {
       case GameMode.definition:
         answer = word.word;
@@ -563,24 +718,20 @@ class _FlashcardsGameScreenState extends State<FlashcardsGameScreen>
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Icon(
-              Icons.lightbulb,
-              size: 48,
-              color: Colors.green[600],
-            ),
+            Icon(Icons.lightbulb, size: 48, color: Color(0xFF388E3C)),
             const SizedBox(height: 24),
             Text(
               'Answer:',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: Colors.grey[600],
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(color: Color(0xFF90A4AE)),
             ),
             const SizedBox(height: 16),
             Text(
               answer,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.bold,
-                color: Colors.green[700],
+                color: Color(0xFF43A047),
               ),
               textAlign: TextAlign.center,
             ),
@@ -590,7 +741,7 @@ class _FlashcardsGameScreenState extends State<FlashcardsGameScreen>
                 word.pronunciation!,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   fontStyle: FontStyle.italic,
-                  color: Colors.grey[600],
+                  color: Color(0xFF90A4AE),
                 ),
               ),
             ],
@@ -598,16 +749,16 @@ class _FlashcardsGameScreenState extends State<FlashcardsGameScreen>
               const SizedBox(height: 24),
               Text(
                 'Example:',
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  color: Colors.grey[600],
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleSmall?.copyWith(color: Color(0xFF90A4AE)),
               ),
               const SizedBox(height: 8),
               Text(
                 word.examples.first,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   fontStyle: FontStyle.italic,
-                  color: Colors.grey[700],
+                  color: Color(0xFF789262),
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -633,8 +784,8 @@ class _FlashcardsGameScreenState extends State<FlashcardsGameScreen>
                     icon: const Icon(Icons.close),
                     label: const Text('Incorrect'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red,
-                      foregroundColor: Colors.white,
+                      backgroundColor: pastelRed,
+                      foregroundColor: Color(0xFFD32F2F),
                       padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
                   ),
@@ -646,8 +797,8 @@ class _FlashcardsGameScreenState extends State<FlashcardsGameScreen>
                     icon: const Icon(Icons.check),
                     label: const Text('Correct'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
-                      foregroundColor: Colors.white,
+                      backgroundColor: pastelGreen,
+                      foregroundColor: Color(0xFF388E3C),
                       padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
                   ),

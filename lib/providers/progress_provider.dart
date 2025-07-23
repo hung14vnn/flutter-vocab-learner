@@ -4,7 +4,7 @@ import '../services/progress_service.dart';
 
 class ProgressProvider with ChangeNotifier {
   final ProgressService _progressService = ProgressService();
-  
+
   List<UserProgress> _userProgress = [];
   List<UserProgress> _wordsForReview = [];
   List<UserProgress> _learnedWords = [];
@@ -27,42 +27,48 @@ class ProgressProvider with ChangeNotifier {
   }
 
   void _loadUserProgress(String userId) {
-    _progressService.getUserProgress(userId).listen(
-      (progress) {
-        _userProgress = progress;
-        notifyListeners();
-      },
-      onError: (error) {
-        _errorMessage = 'Failed to load progress: $error';
-        notifyListeners();
-      },
-    );
+    _progressService
+        .getUserProgress(userId)
+        .listen(
+          (progress) {
+            _userProgress = progress;
+            notifyListeners();
+          },
+          onError: (error) {
+            _errorMessage = 'Failed to load progress: $error';
+            notifyListeners();
+          },
+        );
   }
 
   void _loadWordsForReview(String userId) {
-    _progressService.getWordsForReview(userId).listen(
-      (words) {
-        _wordsForReview = words;
-        notifyListeners();
-      },
-      onError: (error) {
-        _errorMessage = 'Failed to load review words: $error';
-        notifyListeners();
-      },
-    );
+    _progressService
+        .getWordsForReview(userId)
+        .listen(
+          (words) {
+            _wordsForReview = words;
+            notifyListeners();
+          },
+          onError: (error) {
+            _errorMessage = 'Failed to load review words: $error';
+            notifyListeners();
+          },
+        );
   }
 
   void _loadLearnedWords(String userId) {
-    _progressService.getLearnedWords(userId).listen(
-      (words) {
-        _learnedWords = words;
-        notifyListeners();
-      },
-      onError: (error) {
-        _errorMessage = 'Failed to load learned words: $error';
-        notifyListeners();
-      },
-    );
+    _progressService
+        .getLearnedWords(userId)
+        .listen(
+          (words) {
+            _learnedWords = words;
+            notifyListeners();
+          },
+          onError: (error) {
+            _errorMessage = 'Failed to load learned words: $error';
+            notifyListeners();
+          },
+        );
   }
 
   Future<void> _loadUserStats(String userId) async {
@@ -75,21 +81,14 @@ class ProgressProvider with ChangeNotifier {
     }
   }
 
-  Future<UserProgress?> getWordProgress(String userId, String wordId) async {
-    try {
-      return await _progressService.getWordProgress(userId, wordId);
-    } catch (e) {
-      _errorMessage = 'Failed to get word progress: $e';
-      notifyListeners();
-      return null;
-    }
-  }
-
   Future<bool> recordPracticeSession(
-      String userId, String wordId, bool isCorrect) async {
+    String sessionId,
+    String userId,
+    List<Map<String, bool>> wordIds,
+  ) async {
     _setLoading(true);
     try {
-      await _progressService.recordPracticeSession(userId, wordId, isCorrect);
+      await _progressService.recordPracticeSession(sessionId, userId, wordIds);
       // Refresh stats after recording session
       await _loadUserStats(userId);
       return true;
@@ -148,23 +147,15 @@ class ProgressProvider with ChangeNotifier {
   double get averageAccuracy => _userStats['averageAccuracy'] ?? 0.0;
   int get totalAttempts => _userStats['totalAttempts'] ?? 0;
   int get totalCorrect => _userStats['totalCorrect'] ?? 0;
-  
+
   double get learningProgress {
     if (totalWordsStudied == 0) return 0.0;
     return wordsLearned / totalWordsStudied;
   }
 
   int get wordsToReview => _wordsForReview.length;
-  
-  bool hasWordProgress(String wordId) {
-    return _userProgress.any((progress) => progress.wordId == wordId);
-  }
 
-  UserProgress? getProgressForWord(String wordId) {
-    try {
-      return _userProgress.firstWhere((progress) => progress.wordId == wordId);
-    } catch (e) {
-      return null;
-    }
+  bool hasWordProgress(String wordId) {
+    return _userProgress.any((progress) => progress.wordIds.contains(wordId));
   }
 }

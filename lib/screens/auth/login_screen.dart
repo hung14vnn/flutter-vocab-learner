@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:vocab_learner/consts/app_consts.dart';
 import '../../providers/auth_provider.dart';
 import 'register_screen.dart';
 
@@ -35,7 +36,7 @@ class _LoginScreenState extends State<LoginScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(authProvider.errorMessage ?? 'Login failed'),
-            backgroundColor: Colors.red,
+            backgroundColor: pastelRed,
           ),
         );
       }
@@ -253,7 +254,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             : authProvider.errorMessage ??
                                   'Failed to send reset email',
                       ),
-                      backgroundColor: success ? Colors.green : Colors.red,
+                      backgroundColor: success ? pastelGreen : pastelRed,
                     ),
                   );
                 }

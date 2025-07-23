@@ -12,6 +12,7 @@ class VocabWord {
   final List<String> synonyms;
   final String partOfSpeech;
   final WordState state; // new, learning, mastered
+  final int repetitionLevel; // Level of repetition for spaced repetition
   final DateTime due;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -30,6 +31,7 @@ class VocabWord {
     this.synonyms = const [],
     required this.partOfSpeech,
     this.state = WordState.newWordState,
+    required this.repetitionLevel,
     required this.due,
     required this.createdAt,
     required this.updatedAt,
@@ -55,6 +57,7 @@ class VocabWord {
             state.value == (map['state'] ?? WordState.newWordState.value),
         orElse: () => WordState.newWordState,
       ),
+      repetitionLevel: map['repetitionLevel'] ?? 0,
       due: DateTime.fromMillisecondsSinceEpoch(map['due'] ?? 0),
       createdAt: DateTime.fromMillisecondsSinceEpoch(map['createdAt'] ?? 0),
       updatedAt: DateTime.fromMillisecondsSinceEpoch(map['updatedAt'] ?? 0),
@@ -75,6 +78,7 @@ class VocabWord {
       'synonyms': synonyms,
       'partOfSpeech': partOfSpeech,
       'state': state.value,
+      'repetitionLevel': repetitionLevel,
       'due': due.millisecondsSinceEpoch,
       'createdAt': createdAt.millisecondsSinceEpoch,
       'updatedAt': updatedAt.millisecondsSinceEpoch,
@@ -95,6 +99,7 @@ class VocabWord {
     List<String>? synonyms,
     String? partOfSpeech,
     WordState? state,
+    int? repetitionLevel,
     DateTime? due,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -113,6 +118,7 @@ class VocabWord {
       synonyms: synonyms ?? this.synonyms,
       partOfSpeech: partOfSpeech ?? this.partOfSpeech,
       state: state ?? this.state,
+      repetitionLevel: repetitionLevel ?? this.repetitionLevel,
       due: due ?? this.due,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,

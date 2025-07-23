@@ -1,23 +1,25 @@
 class UserProgress {
   final String id;
   final String userId;
-  final String wordId;
-  final int correctAnswers;
+  final String gameId;
+  final List<String> wordIds;
+  final List<String> wrongAnswers;
+  final List<String> correctAnswers;
   final int totalAttempts;
   final DateTime lastReviewedAt;
-  final DateTime nextReviewAt;
-  final int repetitionLevel; // Spaced repetition level
+  final DateTime due;
   final bool isLearned;
 
   UserProgress({
     required this.id,
     required this.userId,
-    required this.wordId,
-    this.correctAnswers = 0,
+    required this.gameId,
+    required this.wordIds,
+    this.wrongAnswers = const [],
+    this.correctAnswers = const [],
     this.totalAttempts = 0,
     required this.lastReviewedAt,
-    required this.nextReviewAt,
-    this.repetitionLevel = 0,
+    required this.due,
     this.isLearned = false,
   });
 
@@ -26,12 +28,13 @@ class UserProgress {
     return UserProgress(
       id: id,
       userId: map['userId'] ?? '',
-      wordId: map['wordId'] ?? '',
-      correctAnswers: map['correctAnswers'] ?? 0,
+      gameId: map['gameId'] ?? '',
+      wordIds: List<String>.from(map['wordIds'] ?? []),
+      correctAnswers: List<String>.from(map['correctAnswers'] ?? []),
+      wrongAnswers: List<String>.from(map['wrongAnswers'] ?? []),
       totalAttempts: map['totalAttempts'] ?? 0,
       lastReviewedAt: DateTime.fromMillisecondsSinceEpoch(map['lastReviewedAt'] ?? 0),
-      nextReviewAt: DateTime.fromMillisecondsSinceEpoch(map['nextReviewAt'] ?? 0),
-      repetitionLevel: map['repetitionLevel'] ?? 0,
+      due: DateTime.fromMillisecondsSinceEpoch(map['nextReviewAt'] ?? 0),
       isLearned: map['isLearned'] ?? false,
     );
   }
@@ -39,41 +42,45 @@ class UserProgress {
   Map<String, dynamic> toFirestore() {
     return {
       'userId': userId,
-      'wordId': wordId,
+      'gameId': gameId,
+      'wordIds': wordIds,
       'correctAnswers': correctAnswers,
+      'wrongAnswers': wrongAnswers,
       'totalAttempts': totalAttempts,
       'lastReviewedAt': lastReviewedAt.millisecondsSinceEpoch,
-      'nextReviewAt': nextReviewAt.millisecondsSinceEpoch,
-      'repetitionLevel': repetitionLevel,
+      'due': due.millisecondsSinceEpoch,
       'isLearned': isLearned,
     };
   }
 
   double get accuracy {
     if (totalAttempts == 0) return 0.0;
-    return correctAnswers / totalAttempts;
+    return (correctAnswers.length / wordIds.length).clamp(0.0, 1.0);
   }
 
   UserProgress copyWith({
     String? id,
     String? userId,
-    String? wordId,
-    int? correctAnswers,
+    String? gameId,
+    List<String>? wordIds,
+    List<String>? wrongAnswers,
+    List<String>? correctAnswers,
     int? totalAttempts,
     DateTime? lastReviewedAt,
-    DateTime? nextReviewAt,
+    DateTime? due,
     int? repetitionLevel,
     bool? isLearned,
   }) {
     return UserProgress(
       id: id ?? this.id,
       userId: userId ?? this.userId,
-      wordId: wordId ?? this.wordId,
+      gameId: gameId ?? this.gameId,
+      wordIds: wordIds ?? this.wordIds,
       correctAnswers: correctAnswers ?? this.correctAnswers,
+      wrongAnswers: wrongAnswers ?? this.wrongAnswers,
       totalAttempts: totalAttempts ?? this.totalAttempts,
       lastReviewedAt: lastReviewedAt ?? this.lastReviewedAt,
-      nextReviewAt: nextReviewAt ?? this.nextReviewAt,
-      repetitionLevel: repetitionLevel ?? this.repetitionLevel,
+      due: due ?? this.due,
       isLearned: isLearned ?? this.isLearned,
     );
   }

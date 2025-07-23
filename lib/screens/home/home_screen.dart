@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:vocab_learner/consts/app_consts.dart';
 import '../../providers/progress_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../vocab/vocab_list_screen.dart';
@@ -93,10 +94,15 @@ class HomeTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final userName = Provider.of<AuthProvider>(context).appUser?.displayName ?? 'User';
+    final userName =
+        Provider.of<AuthProvider>(context).appUser?.displayName ?? 'User';
 
     return Scaffold(
-      appBar: AppBar(title: Text('${renderGreetingBasedOnTime()}, ${userName.split(" ").first}!')),
+      appBar: AppBar(
+        title: Text(
+          '${renderGreetingBasedOnTime()}, ${userName.split(" ").first}!',
+        ),
+      ),
       body: Consumer<ProgressProvider>(
         builder: (context, progressProvider, _) {
           return Padding(
@@ -125,7 +131,7 @@ class HomeTab extends StatelessWidget {
                                 title: 'Words Learned',
                                 value: '${progressProvider.wordsLearned}',
                                 icon: Icons.check_circle,
-                                color: Colors.green,
+                                color: pastelGreen,
                               ),
                             ),
                             const SizedBox(width: 10),
@@ -134,7 +140,7 @@ class HomeTab extends StatelessWidget {
                                 title: 'In Progress',
                                 value: '${progressProvider.wordsInProgress}',
                                 icon: Icons.trending_up,
-                                color: Colors.orange,
+                                color: pastelOrange,
                               ),
                             ),
                           ],
@@ -147,7 +153,7 @@ class HomeTab extends StatelessWidget {
                                 title: 'To Review',
                                 value: '${progressProvider.wordsToReview}',
                                 icon: Icons.schedule,
-                                color: Colors.blue,
+                                color: pastelBlue,
                               ),
                             ),
                             const SizedBox(width: 10),
@@ -157,7 +163,7 @@ class HomeTab extends StatelessWidget {
                                 value:
                                     '${(progressProvider.averageAccuracy * 100).toStringAsFixed(1)}%',
                                 icon: Icons.track_changes,
-                                color: Color(0xFFE2E0F9),
+                                color: pastelPurple,
                               ),
                             ),
                           ],
@@ -204,7 +210,7 @@ class HomeTab extends StatelessWidget {
                         title: 'Browse Words',
                         subtitle: 'Explore vocabulary',
                         icon: Icons.book,
-                        color: theme.colorScheme.secondary,
+                        color: theme.colorScheme.primary,
                         onTap: () {
                           // Navigate to vocabulary screen
                           ScaffoldMessenger.of(context).showSnackBar(
@@ -234,23 +240,23 @@ class HomeTab extends StatelessWidget {
                 Expanded(
                   child: Card(
                     child: progressProvider.userProgress.isEmpty
-                        ? const Center(
+                        ? Center(
                             child: Padding(
-                              padding: EdgeInsets.all(16.0),
+                              padding: const EdgeInsets.all(16.0),
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Icon(
                                     Icons.emoji_events,
                                     size: 48,
-                                    color: Colors.grey,
+                                    color: pastelGrey,
                                   ),
-                                  SizedBox(height: 10),
+                                  const SizedBox(height: 10),
                                   Text(
                                     'Start learning to see your progress here!',
                                     style: TextStyle(
                                       fontSize: 12,
-                                      color: Colors.grey,
+                                      color: pastelGrey,
                                     ),
                                     textAlign: TextAlign.center,
                                   ),
@@ -269,8 +275,8 @@ class HomeTab extends StatelessWidget {
                               return ListTile(
                                 leading: CircleAvatar(
                                   backgroundColor: progress.isLearned
-                                      ? Colors.green
-                                      : Colors.orange,
+                                      ? Colors.lightGreen[800]
+                                      : Colors.orangeAccent[800],
                                   child: Icon(
                                     progress.isLearned
                                         ? Icons.check
@@ -279,7 +285,7 @@ class HomeTab extends StatelessWidget {
                                     size: 20,
                                   ),
                                 ),
-                                title: Text('Word ID: ${progress.wordId}'),
+                                title: Text('${progress.due}'),
                                 subtitle: Text(
                                   'Accuracy: ${(progress.accuracy * 100).toStringAsFixed(1)}%',
                                 ),
@@ -289,8 +295,8 @@ class HomeTab extends StatelessWidget {
                                       : 'In Progress',
                                   style: TextStyle(
                                     color: progress.isLearned
-                                        ? Colors.green
-                                        : Colors.orange,
+                                        ? pastelGreen
+                                        : pastelOrange,
                                     fontWeight: FontWeight.w500,
                                   ),
                                 ),
@@ -356,7 +362,7 @@ class _StatCard extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             title,
-            style: const TextStyle(fontSize: 12, color: Colors.grey),
+            style: TextStyle(fontSize: 12, color: pastelGrey),
             textAlign: TextAlign.center,
           ),
         ],
@@ -407,7 +413,7 @@ class _ActionCard extends StatelessWidget {
               const SizedBox(height: 4),
               Text(
                 subtitle,
-                style: const TextStyle(color: Colors.grey, fontSize: 12),
+                style: TextStyle(color: pastelGrey, fontSize: 12),
                 textAlign: TextAlign.center,
               ),
             ],

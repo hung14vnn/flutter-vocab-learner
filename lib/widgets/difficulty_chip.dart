@@ -31,19 +31,19 @@ class DifficultyChip extends StatelessWidget {
     
     switch (difficulty.toLowerCase()) {
       case 'beginner':
-        color = Colors.green;
+        color = Color(0xFF8ABB6C); // Green
         icon = Icons.looks_one;
         break;
       case 'intermediate':
-        color = Colors.orange;
+        color = Color(0xFFFFBC4C); // Orange
         icon = Icons.looks_two;
         break;
       case 'advanced':
-        color = Colors.red;
+        color = Color(0xFFFB4141); // Red
         icon = Icons.looks_3;
         break;
       default:
-        color = Colors.grey;
+        color = Color(0xFFF3E9DC); // Grey
         icon = Icons.help;
     }
 
@@ -70,19 +70,19 @@ class DifficultyChip extends StatelessWidget {
     IconData icon;
     
     if (state == WordState.newWordState) {
-      color = Colors.blue;
+      color = Color(0xFF3D74B6); 
       text = 'NEW';
       icon = Icons.fiber_new;
     } else if (state == WordState.learningState) {
-      color = Colors.orange;
+      color = Color(0xFFFB9E3A);
       text = 'LEARNING';
       icon = Icons.school;
     } else if (state == WordState.masteredState) {
-      color = Colors.green;
+      color = Color(0xFF8ABB6C);
       text = 'MASTERED';
       icon = Icons.check_circle;
     } else {
-      color = Colors.grey;
+      color = Color(0xFFF3E9DC);
       text = 'UNKNOWN';
       icon = Icons.help;
     }

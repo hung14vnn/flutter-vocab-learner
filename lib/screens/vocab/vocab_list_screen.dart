@@ -1,6 +1,7 @@
 // ignore_for_file: use_build_context_synchronously
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:vocab_learner/consts/app_consts.dart';
 import 'package:vocab_learner/utils/guid_generator.dart';
 import '../../providers/vocab_provider.dart';
 import '../../providers/auth_provider.dart';
@@ -444,6 +445,7 @@ class _VocabListScreenState extends State<VocabListScreen> {
                     difficulty: selectedDifficulty,
                     partOfSpeech: selectedPartOfSpeech,
                     state: WordState.newWordState,
+                    repetitionLevel: 0, // Default repetition level
                     due: now.add(const Duration(days: 1)), // Due tomorrow
                     createdAt: now,
                     updatedAt: now,
@@ -631,13 +633,12 @@ class _VocabListScreenState extends State<VocabListScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Vocabulary'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.search),
+            icon: const Icon(Icons.search, color: Color(0xFF6A1B9A)),
             onPressed: () {
               // TODO: Implement search functionality
               ScaffoldMessenger.of(context).showSnackBar(
@@ -661,18 +662,18 @@ class _VocabListScreenState extends State<VocabListScreen> {
                   Icon(
                     Icons.error_outline,
                     size: 64,
-                    color: Colors.red.shade300,
+                    color: pastelRed,
                   ),
                   const SizedBox(height: 16),
                   Text(
                     'Error loading vocabulary',
-                    style: theme.textTheme.headlineSmall,
+                    style: theme.textTheme.headlineSmall?.copyWith(color: Color(0xFFD32F2F)),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     vocabProvider.errorMessage!,
                     style: theme.textTheme.bodyMedium?.copyWith(
-                      color: Colors.grey.shade600,
+                      color: Color(0xFFB71C1C),
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -699,20 +700,20 @@ class _VocabListScreenState extends State<VocabListScreen> {
                   Icon(
                     Icons.book_outlined,
                     size: 64,
-                    color: Colors.grey.shade400,
+                    color: pastelBlue,
                   ),
                   const SizedBox(height: 16),
                   Text(
                     'No vocabulary words yet',
                     style: theme.textTheme.headlineSmall?.copyWith(
-                      color: Colors.grey.shade600,
+                      color: Color(0xFF0288D1),
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     'Words will appear here once you add them',
                     style: theme.textTheme.bodyMedium?.copyWith(
-                      color: Colors.grey.shade500,
+                      color: Color(0xFF4FC3F7),
                     ),
                   ),
                 ],
