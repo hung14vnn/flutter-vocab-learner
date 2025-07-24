@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:vocab_learner/consts/app_consts.dart';
+import 'package:intl/intl.dart';
 import '../../providers/progress_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../vocab/vocab_list_screen.dart';
@@ -285,9 +286,9 @@ class HomeTab extends StatelessWidget {
                                     size: 20,
                                   ),
                                 ),
-                                title: Text('${progress.due}'),
+                                title: renderTextDate(progress.due, progress.isLearned),
                                 subtitle: Text(
-                                  'Accuracy: ${(progress.accuracy * 100).toStringAsFixed(1)}%',
+                                  '${progress}',
                                 ),
                                 trailing: Text(
                                   progress.isLearned
@@ -322,6 +323,35 @@ class HomeTab extends StatelessWidget {
     } else {
       return 'Good Evening';
     }
+  }
+  
+  renderTextDate(DateTime due, bool isLearned) {
+    if (DateTime.now().difference(due).inDays == 0) {
+      return Text("Today",
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: isLearned ? pastelGreen : pastelOrange,
+          ));
+    }
+    if (DateTime.now().difference(due).inDays == 1) {
+      return Text("Yesterday",
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: isLearned ? pastelGreen : pastelOrange,
+          ));
+    }
+    if (DateTime.now().difference(due).inDays < 7) {
+      return Text("Last ${DateFormat('EEEE').format(due)}",
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: isLearned ? pastelGreen : pastelOrange,
+          ));
+    }
+    return Text("Date: ${DateFormat('yMd').format(due)}",
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          color: isLearned ? pastelGreen : pastelOrange,
+        ));
   }
 }
 
