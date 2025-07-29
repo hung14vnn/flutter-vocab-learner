@@ -104,6 +104,36 @@ class VocabService {
     }
   }
 
+  // Get multiple words by their IDs
+  Future<List<VocabWord>> getWordsByIds(List<String> wordIds) async {
+    try {
+      if (wordIds.isEmpty) return [];
+
+      // Firestore 'in' queries are limited to 10 items, so we need to batch
+      List<VocabWord> allWords = [];
+      
+      for (int i = 0; i < wordIds.length; i += 10) {
+        int end = (i + 10 < wordIds.length) ? i + 10 : wordIds.length;
+        List<String> batch = wordIds.sublist(i, end);
+        
+        QuerySnapshot snapshot = await _firestore
+            .collection(_collection)
+            .where(FieldPath.documentId, whereIn: batch)
+            .get();
+
+        List<VocabWord> batchWords = snapshot.docs
+            .map((doc) => VocabWord.fromFirestore(doc.data(), doc.id))
+            .toList();
+        
+        allWords.addAll(batchWords);
+      }
+      
+      return allWords;
+    } catch (e) {
+      throw Exception('Failed to get words by IDs: $e');
+    }
+  }
+
   // Add new word (admin function)
   Future<String> addWord(VocabWord word) async {
     try {

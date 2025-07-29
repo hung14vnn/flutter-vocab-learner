@@ -34,7 +34,7 @@ class UserProgress {
       wrongAnswers: List<String>.from(map['wrongAnswers'] ?? []),
       totalAttempts: map['totalAttempts'] ?? 0,
       lastReviewedAt: DateTime.fromMillisecondsSinceEpoch(map['lastReviewedAt'] ?? 0),
-      due: DateTime.fromMillisecondsSinceEpoch(map['nextReviewAt'] ?? 0),
+      due: DateTime.fromMillisecondsSinceEpoch(map['due'] ?? 0),
       isLearned: map['isLearned'] ?? false,
     );
   }
@@ -54,8 +54,11 @@ class UserProgress {
   }
 
   double get accuracy {
-    if (totalAttempts == 0) return 0.0;
+    //if (totalAttempts == 0) return 0.0;
     return (correctAnswers.length / wordIds.length).clamp(0.0, 1.0);
+  }
+  String get toJSONString {
+    return 'UserProgress(id: $id, userId: $userId, gameId: $gameId, wordIds: $wordIds, correctAnswers: $correctAnswers, wrongAnswers: $wrongAnswers, totalAttempts: $totalAttempts, lastReviewedAt: $lastReviewedAt, due: $due, isLearned: $isLearned)';
   }
 
   UserProgress copyWith({

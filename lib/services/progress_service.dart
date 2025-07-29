@@ -106,7 +106,7 @@ class ProgressService {
               .where((e) => e.values.first == false)
               .map((e) => e.keys.first)
               .toList(),
-          totalAttempts: 0,
+          totalAttempts: 1,
           lastReviewedAt: now,
           due: now, // Mark as this day's review
           isLearned: wordIds.every((e) => e.values.first),
@@ -141,11 +141,11 @@ class ProgressService {
         .collection(_collection)
         .where('userId', isEqualTo: userId)
         .where(
-          'nextReviewAt',
+          'due',
           isLessThanOrEqualTo: DateTime.now().millisecondsSinceEpoch,
         )
         .where('isLearned', isEqualTo: false)
-        .orderBy('nextReviewAt')
+        .orderBy('due')
         .snapshots()
         .map(
           (snapshot) => snapshot.docs

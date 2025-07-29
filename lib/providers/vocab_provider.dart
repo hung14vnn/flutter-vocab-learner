@@ -115,6 +115,16 @@ class VocabProvider with ChangeNotifier {
     }
   }
 
+  Future<List<VocabWord>> getWordsByIds(List<String> wordIds) async {
+    try {
+      return await _vocabService.getWordsByIds(wordIds);
+    } catch (e) {
+      _errorMessage = 'Failed to get words: $e';
+      notifyListeners();
+      return [];
+    }
+  }
+
   Future<List<VocabWord>> searchWords(String query) async {
     if (_currentUserId == null) return [];
     try {
