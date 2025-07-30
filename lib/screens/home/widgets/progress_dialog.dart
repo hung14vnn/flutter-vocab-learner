@@ -57,28 +57,34 @@ class _ProgressDialogState extends State<ProgressDialog> with TickerProviderStat
         height: 600, // Fixed height
         width: 400,  // Fixed width
         padding: const EdgeInsets.all(24.0),
-        child: Stack(
-          children: [
-            // Progress view (always present)
-            AnimatedOpacity(
-              opacity: _showWordsList ? 0.0 : 1.0,
-              duration: const Duration(milliseconds: 200),
-              child: _showWordsList 
-                ? const SizedBox.shrink()
-                : _buildProgressView(context, theme, statusColor, statusIcon),
-            ),
-            // Words list view (slides in from right)
-            SlideTransition(
-              position: _slideAnimation,
-              child: AnimatedOpacity(
-                opacity: _showWordsList ? 1.0 : 0.0,
-                duration: const Duration(milliseconds: 200),
-                child: _showWordsList 
-                  ? _buildWordsListView(context, theme)
-                  : const SizedBox.shrink(),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: Stack(
+            children: [
+              // Progress view (slides left when words list is shown)
+              SlideTransition(
+                position: Tween<Offset>(
+                  begin: Offset.zero,
+                  end: const Offset(-1.0, 0.0),
+                ).animate(CurvedAnimation(
+                  parent: _animationController,
+                  curve: Curves.easeInOut,
+                )),
+                child: _buildProgressView(context, theme, statusColor, statusIcon),
               ),
-            ),
-          ],
+              // Words list view (slides in from right)
+              SlideTransition(
+                position: _slideAnimation,
+                child: Container(
+                  height: 552, // Same height as progress view
+                  width: 352,  // Full width minus padding
+                  child: _showWordsList 
+                    ? _buildWordsListView(context, theme)
+                    : const SizedBox.shrink(),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -168,97 +174,94 @@ class _ProgressDialogState extends State<ProgressDialog> with TickerProviderStat
   }
 
   Widget _buildWordsListView(BuildContext context, ThemeData theme) {
-    return SizedBox(
-      height: 552, // Fixed height minus padding
-      child: Column(
-        children: [
-          // Header with back button
-          Row(
-            children: [
-              IconButton(
-                onPressed: () => _goBackToProgress(),
-                icon: const Icon(Icons.arrow_back),
-              ),
-              Expanded(
-                child: Text(
-                  'Words in Progress',
-                  style: theme.textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                  textAlign: TextAlign.center,
+    return Column(
+      children: [
+        // Header with back button
+        Row(
+          children: [
+            IconButton(
+              onPressed: () => _goBackToProgress(),
+              icon: const Icon(Icons.arrow_back),
+            ),
+            Expanded(
+              child: Text(
+                'Words in Progress',
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
                 ),
+                textAlign: TextAlign.center,
               ),
-              const SizedBox(width: 48), // Balance the back button
-            ],
-          ),
-          const SizedBox(height: 16),
-          
-          // Words list
-          Expanded(
-            child: _isLoadingWords
+            ),
+            const SizedBox(width: 48), // Balance the back button
+          ],
+        ),
+        const SizedBox(height: 16),
+        
+        // Words list
+        Expanded(
+          child: _isLoadingWords
+            ? const Center(
+                child: CircularProgressIndicator(),
+              )
+            : _words.isEmpty
               ? const Center(
-                  child: CircularProgressIndicator(),
+                  child: Text(
+                    'No words found',
+                    style: TextStyle(fontSize: 16),
+                  ),
                 )
-              : _words.isEmpty
-                ? const Center(
-                    child: Text(
-                      'No words found',
-                      style: TextStyle(fontSize: 16),
-                    ),
-                  )
-                : ListView.separated(
-                    itemCount: _words.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 8),
-                    itemBuilder: (context, index) {
-                      final word = _words[index];
-                      final isLearned = word.state == WordState.masteredState;
-                      return Card(
-                        color: pastelBlue.withOpacity(0.1),
-                        child: ListTile(
-                          title: Text(
-                            word.word,
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          subtitle: Text(word.definition.isNotEmpty ? word.definition : '-'),
-                          trailing: isLearned
-                              ? Icon(Icons.check_circle, color: pastelGreen)
-                              : Icon(Icons.schedule, color: pastelOrange),
+              : ListView.separated(
+                  itemCount: _words.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: 8),
+                  itemBuilder: (context, index) {
+                    final word = _words[index];
+                    final isLearned = word.state == WordState.masteredState;
+                    return Card(
+                      color: pastelBlue.withOpacity(0.1),
+                      child: ListTile(
+                        title: Text(
+                          word.word,
+                          style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
-                      );
-                    },
-                  ),
-          ),
-          
-          const SizedBox(height: 16),
-          
-          // Action buttons
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              TextButton(
-                onPressed: () => _goBackToProgress(),
-                child: Text(
-                  'Back',
-                  style: TextStyle(
-                    color: theme.colorScheme.primary,
-                    fontWeight: FontWeight.w600,
-                  ),
+                        subtitle: Text(word.definition.isNotEmpty ? word.definition : '-'),
+                        trailing: isLearned
+                            ? Icon(Icons.check_circle, color: pastelGreen)
+                            : Icon(Icons.schedule, color: pastelOrange),
+                      ),
+                    );
+                  },
+                ),
+        ),
+        
+        const SizedBox(height: 16),
+        
+        // Action buttons
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            TextButton(
+              onPressed: () => _goBackToProgress(),
+              child: Text(
+                'Back',
+                style: TextStyle(
+                  color: theme.colorScheme.primary,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: Text(
-                  'Close',
-                  style: TextStyle(
-                    color: theme.colorScheme.primary,
-                    fontWeight: FontWeight.w600,
-                  ),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(
+                'Close',
+                style: TextStyle(
+                  color: theme.colorScheme.primary,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
-            ],
-          ),
-        ],
-      ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 

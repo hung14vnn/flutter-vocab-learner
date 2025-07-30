@@ -192,49 +192,61 @@ class HomeTab extends StatelessWidget {
                             itemBuilder: (context, index) {
                               final progress =
                                   progressProvider.userProgress[index];
-                              return ListTile(
-                                leading: CircleAvatar(
-                                  backgroundColor: progress.isLearned
-                                      ? Colors.lightGreen[800]
-                                      : Colors.orangeAccent[800],
-                                  child: Icon(
+                              return Container(
+                                margin: const EdgeInsets.only(bottom: 8.0),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(12),
+                                  color: theme.colorScheme.surface,
+                                  border: Border.all(
+                                    color: theme.colorScheme.outline.withOpacity(0.2),
+                                    width: 1,
+                                  ),
+                                ),
+                                clipBehavior: Clip.antiAlias,
+                                child: ListTile(
+                                  leading: CircleAvatar(
+                                    backgroundColor: progress.isLearned
+                                        ? Colors.lightGreen[800]
+                                        : Colors.orangeAccent[800],
+                                    child: Icon(
+                                      progress.isLearned
+                                          ? Icons.check
+                                          : Icons.schedule,
+                                      color: Colors.white,
+                                      size: 20,
+                                    ),
+                                  ),
+                                  title: renderTextDate(
+                                    progress.due,
+                                    progress.isLearned,
+                                  ),
+                                  subtitle: Text(
+                                    'Accuracy: ${(progress.accuracy * 100).toStringAsFixed(1)}%',
+                                  ),
+                                  trailing: Text(
                                     progress.isLearned
-                                        ? Icons.check
-                                        : Icons.schedule,
-                                    color: Colors.white,
-                                    size: 20,
+                                        ? 'Learned'
+                                        : 'In Progress',
+                                    style: TextStyle(
+                                      color: progress.isLearned
+                                          ? pastelGreen
+                                          : pastelOrange,
+                                      fontWeight: FontWeight.w500,
+                                    ),
                                   ),
-                                ),
-                                title: renderTextDate(
-                                  progress.due,
-                                  progress.isLearned,
-                                ),
-                                subtitle: Text(
-                                  'Accuracy: ${(progress.accuracy * 100).toStringAsFixed(1)}%',
-                                ),
-                                trailing: Text(
-                                  progress.isLearned
-                                      ? 'Learned'
-                                      : 'In Progress',
-                                  style: TextStyle(
-                                    color: progress.isLearned
-                                        ? pastelGreen
-                                        : pastelOrange,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                onTap: () {
-                                  showDialog(
-                                    context: context,
-                                    builder: (context) {
-                                      return ProgressDialog(
-                                        progress: progress,
-                                      );
-                                    },
-                                  );
-                                }
+                                  onTap: () {
+                                    showDialog(
+                                      context: context,
+                                      builder: (context) {
+                                        return ProgressDialog(
+                                          progress: progress,
+                                        );
+                                      },
+                                    );
+                                  },
                                   // Here you can implement navigation to a detailed view
                                   // For example, Navigator.push(context, MaterialPageRoute(builder: (context) => ProgressDetailScreen(progress: progress))
+                                ),
                               );
                             },
                           ),
@@ -246,9 +258,8 @@ class HomeTab extends StatelessWidget {
         },
       ),
     );
-    
   }
-  
+
   static String renderGreetingBasedOnTime() {
     final hour = DateTime.now().hour;
     if (hour < 12) {
