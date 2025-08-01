@@ -85,10 +85,12 @@ class ProgressProvider with ChangeNotifier {
     String sessionId,
     String userId,
     List<Map<String, bool>> wordIds,
+    List<String> listOfWords,
+    bool isContinueProgress,
   ) async {
     _setLoading(true);
     try {
-      await _progressService.recordPracticeSession(sessionId, userId, wordIds);
+      await _progressService.recordPracticeSession(sessionId, userId, wordIds, listOfWords, isContinueProgress);
       // Refresh stats after recording session
       await _loadUserStats(userId);
       return true;

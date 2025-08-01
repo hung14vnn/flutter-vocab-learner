@@ -5,6 +5,7 @@ import 'package:vocab_learner/consts/app_consts.dart';
 import 'package:provider/provider.dart';
 import 'package:vocab_learner/providers/vocab_provider.dart';
 import 'package:vocab_learner/models/vocab_word.dart';
+import 'package:vocab_learner/screens/practice/flashcards/flashcards_game_screen.dart';
 class ProgressDialog extends StatefulWidget {
   final UserProgress progress;
 
@@ -156,6 +157,19 @@ class _ProgressDialogState extends State<ProgressDialog> with TickerProviderStat
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
+              if (!widget.progress.isLearned) // Only show Continue button if not learned
+                TextButton(
+                  onPressed: () {
+                    _continueProgress();
+                  },
+                  child: Text(
+                    "Continue",
+                    style: TextStyle(
+                      color: theme.colorScheme.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
                 child: Text(
@@ -237,18 +251,8 @@ class _ProgressDialogState extends State<ProgressDialog> with TickerProviderStat
         
         // Action buttons
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            TextButton(
-              onPressed: () => _goBackToProgress(),
-              child: Text(
-                'Back',
-                style: TextStyle(
-                  color: theme.colorScheme.primary,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
               child: Text(
@@ -308,6 +312,52 @@ class _ProgressDialogState extends State<ProgressDialog> with TickerProviderStat
       setState(() {
         _showWordsList = false;
       });
+    }
+  }
+
+  Future<void> _continueProgress() async {
+    if (widget.progress.isLearned) {
+      // If already learned, show a message
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('This progress is already completed!')),
+      );
+      return;
+    }
+
+    try {
+      final vocabProvider = Provider.of<VocabProvider>(context, listen: false);
+      
+      // Get the words for this progress
+      final words = await vocabProvider.getWordsByIds(widget.progress.wordIds);
+      
+      if (words.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No words found for this progress')),
+        );
+        return;
+      }
+
+      final wordsToReview = words.where((word) => 
+        ![...widget.progress.wrongAnswers, ...widget.progress.correctAnswers].contains(word.id)
+      ).toList();
+
+      final selectedWords = wordsToReview.isNotEmpty ? wordsToReview : words;
+
+      // Close the dialog
+      Navigator.of(context).pop();
+
+      // Navigate to flashcards with specific words
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => FlashcardsGameScreen(
+            specificWords: selectedWords,
+          ),
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to continue progress: $e')),
+      );
     }
   }
 

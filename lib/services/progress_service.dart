@@ -84,52 +84,91 @@ class ProgressService {
     String sessionId,
     String userId,
     List<Map<String, bool>> wordIds,
+    List<String> listOfWords,
+    bool isContinueProgress,
   ) async {
     try {
-      DateTime now = DateTime.now();
-      var progress = await getProgress(userId, sessionId);
-      for (var wordId in wordIds) {
-        updateWordProgress(userId, wordId.keys.first, wordId.values.first);
-      }
-      if (progress == null) {
-        // Create new progress
-        progress = UserProgress(
-          id: sessionId,
-          userId: userId,
-          gameId: 'practice',
-          wordIds: wordIds.map((e) => e.keys.first).toList(),
-          correctAnswers: wordIds
-              .where((e) => e.values.first == true)
-              .map((e) => e.keys.first)
-              .toList(),
-          wrongAnswers: wordIds
-              .where((e) => e.values.first == false)
-              .map((e) => e.keys.first)
-              .toList(),
-          totalAttempts: 1,
-          lastReviewedAt: now,
-          due: now, // Mark as this day's review
-          isLearned: wordIds.every((e) => e.values.first),
-        );
-      } else {
-        // Update existing progress
-        progress = progress.copyWith(
-          wordIds: wordIds.map((e) => e.keys.first).toList(),
-          correctAnswers: wordIds
-              .where((e) => e.values.first == true)
-              .map((e) => e.keys.first)
-              .toList(),
-          wrongAnswers: wordIds
-              .where((e) => e.values.first == false)
-              .map((e) => e.keys.first)
-              .toList(),
-          totalAttempts: progress.totalAttempts + 1,
-          lastReviewedAt: now,
-          isLearned: wordIds.every((e) => e.values.first),
-        );
-      }
+      if (isContinueProgress) {
+        // Continue existing progress
+        var progress = await getProgress(userId, sessionId);
+        if (progress != null) {
+          for (var wordId in wordIds) {
+            updateWordProgress(wordId.keys.first, wordId.values.first);
+          }
+          final correct = progress.correctAnswers
+              .followedBy(
+                wordIds
+                    .where((e) => e.values.first == true)
+                    .map((e) => e.keys.first),
+              )
+              .toList();
+          final wrong = progress.wrongAnswers
+              .followedBy(
+                wordIds
+                    .where((e) => e.values.first == false)
+                    .map((e) => e.keys.first),
+              )
+              .toList();
 
-      await updateProgress(progress);
+          progress = progress.copyWith(
+            correctAnswers: correct,
+            wrongAnswers: wrong,
+            lastReviewedAt: DateTime.now(),
+            isLearned: listOfWords.every(
+              (word) => correct.contains(word) || wrong.contains(word),
+            ),
+          );
+        }
+      } else {
+        DateTime now = DateTime.now();
+        var progress = await getProgress(userId, sessionId);
+        for (var wordId in wordIds) {
+          updateWordProgress(wordId.keys.first, wordId.values.first);
+        }
+        if (progress == null) {
+          // Create new progress
+          progress = UserProgress(
+            id: sessionId,
+            userId: userId,
+            gameId: 'practice',
+            wordIds: listOfWords,
+            correctAnswers: wordIds
+                .where((e) => e.values.first == true)
+                .map((e) => e.keys.first)
+                .toList(),
+            wrongAnswers: wordIds
+                .where((e) => e.values.first == false)
+                .map((e) => e.keys.first)
+                .toList(),
+            totalAttempts: 1,
+            lastReviewedAt: now,
+            due: now, // Mark as this day's review
+            isLearned: listOfWords.every(
+              (word) =>
+                  wordIds.any((e) => e.keys.first == word && e.values.first),
+            ),
+          );
+        } else {
+          // Update existing progress
+          progress = progress.copyWith(
+            correctAnswers: wordIds
+                .where((e) => e.values.first == true)
+                .map((e) => e.keys.first)
+                .toList(),
+            wrongAnswers: wordIds
+                .where((e) => e.values.first == false)
+                .map((e) => e.keys.first)
+                .toList(),
+            totalAttempts: progress.totalAttempts + 1,
+            lastReviewedAt: now,
+            isLearned: listOfWords.every(
+              (word) =>
+                  wordIds.any((e) => e.keys.first == word && e.values.first),
+            ),
+          );
+        }
+        await updateProgress(progress);
+      }
     } catch (e) {
       throw Exception('Failed to record practice session: $e');
     }
@@ -241,11 +280,7 @@ class ProgressService {
     }
   }
 
-  Future<void> updateWordProgress(
-    String userId,
-    String wordId,
-    bool isCorrect,
-  ) async {
+  Future<void> updateWordProgress(String wordId, bool isCorrect) async {
     try {
       var word = await getWord(wordId);
       DateTime nextReview = _calculateNextReview(

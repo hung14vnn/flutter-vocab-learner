@@ -272,7 +272,11 @@ class HomeTab extends StatelessWidget {
   }
 
   static Widget renderTextDate(DateTime due, bool isLearned) {
-    if (DateTime.now().difference(due).inDays == 0) {
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+      final yesterday = today.subtract(Duration(days: 1));
+      final dateOnly = DateTime(due.year, due.month, due.day);
+    if (dateOnly == today) {
       return Text(
         "Today",
         style: TextStyle(
@@ -281,7 +285,7 @@ class HomeTab extends StatelessWidget {
         ),
       );
     }
-    if (DateTime.now().difference(due).inDays == 1) {
+    if (dateOnly == yesterday) {
       return Text(
         "Yesterday",
         style: TextStyle(
@@ -300,7 +304,7 @@ class HomeTab extends StatelessWidget {
       );
     }
     return Text(
-      "Date: ${DateFormat('yMd').format(due)}",
+      DateFormat('yMd').format(due),
       style: TextStyle(
         fontWeight: FontWeight.bold,
         color: isLearned ? pastelGreen : pastelOrange,

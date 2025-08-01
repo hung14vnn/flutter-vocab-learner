@@ -17,7 +17,9 @@ enum GameMode { definition, word, mixed }
 enum CardSide { front, back }
 
 class FlashcardsGameScreen extends StatefulWidget {
-  const FlashcardsGameScreen({super.key});
+  final List<VocabWord>? specificWords;
+  
+  const FlashcardsGameScreen({super.key, this.specificWords});
 
   @override
   State<FlashcardsGameScreen> createState() => _FlashcardsGameScreenState();
@@ -39,6 +41,7 @@ class _FlashcardsGameScreenState extends State<FlashcardsGameScreen>
   int _totalAnswers = 0;
   final List<Map<String, bool>> _answeredWords = [];
   final ProgressService _progressService = ProgressService();
+  bool _progressRecorded = false; // Flag to prevent double recording
 
   // Settings
   int _numberOfCards = 20;
@@ -81,21 +84,26 @@ class _FlashcardsGameScreenState extends State<FlashcardsGameScreen>
     try {
       List<VocabWord> words;
 
-      // Apply difficulty filter
-      if (_difficultyFilter == 'all') {
-        words = await vocabProvider.getRandomWords(_numberOfCards);
+      // Check if specific words are provided (for continuing progress)
+      if (widget.specificWords != null && widget.specificWords!.isNotEmpty) {
+        words = widget.specificWords!;
       } else {
-        // Use existing filtered words functionality
-        vocabProvider.setDifficultyFilter(_difficultyFilter);
-        final filteredWords = vocabProvider.filteredWords
-            .where((word) => word.difficulty == _difficultyFilter)
-            .toList();
-
-        if (filteredWords.length >= _numberOfCards) {
-          filteredWords.shuffle();
-          words = filteredWords.take(_numberOfCards).toList();
+        // Apply difficulty filter for general practice
+        if (_difficultyFilter == 'all') {
+          words = await vocabProvider.getRandomWords(_numberOfCards);
         } else {
-          words = filteredWords;
+          // Use existing filtered words functionality
+          vocabProvider.setDifficultyFilter(_difficultyFilter);
+          final filteredWords = vocabProvider.filteredWords
+              .where((word) => word.difficulty == _difficultyFilter)
+              .toList();
+
+          if (filteredWords.length >= _numberOfCards) {
+            filteredWords.shuffle();
+            words = filteredWords.take(_numberOfCards).toList();
+          } else {
+            words = filteredWords;
+          }
         }
       }
 
@@ -199,15 +207,20 @@ class _FlashcardsGameScreenState extends State<FlashcardsGameScreen>
 
   Future<void> _showGameComplete() async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final listWords = _gameWords.map((word) => word.id).toList();
     final userId = authProvider.user?.uid;
     final accuracy = _totalAnswers > 0
         ? ((_correctAnswers / _totalAnswers) * 100)
         : 0.0;
+    final isContinueProgress = widget.specificWords != null;
     await _progressService.recordPracticeSession(
       GuidGenerator.generateGuid(),
       userId ?? '',
       _answeredWords,
+      listWords,
+      isContinueProgress,
     );
+    _progressRecorded = true; // Mark as recorded to prevent double recording
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -417,7 +430,9 @@ class _FlashcardsGameScreenState extends State<FlashcardsGameScreen>
       _showAnswer = false;
       _correctAnswers = 0;
       _totalAnswers = 0;
+      _progressRecorded = false; // Reset progress recorded flag
     });
+    _answeredWords.clear(); // Clear answered words
     _flipController.reset();
     _slideController.reset();
     _loadGameWords();
@@ -450,8 +465,66 @@ class _FlashcardsGameScreenState extends State<FlashcardsGameScreen>
     );
   }
 
+  Future<void> _recordProgressOnExit() async {
+    // Only record if there are answered words, user is authenticated, and progress hasn't been recorded yet
+    if (_answeredWords.isNotEmpty && !_progressRecorded) {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final userId = authProvider.user?.uid;
+      final isContinueProgress = widget.specificWords != null;
+      
+      try {
+        await _progressService.recordPracticeSession(
+          GuidGenerator.generateGuid(),
+          userId ?? '',
+          _answeredWords,
+          _gameWords.map((word) => word.id).toList(),
+          isContinueProgress,
+        );
+        _progressRecorded = true; // Mark as recorded
+      } catch (e) {
+        debugPrint('Error recording progress on exit: $e');
+      }
+    }
+  }
+
+  Future<void> _showExitConfirmation() async {
+    if (_answeredWords.isEmpty) {
+      // No progress to save, just exit
+      Navigator.of(context).pop();
+      return;
+    }
+
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Save Progress?'),
+        content: const Text(
+          'You have answered some questions. Do you want to save your progress before leaving?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Don\'t Save'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Save & Exit'),
+          ),
+        ],
+      ),
+    );
+
+    if (result == true) {
+      await _recordProgressOnExit();
+    }
+    if (mounted) {
+      Navigator.of(context).pop();
+    }
+  }
+
   @override
   void dispose() {
+    // Note: Progress recording is now handled through the exit confirmation dialog
     _flipController.dispose();
     _slideController.dispose();
     super.dispose();
@@ -459,14 +532,28 @@ class _FlashcardsGameScreenState extends State<FlashcardsGameScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Flashcards'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: _showSettings,
+    return PopScope(
+      canPop: false, // Always handle the back button manually
+      onPopInvoked: (didPop) async {
+        if (!didPop) {
+          await _showExitConfirmation();
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(widget.specificWords != null ? 'Continue Progress' : 'Flashcards'),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => _showExitConfirmation(),
           ),
+        actions: [
+          // Only show settings when not using specific words
+          if (widget.specificWords == null) ...[
+            IconButton(
+              icon: const Icon(Icons.settings),
+              onPressed: _showSettings,
+            ),
+          ],
           PopupMenuButton<GameMode>(
             icon: const Icon(Icons.tune),
             onSelected: _changeGameMode,
@@ -495,6 +582,7 @@ class _FlashcardsGameScreenState extends State<FlashcardsGameScreen>
           : _gameWords.isEmpty
           ? _buildEmptyState()
           : _buildGameContent(),
+      ),
     );
   }
 
