@@ -127,7 +127,7 @@ class _AchievementExampleScreenState extends State<AchievementExampleScreen> {
                       children: [
                         _buildStatCard('Correct', _correctAnswers, Colors.green),
                         _buildStatCard('Total', _totalAnswers, Colors.blue),
-                        _buildStatCard('Progress', '${_currentIndex}/$_totalWords', Colors.orange),
+                        _buildStatCard('Progress', '$_currentIndex/$_totalWords', Colors.orange),
                       ],
                     ),
                     const SizedBox(height: 16),

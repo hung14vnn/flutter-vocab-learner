@@ -18,8 +18,12 @@ class StateChip extends StatelessWidget {
     } else if (state == WordState.masteredState) {
       color = Color(0xFF8ABB6C);
       text = 'MASTERED';
-    } else {
-      color = Color.fromARGB(255, 109, 105, 99);
+    } else if (state == WordState.reviewedState) {
+      color = Color(0xFF6C757D);
+      text = 'REVIEWED';
+    }
+    else {
+      color = Colors.grey;
       text = 'UNKNOWN';
     }
     return Chip(

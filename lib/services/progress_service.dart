@@ -193,21 +193,6 @@ class ProgressService {
         );
   }
 
-  // Get learned words
-  Stream<List<UserProgress>> getLearnedWords(String userId) {
-    return _firestore
-        .collection(_collection)
-        .where('userId', isEqualTo: userId)
-        .where('isLearned', isEqualTo: true)
-        .orderBy('lastReviewedAt', descending: true)
-        .snapshots()
-        .map(
-          (snapshot) => snapshot.docs
-              .map((doc) => UserProgress.fromFirestore(doc.data(), doc.id))
-              .toList(),
-        );
-  }
-
   // Get user statistics
   Future<Map<String, dynamic>> getUserStats(String userId) async {
     try {
@@ -220,27 +205,32 @@ class ProgressService {
           .map((doc) => UserProgress.fromFirestore(doc.data(), doc.id))
           .toList();
 
-      int totalWords = allProgress.length;
-      int learnedWords = allProgress.where((p) => p.isLearned).length;
-      int totalAttempts = allProgress.fold(
-        0,
-        (total, p) => total + p.totalAttempts,
-      );
+      int totalWords = allProgress.fold(0, (total, p) => total + p.wordIds.length);
+      int totalProgressLearned = allProgress.where((p) => p.isLearned).length;
+
+      int totalWordsDistinct = allProgress
+          .expand((p) => p.wordIds)
+          .toSet()
+          .length;
+      int totalLearnedWordsDistinct = allProgress
+          .where((p) => p.isLearned)
+          .expand((p) => p.wordIds)
+          .toSet()
+          .length;
+
       int totalCorrect = allProgress.fold(
         0,
         (total, p) => total + p.correctAnswers.length,
       );
-      double averageAccuracy = totalAttempts > 0
-          ? totalCorrect / totalAttempts
-          : 0.0;
+      double averageAccuracy = allProgress.isEmpty
+          ? 0.0
+          : totalCorrect / totalWords;
 
       return {
-        'totalWords': totalWords,
-        'learnedWords': learnedWords,
-        'totalAttempts': totalAttempts,
-        'totalCorrect': totalCorrect,
+        'totalWords': totalWordsDistinct,
+        'learnedWords': totalLearnedWordsDistinct,
         'averageAccuracy': averageAccuracy,
-        'wordsInProgress': totalWords - learnedWords,
+        'totalProgressLearned': totalProgressLearned
       };
     } catch (e) {
       throw Exception('Failed to get user stats: $e');

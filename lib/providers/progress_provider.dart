@@ -7,14 +7,12 @@ class ProgressProvider with ChangeNotifier {
 
   List<UserProgress> _userProgress = [];
   List<UserProgress> _wordsForReview = [];
-  List<UserProgress> _learnedWords = [];
   Map<String, dynamic> _userStats = {};
   bool _isLoading = false;
   String? _errorMessage;
 
   List<UserProgress> get userProgress => _userProgress;
   List<UserProgress> get wordsForReview => _wordsForReview;
-  List<UserProgress> get learnedWords => _learnedWords;
   Map<String, dynamic> get userStats => _userStats;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
@@ -22,7 +20,6 @@ class ProgressProvider with ChangeNotifier {
   void initializeForUser(String userId) {
     _loadUserProgress(userId);
     _loadWordsForReview(userId);
-    _loadLearnedWords(userId);
     _loadUserStats(userId);
   }
 
@@ -51,21 +48,6 @@ class ProgressProvider with ChangeNotifier {
           },
           onError: (error) {
             _errorMessage = 'Failed to load review words: $error';
-            notifyListeners();
-          },
-        );
-  }
-
-  void _loadLearnedWords(String userId) {
-    _progressService
-        .getLearnedWords(userId)
-        .listen(
-          (words) {
-            _learnedWords = words;
-            notifyListeners();
-          },
-          onError: (error) {
-            _errorMessage = 'Failed to load learned words: $error';
             notifyListeners();
           },
         );
@@ -137,22 +119,19 @@ class ProgressProvider with ChangeNotifier {
   void clear() {
     _userProgress.clear();
     _wordsForReview.clear();
-    _learnedWords.clear();
     _userStats.clear();
     notifyListeners();
   }
 
   // Helper methods for statistics
   int get totalWordsStudied => _userStats['totalWords'] ?? 0;
-  int get wordsLearned => _userStats['learnedWords'] ?? 0;
-  int get wordsInProgress => _userStats['wordsInProgress'] ?? 0;
+  int get progressLearned => _userStats['totalProgressLearned'] ?? 0;
+  int get learnedWords => _userStats['learnedWords'] ?? 0;
   double get averageAccuracy => _userStats['averageAccuracy'] ?? 0.0;
-  int get totalAttempts => _userStats['totalAttempts'] ?? 0;
-  int get totalCorrect => _userStats['totalCorrect'] ?? 0;
 
   double get learningProgress {
     if (totalWordsStudied == 0) return 0.0;
-    return wordsLearned / totalWordsStudied;
+    return progressLearned / totalWordsStudied;
   }
 
   int get wordsToReview => _wordsForReview.length;

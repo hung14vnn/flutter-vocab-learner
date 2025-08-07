@@ -15,18 +15,6 @@ final List<PracticeGame> kPracticeGames = [
       repeat: true,
     ),
   ),
-  PracticeGame(
-    name: 'Word Match',
-    description: 'Match words with their definitions, images, or synonyms against a timer.',
-    icon: LottieIcon(
-      animationPath: 'assets/animations/note.json',
-      darkAnimationPath: 'assets/animations/note.json',
-      size: 50.0,
-      isNetwork: false,
-      autoPlay: true,
-      repeat: true,
-    ),
-  ),
 ];
 class PracticeGame {  
   final String name;

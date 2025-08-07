@@ -48,17 +48,17 @@ class HomeTab extends StatelessWidget {
                           children: [
                             Expanded(
                               child: StatCard(
-                                title: 'Words Learned',
-                                value: '${progressProvider.wordsLearned}',
+                                title: 'Days Practiced',
+                                value: '${progressProvider.progressLearned}',
                                 icon: Icons.check_circle,
                                 color: pastelGreen,
                               ),
-                            ),
+                            ), 
                             const SizedBox(width: 10),
                             Expanded(
                               child: StatCard(
-                                title: 'In Progress',
-                                value: '${progressProvider.wordsInProgress}',
+                                title: 'Words Learned',
+                                value: '${progressProvider.learnedWords}',
                                 icon: Icons.trending_up,
                                 color: pastelOrange,
                               ),
@@ -198,7 +198,9 @@ class HomeTab extends StatelessWidget {
                                   borderRadius: BorderRadius.circular(12),
                                   color: theme.colorScheme.surface,
                                   border: Border.all(
-                                    color: theme.colorScheme.outline.withOpacity(0.2),
+                                    color: theme.colorScheme.outline.withValues(
+                                      alpha: 0.2,
+                                    ),
                                     width: 1,
                                   ),
                                 ),

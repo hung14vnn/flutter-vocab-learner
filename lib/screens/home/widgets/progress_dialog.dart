@@ -76,7 +76,7 @@ class _ProgressDialogState extends State<ProgressDialog> with TickerProviderStat
               // Words list view (slides in from right)
               SlideTransition(
                 position: _slideAnimation,
-                child: Container(
+                child: SizedBox(
                   height: 552, // Same height as progress view
                   width: 352,  // Full width minus padding
                   child: _showWordsList 
@@ -135,7 +135,7 @@ class _ProgressDialogState extends State<ProgressDialog> with TickerProviderStat
           _buildInfoCard(
             icon: Icons.track_changes,
             title: 'Accuracy',
-            value: '${(widget.progress.accuracy * 100).toStringAsFixed(1)}%',
+            value: '${(widget.progress.accuracy * 100).toStringAsFixed(1)}% (${widget.progress.correctAnswers.length}/${widget.progress.correctAnswers.length + widget.progress.wrongAnswers.length})',
             color: pastelPurple,
           ),
           const SizedBox(height: 12),
