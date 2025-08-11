@@ -7,7 +7,7 @@ import 'firebase_options.dart';
 import 'providers/auth_provider.dart';
 import 'providers/vocab_provider.dart';
 import 'providers/progress_provider.dart';
-import 'screens/auth_wrapper.dart';
+import 'widgets/app_loading_wrapper.dart';
 import 'package:vocab_learner/screens/practice/flashcards/flashcards_game_screen.dart';
 
 void main() async {
@@ -108,7 +108,7 @@ class VocabLearnerApp extends StatelessWidget {
           ),
         ),
         themeMode: ThemeMode.system,
-        home: const AuthWrapper(),
+        home: const AppLoadingWrapper(),
         routes: {
           '/flashcards': (context) => const FlashcardsGameScreen(),
           // ...other routes...

@@ -11,12 +11,14 @@ class AuthProvider with ChangeNotifier {
   bool _isLoading = false;
   String? _errorMessage;
   String? _userApiKey;
+  bool _isInitialized = false;
 
   User? get user => _user;
   AppUser? get appUser => _appUser;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   bool get isAuthenticated => _user != null;
+  bool get isInitialized => _isInitialized;
   String? get userApiKey => _userApiKey;
   void setUserApiKey(String apiKey) {
     _userApiKey = apiKey;
@@ -27,6 +29,15 @@ class AuthProvider with ChangeNotifier {
     _initializeAuth();
   }
 
+  // Public method to wait for initial authentication state
+  Future<void> initialize() async {
+    if (_isInitialized) return;
+    
+    // Wait for the first auth state change
+    await _authService.authStateChanges.first;
+    _isInitialized = true;
+  }
+
   void _initializeAuth() {
     _authService.authStateChanges.listen((User? user) async {
       _user = user;
@@ -35,6 +46,7 @@ class AuthProvider with ChangeNotifier {
       } else {
         _appUser = null;
       }
+      _isInitialized = true;
       notifyListeners();
     });
   }
