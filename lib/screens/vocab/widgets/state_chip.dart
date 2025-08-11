@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../models/vocab_word.dart';
+import '../../../models/vocab_word.dart';
 
 class StateChip extends StatelessWidget {
   final WordState state;

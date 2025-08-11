@@ -62,7 +62,9 @@ class CSVAnalysisResult {
   }
 
   String _escapeCsvField(String field) {
-    if (field.contains(',') || field.contains('"') || field.contains('\n')) {
+    // Always escape fields that contain special characters or could cause parsing issues
+    if (field.contains(',') || field.contains('"') || field.contains('\n') || 
+        field.contains('\r') || field.contains('/') || field.contains('\\')) {
       return '"${field.replaceAll('"', '""')}"';
     }
     return field;
@@ -76,6 +78,8 @@ class CSVWordAnalysis {
   final String pronunciation;
   final List<String> examples;
   final List<String> synonyms;
+  final List<String> antonyms;
+  final List<String> tags;
   final String difficulty;
   final String partOfSpeech;
   final String? fixedWord;
@@ -88,6 +92,8 @@ class CSVWordAnalysis {
     required this.pronunciation,
     required this.examples,
     required this.synonyms,
+    required this.antonyms,
+    required this.tags,
     required this.difficulty,
     required this.partOfSpeech,
     this.fixedWord,
@@ -102,6 +108,8 @@ class CSVWordAnalysis {
       pronunciation: json['pronunciation'] ?? '',
       examples: List<String>.from(json['examples'] ?? []),
       synonyms: List<String>.from(json['synonyms'] ?? []),
+      antonyms: List<String>.from(json['antonyms'] ?? []),
+      tags: List<String>.from(json['tags'] ?? []),
       difficulty: json['difficulty'] ?? 'beginner',
       partOfSpeech: json['partOfSpeech'] ?? 'noun',
       fixedWord: json['fixedWord'],
@@ -117,6 +125,8 @@ class CSVWordAnalysis {
       'pronunciation': pronunciation,
       'examples': examples,
       'synonyms': synonyms,
+      'antonyms': antonyms,
+      'tags': tags,
       'difficulty': difficulty,
       'partOfSpeech': partOfSpeech,
       'fixedWord': fixedWord,
@@ -137,6 +147,8 @@ class CSVWordAnalysis {
       pronunciation: '',
       examples: [],
       synonyms: [],
+      antonyms: [],
+      tags: [],
       difficulty: 'beginner',
       partOfSpeech: 'unknown',
       isAnalysisSuccessful: false,

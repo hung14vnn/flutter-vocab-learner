@@ -1,8 +1,6 @@
 import 'dart:convert';
-import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:http/http.dart' as http;
-import 'package:csv/csv.dart';
 import 'package:vocab_learner/models/app_user.dart';
 import '../models/word_analysis.dart';
 import '../models/csv_analysis_result.dart';
@@ -48,7 +46,7 @@ class AIService {
       final prompt = _buildWordAnalysisPrompt(word, userDoc.language);
       final response = await http.post(
         Uri.parse(
-          '$baseUrl/${userDoc.modelName}:generateContent?key=${userDoc.apiKey}',
+          '$baseUrl/${userDoc.modelVersion}:generateContent?key=${userDoc.apiKey}',
         ),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
@@ -131,6 +129,8 @@ class AIService {
       $definitionInUserLanguageField
       "examples": ["Example sentence 1", "Example sentence 2", "Example sentence 3"],
       "synonyms": ["synonym1", "synonym2", "synonym3"],
+      "antonyms": ["antonym1", "antonym2", "antonym3"],
+      "tags": ["tag1", "tag2", "tag3"],
       "difficulty": "beginner|intermediate|advanced",
       "partOfSpeech": "noun|verb|adjective|adverb|conjunction|preposition"
     }
@@ -140,8 +140,10 @@ class AIService {
     - Definition: Clear and educational, suitable for language learners, dont include the word itself in the definition(e.g., "box" = "a container with a lid", not "a box is a container with a lid"), if it has multiple meanings, provide at most 3 most common definitions
     - Pronunciation: Use proper IPA notation
     ${userLanguage != null ? 'DefinitionInUserLanguage: Provide a brief translation of the word itself in $userLanguage (not the definition, just the word translation, e.g., "hello" = "xin chào")' : ''}
-    - Examples: 3 varied, practical sentences showing different contexts, divided by commas
+    - Examples: 3 varied, practical sentences showing different contexts
     - Synonyms: 3-5 relevant synonyms if available
+    - Antonyms: 3-5 relevant antonyms if available
+    - Tags: 3-5 relevant tags or categories for the word (e.g., "food", "emotion", "nature")
     - Difficulty: Classify as "beginner" (common, everyday words), "intermediate" (moderately complex), or "advanced" (academic, technical, or rare words)
     - Part of Speech: Specify the part of speech (noun, verb, adjective, adverb, conjunction, preposition)
 
@@ -149,9 +151,8 @@ class AIService {
     ''';
   }
 
-
   Future<CSVAnalysisResult> analyzeCSVData({
-    required List<List<dynamic>> csvData,
+    required Map<String, String> csvData,
     required String userId,
     Function(int current, int total)? onProgress,
   }) async {
@@ -164,34 +165,23 @@ class AIService {
         throw Exception('User not found');
       }
       // Extract valid word pairs
-      final wordPairs = <Map<String, String>>[];
-      for (final row in csvData) {
-        if (row.length < 2) continue;
-
-        final originalWord = row[0]?.toString().trim() ?? '';
-        final translation = row[1]?.toString().trim() ?? '';
-
-        if (originalWord.isNotEmpty && translation.isNotEmpty) {
-          wordPairs.add({
-            'originalWord': originalWord,
-            'translation': translation,
-          });
+      final listWords = <String>[];
+      for (final entry in csvData.entries) {
+        final originalWord = entry.key.trim();
+        if (originalWord.isNotEmpty) {
+          listWords.add(originalWord);
         }
-      }
-
-      if (wordPairs.isEmpty) {
-        throw Exception('No valid word pairs found in CSV data');
       }
 
       onProgress?.call(1, 2); // Starting analysis
 
       // Build batch analysis prompt
-      final prompt = _buildBatchAnalysisPrompt(wordPairs, userDoc.language);
+      final prompt = _buildBatchAnalysisPrompt(listWords, userDoc.language);
 
       // Make single API call
       final response = await http.post(
         Uri.parse(
-          '$baseUrl/${userDoc.modelName}:generateContent?key=${userDoc.apiKey}',
+          '$baseUrl/${userDoc.modelVersion}:generateContent?key=${userDoc.apiKey}',
         ),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
@@ -285,19 +275,14 @@ class AIService {
 
   /// Builds a batch analysis prompt for multiple words
   static String _buildBatchAnalysisPrompt(
-    List<Map<String, String>> wordPairs,
+    List<String> listWords,
     String? userLanguage,
   ) {
-    final definitionInUserLanguageField = userLanguage != null
-        ? '"definitionInUserLanguage": "A brief translation of the word in $userLanguage",'
-        : '"definitionInUserLanguage": null,';
+    final translationInUserLanguageField = userLanguage != null
+        ? '"translation": "A brief translation of the word in $userLanguage",'
+        : '"translation": null,';
 
-    final wordsListJson = wordPairs
-        .map(
-          (pair) =>
-              '    {"originalWord": "${pair['originalWord']}", "translation": "${pair['translation']}"}',
-        )
-        .join(',\n');
+    final wordsListJson = listWords.map((word) => word).join(',\n');
 
     return '''
     Analyze the following list of words and their translations, and provide comprehensive analysis for each word in JSON format.
@@ -316,13 +301,14 @@ class AIService {
       "words": [
         {
           "originalWord": "the original word from input",
-          "translation": "the translation from input", 
           "fixedWord": "fixed word for misspelling if applicable, otherwise same as originalWord",
           "definition": "A clear, concise definition of the word",
           "pronunciation": "IPA phonetic transcription (e.g., /wɜːrd/)",
-          $definitionInUserLanguageField
+          $translationInUserLanguageField
           "examples": ["Example sentence 1", "Example sentence 2", "Example sentence 3"],
           "synonyms": ["synonym1", "synonym2", "synonym3"],
+          "antonyms": ["antonym1", "antonym2", "antonym3"],
+          "tags": ["tag1", "tag2", "tag3"],
           "difficulty": "beginner|intermediate|advanced",
           "partOfSpeech": "noun|verb|adjective|adverb|conjunction|preposition",
           "isAnalysisSuccessful": true
@@ -331,13 +317,15 @@ class AIService {
     }
 
     Requirements for each word:
-    - Original Word & Translation: Keep exactly as provided in input
+    - Original Word: Keep exactly as provided in input
     - Fixed Word: Fix the word if it's misspelled and replace the original word with the fixed word in the rest of the analysis
-    - Definition: Clear and educational, suitable for language learners, don't include the word itself in the definition
+    - Definition: Clear and educational, suitable for language learners, dont include the word itself in the definition(e.g., "box" = "a container with a lid", not "a box is a container with a lid"), if it has multiple meanings, provide at most 3 most common definitions
     - Pronunciation: Use proper IPA notation
-    ${userLanguage != null ? '- DefinitionInUserLanguage: Provide a brief translation of the word itself in $userLanguage (not the definition, just the word translation)' : ''}
+    ${userLanguage != null ? '- Translation: Provide a brief translation of the word itself in (not the definition, just the word translation, e.g., "hello" = "xin chào")' : ''}
     - Examples: 3 varied, practical sentences showing different contexts
     - Synonyms: 3-5 relevant synonyms if available
+    - Antonyms: 3-5 relevant antonyms if available
+    - Tags: 3-5 relevant tags or categories for the word (e.g., "food", "emotion", "nature")
     - Difficulty: Classify as "beginner" (common, everyday words), "intermediate" (moderately complex), or "advanced" (academic, technical, or rare words)
     - Part of Speech: Specify the main part of speech (noun, verb, adjective, adverb, conjunction, preposition)
     - Analysis Successful: Always set to true unless there's an error

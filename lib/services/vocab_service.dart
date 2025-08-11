@@ -197,4 +197,20 @@ class VocabService {
       throw Exception('Failed to batch add words: $e');
     }
   }
+
+  // Batch delete words (admin function)
+  Future<void> batchDeleteWords(List<String> wordIds) async {
+    try {
+      WriteBatch batch = _firestore.batch();
+
+      for (String wordId in wordIds) {
+        DocumentReference docRef = _firestore.collection(_collection).doc(wordId);
+        batch.delete(docRef);
+      }
+
+      await batch.commit();
+    } catch (e) {
+      throw Exception('Failed to batch delete words: $e');
+    }
+  }
 }

@@ -13,6 +13,8 @@ class VocabProvider with ChangeNotifier {
   String _selectedPartOfSpeech = 'all';
   String _searchQuery = '';
   String? _currentUserId;
+  Set<String> _selectedWordIds = <String>{};
+  bool _isSelectionMode = false;
 
   List<VocabWord> get allWords => _allWords;
   List<VocabWord> get filteredWords => _filteredWords;
@@ -23,6 +25,9 @@ class VocabProvider with ChangeNotifier {
   String get searchQuery => _searchQuery;
   String? get currentUserId =>
       _currentUserId; // Added a getter for currentUserId
+  Set<String> get selectedWordIds => _selectedWordIds;
+  bool get isSelectionMode => _isSelectionMode;
+  int get selectedCount => _selectedWordIds.length;
 
   VocabProvider();
 
@@ -197,5 +202,64 @@ class VocabProvider with ChangeNotifier {
       }
     }
     return partsOfSpeech.toList();
+  }
+
+  // Selection methods
+  void toggleSelectionMode() {
+    _isSelectionMode = !_isSelectionMode;
+    if (!_isSelectionMode) {
+      _selectedWordIds.clear();
+    }
+    notifyListeners();
+  }
+
+  void toggleWordSelection(String wordId) {
+    if (_selectedWordIds.contains(wordId)) {
+      _selectedWordIds.remove(wordId);
+    } else {
+      _selectedWordIds.add(wordId);
+    }
+    
+    // If no words are selected, exit selection mode
+    if (_selectedWordIds.isEmpty) {
+      _isSelectionMode = false;
+    }
+    
+    notifyListeners();
+  }
+
+  void selectAllWords() {
+    _selectedWordIds = _filteredWords.map((word) => word.id).toSet();
+    notifyListeners();
+  }
+
+  void clearSelection() {
+    _selectedWordIds.clear();
+    _isSelectionMode = false;
+    notifyListeners();
+  }
+
+  bool isWordSelected(String wordId) {
+    return _selectedWordIds.contains(wordId);
+  }
+
+  // Batch delete selected words
+  Future<bool> deleteSelectedWords() async {
+    if (_selectedWordIds.isEmpty) return false;
+    
+    try {
+      List<String> wordIdsToDelete = _selectedWordIds.toList();
+      
+      // Use batch delete for better performance
+      await _vocabService.batchDeleteWords(wordIdsToDelete);
+      
+      // Clear selection after successful deletion
+      clearSelection();
+      return true;
+    } catch (e) {
+      _errorMessage = 'Failed to delete selected words: $e';
+      notifyListeners();
+      return false;
+    }
   }
 }

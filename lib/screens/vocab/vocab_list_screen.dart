@@ -1,5 +1,4 @@
 // ignore_for_file: use_build_context_synchronously
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:provider/provider.dart';
@@ -62,64 +61,154 @@ class _VocabListScreenState extends State<VocabListScreen> {
     });
   }
 
+  void _showDeleteConfirmation(BuildContext context, VocabProvider vocabProvider) {
+    final selectedCount = vocabProvider.selectedCount;
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Delete Words'),
+          content: Text(
+            'Are you sure you want to delete $selectedCount selected word${selectedCount > 1 ? 's' : ''}? This action cannot be undone.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () async {
+                Navigator.of(context).pop();
+                
+                // Show loading indicator
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Row(
+                      children: [
+                        SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                        SizedBox(width: 16),
+                        Text('Deleting words...'),
+                      ],
+                    ),
+                  ),
+                );
+
+                final success = await vocabProvider.deleteSelectedWords();
+                
+                if (mounted) {
+                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        success 
+                          ? 'Successfully deleted $selectedCount word${selectedCount > 1 ? 's' : ''}'
+                          : 'Failed to delete words. Please try again.',
+                      ),
+                      backgroundColor: success ? Colors.green : Colors.red,
+                    ),
+                  );
+                }
+              },
+              style: TextButton.styleFrom(foregroundColor: Colors.red),
+              child: const Text('Delete'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Vocabulary'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.search, color: Color(0xFF6A1B9A)),
-            onPressed: () {
-              // TODO: Implement search functionality
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Search coming soon!')),
+    return Consumer<VocabProvider>(
+      builder: (context, vocabProvider, child) {
+        return Scaffold(
+          appBar: AppBar(
+            title: vocabProvider.isSelectionMode
+                ? Text('${vocabProvider.selectedCount} selected')
+                : const Text('Vocabulary'),
+            leading: vocabProvider.isSelectionMode
+                ? IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () {
+                      vocabProvider.clearSelection();
+                    },
+                  )
+                : null,
+            actions: vocabProvider.isSelectionMode
+                ? [
+                    IconButton(
+                      icon: const Icon(Icons.select_all),
+                      onPressed: () {
+                        vocabProvider.selectAllWords();
+                      },
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.delete, color: Colors.red),
+                      onPressed: vocabProvider.selectedCount > 0
+                          ? () => _showDeleteConfirmation(context, vocabProvider)
+                          : null,
+                    ),
+                  ]
+                : [
+                    IconButton(
+                      icon: const Icon(Icons.search),
+                      onPressed: () {
+                        // TODO: Implement search functionality
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Search coming soon!')),
+                        );
+                      },
+                    ),
+                  ],
+          ),
+          body: Consumer<VocabProvider>(
+            builder: (context, vocabProvider, child) {
+              if (vocabProvider.isLoading) {
+                return const Center(child: CircularProgressIndicator());
+              }
+
+              if (vocabProvider.errorMessage != null) {
+                return VocabErrorState(
+                  errorMessage: vocabProvider.errorMessage!,
+                  onRetry: () {
+                    // TODO: Implement retry functionality
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Retry coming soon!')),
+                    );
+                  },
+                );
+              }
+
+              if (vocabProvider.allWords.isEmpty) {
+                return const VocabEmptyState();
+              }
+
+              return const Column(
+                children: [
+                  VocabFilterSection(),
+                  VocabWordCount(),
+                  VocabWordsList(),
+                ],
               );
             },
           ),
-        ],
-      ),
-      body: Consumer<VocabProvider>(
-        builder: (context, vocabProvider, child) {
-          if (vocabProvider.isLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          if (vocabProvider.errorMessage != null) {
-            return VocabErrorState(
-              errorMessage: vocabProvider.errorMessage!,
-              onRetry: () {
-                // TODO: Implement retry functionality
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Retry coming soon!')),
-                );
-              },
-            );
-          }
-
-          if (vocabProvider.allWords.isEmpty) {
-            return const VocabEmptyState();
-          }
-
-          return const Column(
-            children: [
-              VocabFilterSection(),
-              VocabWordCount(),
-              VocabWordsList(),
-            ],
-          );
-        },
-      ),
-      floatingActionButton: Consumer<VocabProvider>(
-        builder: (context, vocabProvider, child) {
-          return FloatingActionButton(
-            onPressed: () {
-              _showAddWordOptions(context, vocabProvider);
-            },
-            child: const Icon(Icons.add),
-          );
-        },
-      ),
+          floatingActionButton: vocabProvider.isSelectionMode
+              ? null
+              : FloatingActionButton(
+                  onPressed: () {
+                    _showAddWordOptions(context, vocabProvider);
+                  },
+                  child: const Icon(Icons.add),
+                ),
+        );
+      },
     );
   }
 }

@@ -4,6 +4,8 @@ class WordAnalysis {
   final String pronunciation;
   final List<String> examples;
   final List<String> synonyms;
+  final List<String> antonyms;
+  final List<String> tags;
   final String difficulty;
   final String partOfSpeech;
   final String? fixedWord;
@@ -14,6 +16,8 @@ class WordAnalysis {
     required this.pronunciation,
     required this.examples,
     required this.synonyms,
+    required this.antonyms,
+    required this.tags,
     required this.difficulty,
     required this.partOfSpeech,
     this.fixedWord,
@@ -26,6 +30,8 @@ class WordAnalysis {
       pronunciation: json['pronunciation'] ?? '',
       examples: List<String>.from(json['examples'] ?? []),
       synonyms: List<String>.from(json['synonyms'] ?? []),
+      antonyms: List<String>.from(json['antonyms'] ?? []),
+      tags: List<String>.from(json['tags'] ?? []),
       difficulty: json['difficulty'] ?? 'beginner',
       partOfSpeech: json['partOfSpeech'] ?? 'noun',
       fixedWord: json['fixedWord'],
@@ -39,6 +45,8 @@ class WordAnalysis {
       'pronunciation': pronunciation,
       'examples': examples,
       'synonyms': synonyms,
+      'antonyms': antonyms,
+      'tags': tags,
       'difficulty': difficulty,
       'partOfSpeech': partOfSpeech,
       'fixedWord': fixedWord,
@@ -47,6 +55,6 @@ class WordAnalysis {
 
   @override
   String toString() {
-    return 'WordAnalysis{definition: $definition, definitionInUserLanguage: $definitionInUserLanguage, pronunciation: $pronunciation, examples: $examples, synonyms: $synonyms, difficulty: $difficulty, partOfSpeech: $partOfSpeech ${fixedWord != null ? ', fixedWord: $fixedWord' : ''}}';
+    return 'WordAnalysis{definition: $definition, definitionInUserLanguage: $definitionInUserLanguage, pronunciation: $pronunciation, examples: $examples, synonyms: $synonyms, antonyms: $antonyms, tags: $tags, difficulty: $difficulty, partOfSpeech: $partOfSpeech ${fixedWord != null ? ', fixedWord: $fixedWord' : ''}}';
   }
 }

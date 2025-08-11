@@ -8,7 +8,7 @@ import '../../../providers/auth_provider.dart';
 import '../../../services/progress_service.dart';
 import '../../../widgets/game_stats_widget.dart';
 import '../../../widgets/difficulty_chip.dart';
-import '../../../widgets/sound_feedback_widget.dart';
+import 'widgets/sound_feedback_widget.dart';
 import '../../../widgets/flashcard_settings_dialog.dart';
 import '../../../widgets/achievement_widget.dart';
 

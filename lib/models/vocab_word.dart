@@ -10,6 +10,8 @@ class VocabWord {
   final List<String> examples;
   final String difficulty; // beginner, intermediate, advanced
   final List<String> synonyms;
+  final List<String> antonyms; // New field for antonyms
+  final List<String> tags; // New field for tags
   final String partOfSpeech;
   final WordState state; // new, learning, mastered
   final int repetitionLevel; // Level of repetition for spaced repetition
@@ -29,6 +31,8 @@ class VocabWord {
     this.examples = const [],
     required this.difficulty,
     this.synonyms = const [],
+    this.antonyms = const [], // Initialize with an empty list
+    this.tags = const [], // Initialize with an empty list
     required this.partOfSpeech,
     this.state = WordState.newWordState,
     required this.repetitionLevel,
@@ -51,6 +55,8 @@ class VocabWord {
       examples: List<String>.from(map['examples'] ?? []),
       difficulty: map['difficulty'] ?? 'beginner',
       synonyms: List<String>.from(map['synonyms'] ?? []),
+      antonyms: List<String>.from(map['antonyms'] ?? []), // Handle antonyms
+      tags: List<String>.from(map['tags'] ?? []), // Handle tags
       partOfSpeech: map['partOfSpeech'] ?? '',
       state: WordState.values.firstWhere(
         (state) =>
@@ -76,6 +82,8 @@ class VocabWord {
       'examples': examples,
       'difficulty': difficulty,
       'synonyms': synonyms,
+      'antonyms': antonyms,
+      'tags': tags,
       'partOfSpeech': partOfSpeech,
       'state': state.value,
       'repetitionLevel': repetitionLevel,
@@ -97,6 +105,8 @@ class VocabWord {
     List<String>? examples,
     String? difficulty,
     List<String>? synonyms,
+    List<String>? antonyms,
+    List<String>? tags,
     String? partOfSpeech,
     WordState? state,
     int? repetitionLevel,
@@ -116,6 +126,8 @@ class VocabWord {
       examples: examples ?? this.examples,
       difficulty: difficulty ?? this.difficulty,
       synonyms: synonyms ?? this.synonyms,
+      antonyms: antonyms ?? this.antonyms,
+      tags: tags ?? this.tags,
       partOfSpeech: partOfSpeech ?? this.partOfSpeech,
       state: state ?? this.state,
       repetitionLevel: repetitionLevel ?? this.repetitionLevel,

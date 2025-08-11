@@ -9,6 +9,8 @@ import 'package:provider/provider.dart';
 import 'package:vocab_learner/providers/auth_provider.dart';
 import 'package:vocab_learner/providers/vocab_provider.dart';
 import 'package:vocab_learner/services/ai_service.dart';
+import 'package:vocab_learner/models/vocab_word.dart';
+import 'package:vocab_learner/utils/guid_generator.dart';
 
 class ImportFromGoogleTranslateDialog extends StatefulWidget {
   final VocabProvider vocabProvider;
@@ -49,12 +51,6 @@ class _ImportFromGoogleTranslateDialogState
       // Handle Excel files (.xlsx, .xls)
       if (fileType == 'xlsx' || fileType == 'xls') {
         await _loadExcelFile(file);
-        final authProvider = Provider.of<AuthProvider>(context, listen: false);
-        final aiService = AIService();
-        final analysis = await aiService.analyzeCSVData(
-          csvData: listWordsImport,
-          userId: authProvider.appUser?.id ?? '',
-        );
         return;
       }
 
@@ -196,6 +192,109 @@ class _ImportFromGoogleTranslateDialogState
       );
     } else {
       return const Center(child: Text('No content available'));
+    }
+  }
+
+  Future<void> _importSelectedWords() async {
+    if (!mounted) return;
+    
+    final currentContext = context;
+    final authProvider = Provider.of<AuthProvider>(currentContext, listen: false);
+    
+    try {
+      // Show loading dialog
+      showDialog(
+        context: currentContext,
+        barrierDismissible: false,
+        builder: (context) => const AlertDialog(
+          content: Row(
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(width: 16),
+              Text('Analyzing and importing words...'),
+            ],
+          ),
+        ),
+      );
+
+      final aiService = AIService();
+      
+      // Get selected words
+      final selectedWordsData = Map.fromEntries(
+        listWordsImport.entries
+            .where((entry) => selectedWords.contains(entry.key))
+      );
+
+      // Analyze words using AI service
+      final analysis = await aiService.analyzeCSVData(
+        csvData: selectedWordsData,
+        userId: authProvider.appUser?.id ?? '',
+        onProgress: (current, total) {
+          // Progress callback - could be used to update UI in the future
+        },
+      );
+
+      // Add words to vocabulary provider
+      final userId = authProvider.appUser?.id ?? '';
+      final now = DateTime.now();
+      
+      for (final wordAnalysis in analysis.words) {
+        if (wordAnalysis.isAnalysisSuccessful) {
+          final vocabWord = VocabWord(
+            id: GuidGenerator.generateGuid(),
+            userId: userId,
+            word: wordAnalysis.fixedWord ?? wordAnalysis.originalWord,
+            definition: wordAnalysis.definition,
+            definitionInUserLanguage: wordAnalysis.translation,
+            pronunciation: wordAnalysis.pronunciation.isNotEmpty ? wordAnalysis.pronunciation : null,
+            examples: wordAnalysis.examples,
+            synonyms: wordAnalysis.synonyms,
+            antonyms: wordAnalysis.antonyms,
+            tags: wordAnalysis.tags,
+            difficulty: wordAnalysis.difficulty,
+            partOfSpeech: wordAnalysis.partOfSpeech,
+            state: WordState.newWordState,
+            repetitionLevel: 0,
+            due: now,
+            createdAt: now,
+            updatedAt: now,
+          );
+          
+          await widget.vocabProvider.addWord(vocabWord);
+        }
+      }
+
+      // Close loading dialog
+      if (mounted) Navigator.of(currentContext).pop();
+      
+      // Close import dialog
+      if (mounted) Navigator.of(currentContext).pop();
+
+      // Show success message
+      if (mounted) {
+        ScaffoldMessenger.of(currentContext).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Successfully imported ${analysis.successfulAnalyses} words! ${analysis.failedAnalyses > 0 ? '${analysis.failedAnalyses} words failed to import.' : ''}',
+          ),
+          backgroundColor: analysis.failedAnalyses > 0 ? Colors.orange : Colors.green,
+        ),
+        );
+      }
+
+    } catch (e) {
+      // Close loading dialog if it's open
+      if (mounted) Navigator.of(currentContext).pop();
+      
+      // Show error message
+      if (mounted) {
+        ScaffoldMessenger.of(currentContext).showSnackBar(
+          SnackBar(
+            content: Text('Failed to import words: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
@@ -374,17 +473,7 @@ class _ImportFromGoogleTranslateDialogState
           ElevatedButton(
             onPressed: selectedWords.isEmpty
                 ? null
-                : () {
-                    // TODO: Implement import logic for selected words
-                    Navigator.of(context).pop();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          'Import ${selectedWords.length} selected words - functionality coming soon!',
-                        ),
-                      ),
-                    );
-                  },
+                : () => _importSelectedWords(),
             child: Text('Import (${selectedWords.length})'),
           ),
       ],

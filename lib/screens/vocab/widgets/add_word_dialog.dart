@@ -9,10 +9,7 @@ import '../../../utils/guid_generator.dart';
 class AddWordDialog extends StatefulWidget {
   final VocabProvider vocabProvider;
 
-  const AddWordDialog({
-    super.key,
-    required this.vocabProvider,
-  });
+  const AddWordDialog({super.key, required this.vocabProvider});
 
   @override
   State<AddWordDialog> createState() => _AddWordDialogState();
@@ -25,6 +22,8 @@ class _AddWordDialogState extends State<AddWordDialog> {
   final exampleController = TextEditingController();
   final nativeDefinitionController = TextEditingController();
   final synonymsController = TextEditingController();
+  final antonymsController = TextEditingController();
+  final tagsController = TextEditingController();
   String selectedDifficulty = 'beginner';
   String selectedPartOfSpeech = 'noun';
   String? errorText;
@@ -50,6 +49,10 @@ class _AddWordDialogState extends State<AddWordDialog> {
             _buildExampleInput(),
             const SizedBox(height: 12),
             _buildSynonymsInput(),
+            const SizedBox(height: 12),
+            _buildAntonymsInput(),
+            const SizedBox(height: 12),
+            _buildTagsInput(),
             const SizedBox(height: 12),
             _buildDifficultyDropdown(),
             const SizedBox(height: 12),
@@ -102,17 +105,10 @@ class _AddWordDialogState extends State<AddWordDialog> {
   Widget _buildPropertiesHeader() {
     return Row(
       children: [
-        Text(
-          'Properties',
-          style: Theme.of(context).textTheme.bodyMedium,
-        ),
+        Text('Properties', style: Theme.of(context).textTheme.bodyMedium),
         const SizedBox(width: 4),
         IconButton(
-          icon: Icon(
-            Icons.info_outline,
-            size: 16,
-            color: Colors.grey.shade500,
-          ),
+          icon: Icon(Icons.info_outline, size: 16, color: Colors.grey.shade500),
           padding: EdgeInsets.zero,
           constraints: const BoxConstraints(),
           tooltip: 'Info',
@@ -123,9 +119,7 @@ class _AddWordDialogState extends State<AddWordDialog> {
           onPressed: _analyzeWordWithAI,
           icon: const Icon(Icons.auto_awesome, size: 18),
           label: const Text('AI Generate'),
-          style: TextButton.styleFrom(
-            foregroundColor: Colors.purple,
-          ),
+          style: TextButton.styleFrom(foregroundColor: Colors.purple),
         ),
       ],
     );
@@ -184,6 +178,30 @@ class _AddWordDialogState extends State<AddWordDialog> {
         labelText: 'Synonyms (optional)',
         border: OutlineInputBorder(),
         hintText: 'Enter synonyms separated by commas...',
+      ),
+      maxLines: 2,
+    );
+  }
+
+  Widget _buildAntonymsInput() {
+    return TextField(
+      controller: antonymsController,
+      decoration: const InputDecoration(
+        labelText: 'Antonyms (optional)',
+        border: OutlineInputBorder(),
+        hintText: 'Enter antonyms separated by commas...',
+      ),
+      maxLines: 2,
+    );
+  }
+
+  Widget _buildTagsInput() {
+    return TextField(
+      controller: tagsController,
+      decoration: const InputDecoration(
+        labelText: 'Tags (optional)',
+        border: OutlineInputBorder(),
+        hintText: 'Enter tags separated by commas...',
       ),
       maxLines: 2,
     );
@@ -267,7 +285,7 @@ class _AddWordDialogState extends State<AddWordDialog> {
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       final aiService = AIService();
-      
+
       final analysis = await aiService.analyzeWord(
         word: wordController.text.trim(),
         userId: authProvider.appUser?.id ?? '',
@@ -358,7 +376,8 @@ class _AddWordDialogState extends State<AddWordDialog> {
   }
 
   void _handleAddWord() async {
-    if (wordController.text.trim().isEmpty || definitionController.text.trim().isEmpty) {
+    if (wordController.text.trim().isEmpty ||
+        definitionController.text.trim().isEmpty) {
       setState(() {
         errorText = 'Please fill in word and definition fields';
       });
@@ -389,17 +408,20 @@ class _AddWordDialogState extends State<AddWordDialog> {
       updatedAt: now,
       synonyms: synonymsController.text.trim().isEmpty
           ? []
-          : synonymsController.text
-              .split(',')
-              .map((s) => s.trim())
-              .toList(),
+          : synonymsController.text.split(',').map((s) => s.trim()).toList(),
+      antonyms: antonymsController.text.trim().isEmpty
+          ? []
+          : antonymsController.text.split(',').map((s) => s.trim()).toList(),
+      tags: tagsController.text.trim().isEmpty
+          ? []
+          : tagsController.text.split(',').map((s) => s.trim()).toList(),
     );
 
     _showAddingWordDialog();
 
     try {
       final success = await widget.vocabProvider.addWord(newWord);
-      
+
       if (mounted) Navigator.of(context).pop(); // Close loading dialog
 
       if (success) {
@@ -407,7 +429,9 @@ class _AddWordDialogState extends State<AddWordDialog> {
           Navigator.of(context).pop(); // Close add word dialog
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Word "${wordController.text}" added successfully!'),
+              content: Text(
+                'Word "${wordController.text}" added successfully!',
+              ),
               backgroundColor: Colors.green,
             ),
           );
@@ -453,6 +477,8 @@ class _AddWordDialogState extends State<AddWordDialog> {
     exampleController.dispose();
     nativeDefinitionController.dispose();
     synonymsController.dispose();
+    antonymsController.dispose();
+    tagsController.dispose();
     super.dispose();
   }
 }
