@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/vocab_word.dart';
 import '../services/vocab_service.dart';
 
@@ -11,10 +12,27 @@ class VocabProvider with ChangeNotifier {
   String? _errorMessage;
   String _selectedDifficulty = 'all';
   String _selectedPartOfSpeech = 'all';
+  String _selectedState = 'all';
+  String _selectedTag = 'all';
   String _searchQuery = '';
+  DateTime? _createdAfter;
+  DateTime? _createdBefore;
   String? _currentUserId;
   Set<String> _selectedWordIds = <String>{};
   bool _isSelectionMode = false;
+  bool _isCompactMode = false;
+  
+  // Pagination state
+  bool _isPaginationEnabled = true;
+  bool _isLoadingMore = false;
+  bool _hasMoreData = true;
+  DocumentSnapshot? _lastDocument;
+  
+  // Page-based pagination state
+  int _currentPage = 1;
+  int _itemsPerPage = 20;
+  int _totalItems = 0;
+  final List<int> _availablePageSizes = [10, 20, 50, 100];
 
   List<VocabWord> get allWords => _allWords;
   List<VocabWord> get filteredWords => _filteredWords;
@@ -22,11 +40,24 @@ class VocabProvider with ChangeNotifier {
   String? get errorMessage => _errorMessage;
   String get selectedDifficulty => _selectedDifficulty;
   String get selectedPartOfSpeech => _selectedPartOfSpeech;
+  String get selectedState => _selectedState;
+  String get selectedTag => _selectedTag;
   String get searchQuery => _searchQuery;
+  DateTime? get createdAfter => _createdAfter;
+  DateTime? get createdBefore => _createdBefore;
   String? get currentUserId =>
       _currentUserId; // Added a getter for currentUserId
   Set<String> get selectedWordIds => _selectedWordIds;
   bool get isSelectionMode => _isSelectionMode;
+  bool get isCompactMode => _isCompactMode;
+  bool get isPaginationEnabled => _isPaginationEnabled;
+  bool get isLoadingMore => _isLoadingMore;
+  bool get hasMoreData => _hasMoreData;
+  int get currentPage => _currentPage;
+  int get itemsPerPage => _itemsPerPage;
+  int get totalItems => _totalItems;
+  List<int> get availablePageSizes => _availablePageSizes;
+  int get totalPages => (_totalItems / _itemsPerPage).ceil();
   int get selectedCount => _selectedWordIds.length;
 
   VocabProvider();
@@ -35,68 +66,187 @@ class VocabProvider with ChangeNotifier {
     if (_currentUserId != userId) {
       _currentUserId = userId;
       if (userId != null) {
-        _loadAllWords();
+        if (_isPaginationEnabled) {
+          _loadWordsPageBased();
+        } else {
+          _loadWordsPaginated(reset: true);
+        }
       } else {
         _allWords = [];
         _filteredWords = [];
+        _resetPaginationState();
         notifyListeners();
       }
     }
   }
 
-  void _loadAllWords() {
+  void _resetPaginationState() {
+    _lastDocument = null;
+    _hasMoreData = true;
+    _isLoadingMore = false;
+    _currentPage = 1;
+    _totalItems = 0;
+  }
+
+  Future<void> _loadWordsPaginated({bool reset = false}) async {
+    if (_currentUserId == null) return;
+
+    if (reset) {
+      _resetPaginationState();
+      _allWords = [];
+      _filteredWords = [];
+      _setLoading(true);
+    } else {
+      if (_isLoadingMore || !_hasMoreData) return;
+      _isLoadingMore = true;
+      notifyListeners();
+    }
+
+    try {
+      final result = await _vocabService.getWordsFilteredPaginated(
+        _currentUserId!,
+        difficulty: _selectedDifficulty,
+        partOfSpeech: _selectedPartOfSpeech,
+        searchQuery: _searchQuery.isEmpty ? null : _searchQuery,
+        limit: _itemsPerPage,
+        lastDocument: _lastDocument,
+      );
+
+      if (reset) {
+        _allWords = result.words;
+      } else {
+        _allWords.addAll(result.words);
+      }
+
+      if (result.docs.isNotEmpty) {
+        _lastDocument = result.docs.last;
+      }
+
+      _hasMoreData = result.words.length == _itemsPerPage;
+      _filteredWords = List.from(_allWords);
+      
+      if (reset) {
+        _setLoading(false);
+      } else {
+        _isLoadingMore = false;
+      }
+      
+      notifyListeners();
+    } catch (error) {
+      _errorMessage = 'Failed to load vocabulary: $error';
+      if (reset) {
+        _setLoading(false);
+      } else {
+        _isLoadingMore = false;
+      }
+      notifyListeners();
+    }
+  }
+
+  Future<void> _loadWordsPageBased() async {
     if (_currentUserId == null) return;
 
     _setLoading(true);
-    _vocabService
-        .getAllWords(_currentUserId!)
-        .listen(
-          (words) {
-            _allWords = words;
-            _applyFilters();
-            _setLoading(false);
-          },
-          onError: (error) {
-            _errorMessage = 'Failed to load vocabulary: $error';
-            _setLoading(false);
-          },
-        );
-  }
+    _errorMessage = null;
 
-  void _applyFilters() {
-    _filteredWords = _allWords.where((word) {
-      bool matchesDifficulty =
-          _selectedDifficulty == 'all' ||
-          word.difficulty == _selectedDifficulty;
+    try {
+      final result = await _vocabService.getWordsByPage(
+        _currentUserId!,
+        difficulty: _selectedDifficulty,
+        partOfSpeech: _selectedPartOfSpeech,
+        searchQuery: _searchQuery.isEmpty ? null : _searchQuery,
+        page: _currentPage,
+        itemsPerPage: _itemsPerPage,
+      );
 
-      bool matchesPartOfSpeech =
-          _selectedPartOfSpeech == 'all' ||
-          word.partOfSpeech == _selectedPartOfSpeech;
-
-      bool matchesSearch =
-          _searchQuery.isEmpty ||
-          word.word.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-          word.definition.toLowerCase().contains(_searchQuery.toLowerCase());
-
-      return matchesDifficulty && matchesPartOfSpeech && matchesSearch;
-    }).toList();
-
-    notifyListeners();
+      _allWords = result.words;
+      _filteredWords = List.from(_allWords);
+      _totalItems = result.totalCount;
+      
+      _setLoading(false);
+      notifyListeners();
+    } catch (error) {
+      _errorMessage = 'Failed to load vocabulary: $error';
+      _setLoading(false);
+      notifyListeners();
+    }
   }
 
   void setDifficultyFilter(String difficulty) {
     _selectedDifficulty = difficulty;
-    _applyFilters();
+    _currentPage = 1; // Reset to first page when filtering
+    if (_isPaginationEnabled) {
+      _loadWordsPageBased();
+    } else {
+      _loadWordsPaginated(reset: true);
+    }
   }
 
   void setPartOfSpeechFilter(String partOfSpeech) {
     _selectedPartOfSpeech = partOfSpeech;
-    _applyFilters();
+    _currentPage = 1; // Reset to first page when filtering
+    if (_isPaginationEnabled) {
+      _loadWordsPageBased();
+    } else {
+      _loadWordsPaginated(reset: true);
+    }
   }
 
   void setSearchQuery(String query) {
     _searchQuery = query;
-    _applyFilters();
+    _currentPage = 1; // Reset to first page when searching
+    if (_isPaginationEnabled) {
+      _loadWordsPageBased();
+    } else {
+      _loadWordsPaginated(reset: true);
+    }
+  }
+
+  void setStateFilter(String state) {
+    _selectedState = state;
+    _currentPage = 1; // Reset to first page when filtering
+    if (_isPaginationEnabled) {
+      _loadWordsPageBased();
+    } else {
+      _loadWordsPaginated(reset: true);
+    }
+  }
+
+  void setTagFilter(String tag) {
+    _selectedTag = tag;
+    _currentPage = 1; // Reset to first page when filtering
+    if (_isPaginationEnabled) {
+      _loadWordsPageBased();
+    } else {
+      _loadWordsPaginated(reset: true);
+    }
+  }
+
+  void setDateRangeFilter(DateTime? after, DateTime? before) {
+    _createdAfter = after;
+    _createdBefore = before;
+    _currentPage = 1; // Reset to first page when filtering
+    if (_isPaginationEnabled) {
+      _loadWordsPageBased();
+    } else {
+      _loadWordsPaginated(reset: true);
+    }
+  }
+
+  void clearAllFilters() {
+    _selectedDifficulty = 'all';
+    _selectedPartOfSpeech = 'all';
+    _selectedState = 'all';
+    _selectedTag = 'all';
+    _searchQuery = '';
+    _createdAfter = null;
+    _createdBefore = null;
+    _currentPage = 1;
+    if (_isPaginationEnabled) {
+      _loadWordsPageBased();
+    } else {
+      _loadWordsPaginated(reset: true);
+    }
   }
 
   Future<List<VocabWord>> getRandomWords(int count) async {
@@ -204,6 +354,22 @@ class VocabProvider with ChangeNotifier {
     return partsOfSpeech.toList();
   }
 
+  List<String> get availableStates => [
+    'all',
+    'new',
+    'learning',
+    'reviewed',
+    'mastered',
+  ];
+
+  List<String> get availableTags {
+    Set<String> tags = {'all'};
+    for (var word in _allWords) {
+      tags.addAll(word.tags);
+    }
+    return tags.toList();
+  }
+
   // Selection methods
   void toggleSelectionMode() {
     _isSelectionMode = !_isSelectionMode;
@@ -241,6 +407,79 @@ class VocabProvider with ChangeNotifier {
 
   bool isWordSelected(String wordId) {
     return _selectedWordIds.contains(wordId);
+  }
+
+  // Toggle compact mode
+  void toggleCompactMode() {
+    _isCompactMode = !_isCompactMode;
+    notifyListeners();
+  }
+
+  // Toggle pagination mode
+  void togglePaginationMode() {
+    _isPaginationEnabled = !_isPaginationEnabled;
+    _resetPaginationState();
+    if (_currentUserId != null) {
+      if (_isPaginationEnabled) {
+        _loadWordsPageBased();
+      } else {
+        _loadWordsPaginated(reset: true);
+      }
+    }
+  }
+
+  // Load more data for infinite scroll pagination
+  Future<void> loadMoreWords() async {
+    if (!_isPaginationEnabled && _hasMoreData && !_isLoadingMore) {
+      await _loadWordsPaginated();
+    }
+  }
+
+  // Page navigation methods
+  void goToPage(int page) {
+    if (page >= 1 && page <= totalPages && page != _currentPage) {
+      _currentPage = page;
+      _loadWordsPageBased();
+    }
+  }
+
+  void goToNextPage() {
+    if (_currentPage < totalPages) {
+      _currentPage++;
+      _loadWordsPageBased();
+    }
+  }
+
+  void goToPreviousPage() {
+    if (_currentPage > 1) {
+      _currentPage--;
+      _loadWordsPageBased();
+    }
+  }
+
+  void goToFirstPage() {
+    if (_currentPage != 1) {
+      _currentPage = 1;
+      _loadWordsPageBased();
+    }
+  }
+
+  void goToLastPage() {
+    if (_currentPage != totalPages && totalPages > 0) {
+      _currentPage = totalPages;
+      _loadWordsPageBased();
+    }
+  }
+
+  // Items per page control
+  void setItemsPerPage(int itemsPerPage) {
+    if (_availablePageSizes.contains(itemsPerPage) && itemsPerPage != _itemsPerPage) {
+      _itemsPerPage = itemsPerPage;
+      _currentPage = 1; // Reset to first page when changing page size
+      if (_isPaginationEnabled) {
+        _loadWordsPageBased();
+      }
+    }
   }
 
   // Batch delete selected words

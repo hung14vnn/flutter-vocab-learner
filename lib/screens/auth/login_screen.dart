@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:vocab_learner/consts/app_consts.dart';
+import 'package:vocab_learner/widgets/toast_notification.dart';
 import '../../providers/auth_provider.dart';
 import 'register_screen.dart';
 
@@ -33,11 +33,9 @@ class _LoginScreenState extends State<LoginScreen> {
       );
 
       if (!success && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(authProvider.errorMessage ?? 'Login failed'),
-            backgroundColor: pastelRed,
-          ),
+        ToastNotification.showError(
+          context,
+          message: authProvider.errorMessage ?? 'Failed to sign in',
         );
       }
     }
@@ -246,17 +244,18 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 if (context.mounted) {
                   Navigator.of(context).pop();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        success
-                            ? 'Password reset email sent!'
-                            : authProvider.errorMessage ??
-                                  'Failed to send reset email',
-                      ),
-                      backgroundColor: success ? pastelGreen : pastelRed,
-                    ),
-                  );
+                  if (success) {
+                    ToastNotification.showSuccess(
+                      context,
+                      message: 'Password reset email sent successfully!',
+                    );
+                  } else {
+                    ToastNotification.showError(
+                      context,
+                      message: authProvider.errorMessage ??
+                          'Failed to send reset email',
+                    );
+                  }
                 }
               }
             },

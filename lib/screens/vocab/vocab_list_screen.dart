@@ -6,6 +6,8 @@ import 'package:file_picker/file_picker.dart';
 import 'package:vocab_learner/screens/vocab/widgets/add_word_options.dart';
 import 'package:vocab_learner/screens/vocab/widgets/import_from_google_translate_dialog.dart';
 import 'package:vocab_learner/screens/vocab/widgets/vocab_word_list.dart';
+import 'package:vocab_learner/screens/vocab/widgets/pagination_controls.dart';
+import 'package:vocab_learner/widgets/toast_notification.dart';
 import '../../providers/vocab_provider.dart';
 import '../../providers/auth_provider.dart';
 import 'widgets/vocab_filter_section.dart';
@@ -22,11 +24,38 @@ class VocabListScreen extends StatefulWidget {
 
 class _VocabListScreenState extends State<VocabListScreen> {
   late AuthProvider authProvider;
+  final ScrollController _scrollController = ScrollController();
+  bool _isAddButtonVisible = true;
+  bool _isFilterExpanded = false;
 
   @override
   void initState() {
     super.initState();
     authProvider = Provider.of<AuthProvider>(context, listen: false);
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.hasClients) {
+      final maxScroll = _scrollController.position.maxScrollExtent;
+      final currentScroll = _scrollController.position.pixels;
+      
+      // Hide button when scrolled to the bottom (within 50 pixels threshold)
+      final shouldShowButton = (maxScroll - currentScroll) > 50;
+      
+      if (shouldShowButton != _isAddButtonVisible) {
+        setState(() {
+          _isAddButtonVisible = shouldShowButton;
+        });
+      }
+    }
   }
 
   void _showAddWordOptions(BuildContext context, VocabProvider vocabProvider) {
@@ -82,37 +111,26 @@ class _VocabListScreenState extends State<VocabListScreen> {
               onPressed: () async {
                 Navigator.of(context).pop();
                 
-                // Show loading indicator
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Row(
-                      children: [
-                        SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        ),
-                        SizedBox(width: 16),
-                        Text('Deleting words...'),
-                      ],
-                    ),
-                  ),
+                ToastNotification.showLoading(
+                  context,
+                  message: 'Deleting $selectedCount word${selectedCount > 1 ? 's' : ''}...',
                 );
 
                 final success = await vocabProvider.deleteSelectedWords();
                 
                 if (mounted) {
-                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        success 
-                          ? 'Successfully deleted $selectedCount word${selectedCount > 1 ? 's' : ''}'
-                          : 'Failed to delete words. Please try again.',
-                      ),
-                      backgroundColor: success ? Colors.green : Colors.red,
-                    ),
-                  );
+                  ToastNotification.hide(context);
+                  if (success) {
+                    ToastNotification.showSuccess(
+                      context,
+                      message: '$selectedCount word${selectedCount > 1 ? 's' : ''} deleted successfully!',
+                    );
+                  } else {
+                    ToastNotification.showError(
+                      context,
+                      message: 'Failed to delete selected words',
+                    );
+                  }
                 }
               },
               style: TextButton.styleFrom(foregroundColor: Colors.red),
@@ -158,12 +176,32 @@ class _VocabListScreenState extends State<VocabListScreen> {
                   ]
                 : [
                     IconButton(
-                      icon: const Icon(Icons.search),
+                      icon: Icon(
+                        vocabProvider.isPaginationEnabled ? Icons.format_list_numbered : Icons.all_inclusive,
+                      ),
+                      tooltip: vocabProvider.isPaginationEnabled ? 'Switch to infinite scroll mode' : 'Switch to page navigation mode',
                       onPressed: () {
-                        // TODO: Implement search functionality
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Search coming soon!')),
-                        );
+                        vocabProvider.togglePaginationMode();
+                      },
+                    ),
+                    IconButton(
+                      icon: Icon(
+                        vocabProvider.isCompactMode ? Icons.view_agenda : Icons.view_list,
+                      ),
+                      tooltip: vocabProvider.isCompactMode ? 'Switch to detailed view' : 'Switch to compact view',
+                      onPressed: () {
+                        vocabProvider.toggleCompactMode();
+                      },
+                    ),
+                    IconButton(
+                      icon: Icon(
+                        _isFilterExpanded ? Icons.filter_list_off : Icons.filter_list,
+                      ),
+                      tooltip: _isFilterExpanded ? 'Hide filters' : 'Show filters',
+                      onPressed: () {
+                        setState(() {
+                          _isFilterExpanded = !_isFilterExpanded;
+                        });
                       },
                     ),
                   ],
@@ -175,6 +213,7 @@ class _VocabListScreenState extends State<VocabListScreen> {
               }
 
               if (vocabProvider.errorMessage != null) {
+                print(vocabProvider.errorMessage);
                 return VocabErrorState(
                   errorMessage: vocabProvider.errorMessage!,
                   onRetry: () {
@@ -190,16 +229,27 @@ class _VocabListScreenState extends State<VocabListScreen> {
                 return const VocabEmptyState();
               }
 
-              return const Column(
+              return Column(
                 children: [
-                  VocabFilterSection(),
-                  VocabWordCount(),
-                  VocabWordsList(),
+                  if (_isFilterExpanded) ...[
+                    VocabFilterSection(
+                      onClose: () {
+                        setState(() {
+                          _isFilterExpanded = false;
+                        });
+                      },
+                    ),
+                  ],
+                  const VocabWordCount(),
+                  Expanded(
+                    child: VocabWordsList(scrollController: _scrollController),
+                  ),
+                  const PaginationControls(),
                 ],
               );
             },
           ),
-          floatingActionButton: vocabProvider.isSelectionMode
+          floatingActionButton: vocabProvider.isSelectionMode || !_isAddButtonVisible
               ? null
               : FloatingActionButton(
                   onPressed: () {

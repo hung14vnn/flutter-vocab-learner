@@ -6,6 +6,8 @@ import 'package:provider/provider.dart';
 import 'package:vocab_learner/providers/vocab_provider.dart';
 import 'package:vocab_learner/models/vocab_word.dart';
 import 'package:vocab_learner/screens/practice/flashcards/flashcards_game_screen.dart';
+import 'package:vocab_learner/widgets/toast_notification.dart';
+
 class ProgressDialog extends StatefulWidget {
   final UserProgress progress;
 
@@ -15,7 +17,8 @@ class ProgressDialog extends StatefulWidget {
   State<ProgressDialog> createState() => _ProgressDialogState();
 }
 
-class _ProgressDialogState extends State<ProgressDialog> with TickerProviderStateMixin {
+class _ProgressDialogState extends State<ProgressDialog>
+    with TickerProviderStateMixin {
   bool _showWordsList = false;
   List<VocabWord> _words = [];
   bool _isLoadingWords = false;
@@ -29,13 +32,13 @@ class _ProgressDialogState extends State<ProgressDialog> with TickerProviderStat
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(1.0, 0.0),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(1.0, 0.0), end: Offset.zero).animate(
+          CurvedAnimation(
+            parent: _animationController,
+            curve: Curves.easeInOut,
+          ),
+        );
   }
 
   @override
@@ -48,15 +51,15 @@ class _ProgressDialogState extends State<ProgressDialog> with TickerProviderStat
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final statusColor = widget.progress.isLearned ? pastelGreen : pastelOrange;
-    final statusIcon = widget.progress.isLearned ? Icons.check_circle : Icons.schedule;
-    
+    final statusIcon = widget.progress.isLearned
+        ? Icons.check_circle
+        : Icons.schedule;
+
     return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Container(
         height: 600, // Fixed height
-        width: 400,  // Fixed width
+        width: 400, // Fixed width
         padding: const EdgeInsets.all(24.0),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(16),
@@ -64,24 +67,32 @@ class _ProgressDialogState extends State<ProgressDialog> with TickerProviderStat
             children: [
               // Progress view (slides left when words list is shown)
               SlideTransition(
-                position: Tween<Offset>(
-                  begin: Offset.zero,
-                  end: const Offset(-1.0, 0.0),
-                ).animate(CurvedAnimation(
-                  parent: _animationController,
-                  curve: Curves.easeInOut,
-                )),
-                child: _buildProgressView(context, theme, statusColor, statusIcon),
+                position:
+                    Tween<Offset>(
+                      begin: Offset.zero,
+                      end: const Offset(-1.0, 0.0),
+                    ).animate(
+                      CurvedAnimation(
+                        parent: _animationController,
+                        curve: Curves.easeInOut,
+                      ),
+                    ),
+                child: _buildProgressView(
+                  context,
+                  theme,
+                  statusColor,
+                  statusIcon,
+                ),
               ),
               // Words list view (slides in from right)
               SlideTransition(
                 position: _slideAnimation,
                 child: SizedBox(
                   height: 552, // Same height as progress view
-                  width: 352,  // Full width minus padding
-                  child: _showWordsList 
-                    ? _buildWordsListView(context, theme)
-                    : const SizedBox.shrink(),
+                  width: 352, // Full width minus padding
+                  child: _showWordsList
+                      ? _buildWordsListView(context, theme)
+                      : const SizedBox.shrink(),
                 ),
               ),
             ],
@@ -91,7 +102,12 @@ class _ProgressDialogState extends State<ProgressDialog> with TickerProviderStat
     );
   }
 
-  Widget _buildProgressView(BuildContext context, ThemeData theme, Color statusColor, IconData statusIcon) {
+  Widget _buildProgressView(
+    BuildContext context,
+    ThemeData theme,
+    Color statusColor,
+    IconData statusIcon,
+  ) {
     return SizedBox(
       height: 552, // Fixed height minus padding
       child: Column(
@@ -105,14 +121,10 @@ class _ProgressDialogState extends State<ProgressDialog> with TickerProviderStat
               color: statusColor.withOpacity(0.2),
               shape: BoxShape.circle,
             ),
-            child: Icon(
-              statusIcon,
-              size: 32,
-              color: statusColor,
-            ),
+            child: Icon(statusIcon, size: 32, color: statusColor),
           ),
           const SizedBox(height: 16),
-          
+
           // Title
           Text(
             'Progress Details',
@@ -120,7 +132,7 @@ class _ProgressDialogState extends State<ProgressDialog> with TickerProviderStat
               fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 20),           
+          const SizedBox(height: 20),
           GestureDetector(
             onTap: () => _loadAndShowWordsList(),
             child: _buildInfoCard(
@@ -135,7 +147,8 @@ class _ProgressDialogState extends State<ProgressDialog> with TickerProviderStat
           _buildInfoCard(
             icon: Icons.track_changes,
             title: 'Accuracy',
-            value: '${(widget.progress.accuracy * 100).toStringAsFixed(1)}% (${widget.progress.correctAnswers.length}/${widget.progress.correctAnswers.length + widget.progress.wrongAnswers.length})',
+            value:
+                '${(widget.progress.accuracy * 100).toStringAsFixed(1)}% (${widget.progress.correctAnswers.length}/${widget.progress.correctAnswers.length + widget.progress.wrongAnswers.length})',
             color: pastelPurple,
           ),
           const SizedBox(height: 12),
@@ -157,7 +170,9 @@ class _ProgressDialogState extends State<ProgressDialog> with TickerProviderStat
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              if (!widget.progress.isLearned) // Only show Continue button if not learned
+              if (!widget
+                  .progress
+                  .isLearned) // Only show Continue button if not learned
                 TextButton(
                   onPressed: () {
                     _continueProgress();
@@ -210,19 +225,14 @@ class _ProgressDialogState extends State<ProgressDialog> with TickerProviderStat
           ],
         ),
         const SizedBox(height: 16),
-        
+
         // Words list
         Expanded(
           child: _isLoadingWords
-            ? const Center(
-                child: CircularProgressIndicator(),
-              )
-            : _words.isEmpty
+              ? const Center(child: CircularProgressIndicator())
+              : _words.isEmpty
               ? const Center(
-                  child: Text(
-                    'No words found',
-                    style: TextStyle(fontSize: 16),
-                  ),
+                  child: Text('No words found', style: TextStyle(fontSize: 16)),
                 )
               : ListView.separated(
                   itemCount: _words.length,
@@ -237,7 +247,9 @@ class _ProgressDialogState extends State<ProgressDialog> with TickerProviderStat
                           word.word,
                           style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
-                        subtitle: Text(word.definition.isNotEmpty ? word.definition : '-'),
+                        subtitle: Text(
+                          word.definition.isNotEmpty ? word.definition : '-',
+                        ),
                         trailing: isLearned
                             ? Icon(Icons.check_circle, color: pastelGreen)
                             : Icon(Icons.schedule, color: pastelOrange),
@@ -246,9 +258,9 @@ class _ProgressDialogState extends State<ProgressDialog> with TickerProviderStat
                   },
                 ),
         ),
-        
+
         const SizedBox(height: 16),
-        
+
         // Action buttons
         Row(
           mainAxisAlignment: MainAxisAlignment.end,
@@ -271,19 +283,19 @@ class _ProgressDialogState extends State<ProgressDialog> with TickerProviderStat
 
   Future<void> _loadAndShowWordsList() async {
     final vocabProvider = Provider.of<VocabProvider>(context, listen: false);
-    
+
     setState(() {
       _isLoadingWords = true;
       _showWordsList = true;
     });
-    
+
     // Start slide animation
     _animationController.forward();
-    
+
     try {
       // Get the words using the word IDs from progress
       final words = await vocabProvider.getWordsByIds(widget.progress.wordIds);
-      
+
       if (mounted) {
         setState(() {
           _words = words;
@@ -296,9 +308,10 @@ class _ProgressDialogState extends State<ProgressDialog> with TickerProviderStat
           _words = [];
           _isLoadingWords = false;
         });
-        
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to load words: $e')),
+
+        ToastNotification.showError(
+          context,
+          message: 'Failed to load words: $e',
         );
       }
     }
@@ -307,7 +320,7 @@ class _ProgressDialogState extends State<ProgressDialog> with TickerProviderStat
   void _goBackToProgress() async {
     // Start reverse animation
     await _animationController.reverse();
-    
+
     if (mounted) {
       setState(() {
         _showWordsList = false;
@@ -317,29 +330,35 @@ class _ProgressDialogState extends State<ProgressDialog> with TickerProviderStat
 
   Future<void> _continueProgress() async {
     if (widget.progress.isLearned) {
-      // If already learned, show a message
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('This progress is already completed!')),
+      ToastNotification.showInfo(
+        context,
+        message: 'This progress is already completed!',
       );
       return;
     }
 
     try {
       final vocabProvider = Provider.of<VocabProvider>(context, listen: false);
-      
+
       // Get the words for this progress
       final words = await vocabProvider.getWordsByIds(widget.progress.wordIds);
-      
+
       if (words.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No words found for this progress')),
+        ToastNotification.showInfo(
+          context,
+          message: 'No words found for this progress!',
         );
         return;
       }
 
-      final wordsToReview = words.where((word) => 
-        ![...widget.progress.wrongAnswers, ...widget.progress.correctAnswers].contains(word.id)
-      ).toList();
+      final wordsToReview = words
+          .where(
+            (word) => ![
+              ...widget.progress.wrongAnswers,
+              ...widget.progress.correctAnswers,
+            ].contains(word.id),
+          )
+          .toList();
 
       final selectedWords = wordsToReview.isNotEmpty ? wordsToReview : words;
 
@@ -349,19 +368,18 @@ class _ProgressDialogState extends State<ProgressDialog> with TickerProviderStat
       // Navigate to flashcards with specific words
       Navigator.of(context).push(
         MaterialPageRoute(
-          builder: (context) => FlashcardsGameScreen(
-            specificWords: selectedWords,
-          ),
+          builder: (context) =>
+              FlashcardsGameScreen(specificWords: selectedWords),
         ),
       );
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to continue progress: $e')),
+      ToastNotification.showError(
+        context,
+        message: 'Failed to continue progress: $e',
       );
     }
   }
 
-  
   Widget _buildInfoCard({
     required IconData icon,
     required String title,
@@ -375,10 +393,7 @@ class _ProgressDialogState extends State<ProgressDialog> with TickerProviderStat
       decoration: BoxDecoration(
         color: color.withOpacity(0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: color.withOpacity(0.3),
-          width: 1,
-        ),
+        border: Border.all(color: color.withOpacity(0.3), width: 1),
       ),
       child: Row(
         children: [
@@ -389,11 +404,7 @@ class _ProgressDialogState extends State<ProgressDialog> with TickerProviderStat
               color: color.withOpacity(0.2),
               shape: BoxShape.circle,
             ),
-            child: Icon(
-              icon,
-              size: 20,
-              color: color,
-            ),
+            child: Icon(icon, size: 20, color: color),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -420,11 +431,7 @@ class _ProgressDialogState extends State<ProgressDialog> with TickerProviderStat
             ),
           ),
           if (isClickable)
-            Icon(
-              Icons.arrow_forward_ios,
-              size: 16,
-              color: color,
-            ),
+            Icon(Icons.arrow_forward_ios, size: 16, color: color),
         ],
       ),
     );

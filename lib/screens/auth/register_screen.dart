@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:vocab_learner/consts/app_consts.dart';
+import 'package:vocab_learner/widgets/toast_notification.dart';
 import '../../providers/auth_provider.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -42,11 +42,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
           Navigator.of(context).pop();
         }
       } else if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(authProvider.errorMessage ?? 'Registration failed'),
-            backgroundColor: pastelRed
-          ),
+        ToastNotification.showError(
+          context,
+          message: authProvider.errorMessage ?? 'Failed to create account',
         );
       }
     }

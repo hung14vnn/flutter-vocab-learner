@@ -1,5 +1,6 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:vocab_learner/widgets/toast_notification.dart';
 import '../../../providers/vocab_provider.dart';
 import 'add_word_dialog.dart';
 
@@ -70,8 +71,9 @@ class AddWordOptionsDialog extends StatelessWidget {
               subtitle: const Text('Import from comma-separated values file'),
               onTap: () {
                 Navigator.of(dialogContext).pop();
-                ScaffoldMessenger.of(rootContext).showSnackBar(
-                  const SnackBar(content: Text('CSV import coming soon!')),
+                ToastNotification.showInfo(
+                  rootContext,
+                  message: 'CSV import coming soon!',
                 );
               },
             ),
@@ -89,8 +91,9 @@ class AddWordOptionsDialog extends StatelessWidget {
               subtitle: const Text('Import from online vocabulary list'),
               onTap: () {
                 Navigator.of(dialogContext).pop();
-                ScaffoldMessenger.of(rootContext).showSnackBar(
-                  const SnackBar(content: Text('URL import coming soon!')),
+                ToastNotification.showInfo(
+                  rootContext,
+                  message: 'URL import coming soon!',
                 );
               },
             ),
@@ -132,8 +135,9 @@ class AddWordOptionsDialog extends StatelessWidget {
               subtitle: const Text('Add multiple words quickly'),
               onTap: () {
                 Navigator.of(dialogContext).pop();
-                ScaffoldMessenger.of(rootContext).showSnackBar(
-                  const SnackBar(content: Text('Quick add coming soon!')),
+                ToastNotification.showInfo(
+                  rootContext,
+                  message: 'Quick add coming soon!',
                 );
               },
             ),
@@ -178,16 +182,18 @@ class AddWordOptionsDialog extends StatelessWidget {
             debugPrint('No callback provided for file selection');
             // Show error message using root context if it's still mounted
             if (rootContext.mounted) {
-              ScaffoldMessenger.of(rootContext).showSnackBar(
-                const SnackBar(content: Text('Import feature not properly configured')),
+              ToastNotification.showError(
+                rootContext,
+                message: 'Import feature not properly configured',
               );
             }
           }
         } else {
           debugPrint('No file path available');
           if (rootContext.mounted) {
-            ScaffoldMessenger.of(rootContext).showSnackBar(
-              const SnackBar(content: Text('Unable to access selected file')),
+            ToastNotification.showError(
+              rootContext,
+              message: 'Unable to access selected file',
             );
           }
         }
@@ -200,8 +206,9 @@ class AddWordOptionsDialog extends StatelessWidget {
       debugPrint('Error in file picker: $e');
       // Only show error if context is still valid
       if (rootContext.mounted) {
-        ScaffoldMessenger.of(rootContext).showSnackBar(
-          SnackBar(content: Text('Error selecting file: $e')),
+        ToastNotification.showError(
+          rootContext,
+          message: 'Failed to select file: $e',
         );
       }
     }

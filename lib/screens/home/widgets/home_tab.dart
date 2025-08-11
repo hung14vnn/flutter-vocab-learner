@@ -7,6 +7,7 @@ import 'package:vocab_learner/consts/app_consts.dart';
 import 'package:vocab_learner/screens/home/widgets/action_card.dart';
 import 'package:vocab_learner/screens/home/widgets/progress_dialog.dart';
 import 'package:vocab_learner/screens/home/widgets/stat_card.dart';
+import 'package:vocab_learner/widgets/toast_notification.dart';
 
 class HomeTab extends StatelessWidget {
   const HomeTab({super.key});
@@ -113,13 +114,9 @@ class HomeTab extends StatelessWidget {
                         icon: Icons.quiz,
                         color: theme.colorScheme.primary,
                         onTap: () {
-                          // Simple navigation message
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                'Navigate to Practice tab to start practicing!',
-                              ),
-                            ),
+                          ToastNotification.showInfo(
+                            context,
+                            message: 'Navigate to Practice tab to start!',
                           );
                         },
                       ),
@@ -132,13 +129,9 @@ class HomeTab extends StatelessWidget {
                         icon: Icons.book,
                         color: theme.colorScheme.primary,
                         onTap: () {
-                          // Navigate to vocabulary screen
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                'Navigate to Vocabulary tab to browse words!',
-                              ),
-                            ),
+                          ToastNotification.showInfo(
+                            context,
+                            message: 'Navigate to Vocabulary tab to explore!',
                           );
                         },
                       ),

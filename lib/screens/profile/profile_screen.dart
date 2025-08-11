@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:vocab_learner/widgets/toast_notification.dart';
 import '../../providers/auth_provider.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -280,8 +281,9 @@ class ProfileScreen extends StatelessWidget {
                         );
                         await authProvider.updateUserProfile(updatedUser);
                         if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('AI settings saved!')),
+                          ToastNotification.showSuccess(
+                            context,
+                            message: 'AI settings updated successfully!',
                           );
                         }
                       },
@@ -523,11 +525,9 @@ class ProfileScreen extends StatelessWidget {
 
       // Show success message
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Language updated to $newLanguage'),
-            backgroundColor: Colors.green,
-          ),
+        ToastNotification.showSuccess(
+          context,
+          message: 'Language updated to $newLanguage',
         );
       }
     } catch (e) {
@@ -536,11 +536,9 @@ class ProfileScreen extends StatelessWidget {
 
       // Show error message
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to update language: $e'),
-            backgroundColor: Colors.red,
-          ),
+        ToastNotification.showError(
+          context,
+          message: 'Failed to update language: $e',
         );
       }
     }

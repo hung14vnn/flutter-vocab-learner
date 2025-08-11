@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:vocab_learner/consts/app_consts.dart';
 import 'package:vocab_learner/utils/guid_generator.dart';
+import 'package:vocab_learner/widgets/toast_notification.dart';
 import '../../../models/vocab_word.dart';
 import '../../../providers/vocab_provider.dart';
 import '../../../providers/auth_provider.dart';
@@ -116,9 +117,10 @@ class _FlashcardsGameScreenState extends State<FlashcardsGameScreen>
     } catch (e) {
       setState(() => _isLoading = false);
       if (mounted) {
-        ScaffoldMessenger.of(
+        ToastNotification.showError(
           context,
-        ).showSnackBar(SnackBar(content: Text('Failed to load words: $e')));
+          message: 'Failed to load words: $e',
+        );
       }
     }
   }

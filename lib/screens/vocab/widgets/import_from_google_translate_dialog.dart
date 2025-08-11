@@ -11,6 +11,7 @@ import 'package:vocab_learner/providers/vocab_provider.dart';
 import 'package:vocab_learner/services/ai_service.dart';
 import 'package:vocab_learner/models/vocab_word.dart';
 import 'package:vocab_learner/utils/guid_generator.dart';
+import 'package:vocab_learner/widgets/toast_notification.dart';
 
 class ImportFromGoogleTranslateDialog extends StatefulWidget {
   final VocabProvider vocabProvider;
@@ -272,27 +273,25 @@ class _ImportFromGoogleTranslateDialogState
 
       // Show success message
       if (mounted) {
-        ScaffoldMessenger.of(currentContext).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Successfully imported ${analysis.successfulAnalyses} words! ${analysis.failedAnalyses > 0 ? '${analysis.failedAnalyses} words failed to import.' : ''}',
-          ),
-          backgroundColor: analysis.failedAnalyses > 0 ? Colors.orange : Colors.green,
-        ),
-        );
+        analysis.failedAnalyses > 0 
+          ? ToastNotification.showWarning(
+              currentContext,
+              message:
+                  'Successfully imported ${analysis.successfulAnalyses} words! ${analysis.failedAnalyses} words failed to import.',
+            )
+          : ToastNotification.showSuccess(
+              currentContext,
+              message:
+                  'Successfully imported ${analysis.successfulAnalyses} words!',
+            );
       }
 
     } catch (e) {
-      // Close loading dialog if it's open
       if (mounted) Navigator.of(currentContext).pop();
-      
-      // Show error message
       if (mounted) {
-        ScaffoldMessenger.of(currentContext).showSnackBar(
-          SnackBar(
-            content: Text('Failed to import words: $e'),
-            backgroundColor: Colors.red,
-          ),
+        ToastNotification.showError(
+          currentContext,
+          message: 'Failed to import words: $e',
         );
       }
     }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:vocab_learner/widgets/toast_notification.dart';
 import '../../../providers/vocab_provider.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../models/vocab_word.dart';
@@ -427,35 +428,25 @@ class _AddWordDialogState extends State<AddWordDialog> {
       if (success) {
         if (mounted) {
           Navigator.of(context).pop(); // Close add word dialog
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                'Word "${wordController.text}" added successfully!',
-              ),
-              backgroundColor: Colors.green,
-            ),
+          ToastNotification.showSuccess(
+            context,
+            message: 'Word "${wordController.text}" added successfully!',
           );
         }
       } else {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                'Failed to add word. ${widget.vocabProvider.errorMessage ?? "Unknown error"}',
-              ),
-              backgroundColor: Colors.red,
-            ),
+          ToastNotification.showError(
+            context,
+            message: 'Failed to add word. ${widget.vocabProvider.errorMessage ?? "Unknown error"}',
           );
         }
       }
     } catch (e) {
       if (mounted) Navigator.of(context).pop(); // Close loading dialog
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error adding word: $e'),
-            backgroundColor: Colors.red,
-          ),
+        ToastNotification.showError(
+          context,
+          message: 'Error adding word: $e',
         );
       }
     }
