@@ -7,10 +7,10 @@ import '../../../models/vocab_word.dart';
 import '../../../providers/vocab_provider.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../services/progress_service.dart';
-import '../../../widgets/game_stats_widget.dart';
+import 'widgets/game_stats_widget.dart';
 import '../../../widgets/difficulty_chip.dart';
 import 'widgets/sound_feedback_widget.dart';
-import '../../../widgets/flashcard_settings_dialog.dart';
+import 'widgets/flashcard_settings_dialog.dart';
 import '../../../widgets/achievement_widget.dart';
 
 enum GameMode { definition, word, mixed }
@@ -416,13 +416,13 @@ class _FlashcardsGameScreenState extends State<FlashcardsGameScreen>
   // Helper method to get accuracy color
   Color _getAccuracyColor(double accuracy) {
     if (accuracy >= 90) {
-      return pastelGreen;
+      return modernGreen;
     } else if (accuracy >= 80) {
-      return pastelBlue;
+      return modernBlue;
     } else if (accuracy >= 70) {
-      return pastelOrange;
+      return modernOrange;
     } else {
-      return pastelRed;
+      return modernRed;
     }
   }
 
@@ -579,7 +579,7 @@ class _FlashcardsGameScreenState extends State<FlashcardsGameScreen>
       ),
       body: _isLoading
           ? const Center(
-              child: CircularProgressIndicator(color: Color(0xFFB39DDB)),
+              child: CircularProgressIndicator(color: const Color(0xFF8B5CF6)),
             )
           : _gameWords.isEmpty
           ? _buildEmptyState()
@@ -593,7 +593,7 @@ class _FlashcardsGameScreenState extends State<FlashcardsGameScreen>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.quiz, size: 64, color: pastelBlue),
+          Icon(Icons.quiz, size: 64, color: modernBlue),
           const SizedBox(height: 16),
           const Text(
             'No words available for practice',
@@ -684,8 +684,8 @@ class _FlashcardsGameScreenState extends State<FlashcardsGameScreen>
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: _showAnswer
-                      ? [pastelGreen, Color(0xFFA5D6A7)]
-                      : [pastelBlue, Color(0xFF81D4FA)],
+                      ? [modernGreen, const Color(0xFFA7F3D0)]
+                      : [modernBlue, const Color(0xFF93C5FD)],
                 ),
               ),
               child: Stack(
@@ -749,7 +749,7 @@ class _FlashcardsGameScreenState extends State<FlashcardsGameScreen>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.quiz, size: 32, color: Color(0xFF0288D1)),
+          Icon(Icons.quiz, size: 32, color: const Color(0xFF0EA5E9)),
           const SizedBox(height: 24),
           Text(
             hint,
@@ -763,7 +763,7 @@ class _FlashcardsGameScreenState extends State<FlashcardsGameScreen>
             content,
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
               fontWeight: FontWeight.bold,
-              color: Color(0xFF1976D2),
+              color: const Color(0xFF2563EB),
             ),
             textAlign: TextAlign.center,
           ),
@@ -808,20 +808,20 @@ class _FlashcardsGameScreenState extends State<FlashcardsGameScreen>
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Icon(Icons.lightbulb, size: 48, color: Color(0xFF388E3C)),
+            Icon(Icons.lightbulb, size: 48, color: const Color(0xFF059669)),
             const SizedBox(height: 24),
             Text(
               'Answer:',
               style: Theme.of(
                 context,
-              ).textTheme.titleMedium?.copyWith(color: Color(0xFF90A4AE)),
+              ).textTheme.titleMedium?.copyWith(color: const Color(0xFF94A3B8)),
             ),
             const SizedBox(height: 16),
             Text(
               answer,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF43A047),
+                color: const Color(0xFF059669),
               ),
               textAlign: TextAlign.center,
             ),
@@ -831,7 +831,7 @@ class _FlashcardsGameScreenState extends State<FlashcardsGameScreen>
                 word.pronunciation!,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   fontStyle: FontStyle.italic,
-                  color: Color(0xFF90A4AE),
+                  color: const Color(0xFF94A3B8),
                 ),
               ),
             ],
@@ -841,14 +841,14 @@ class _FlashcardsGameScreenState extends State<FlashcardsGameScreen>
                 'Example:',
                 style: Theme.of(
                   context,
-                ).textTheme.titleSmall?.copyWith(color: Color(0xFF90A4AE)),
+                ).textTheme.titleSmall?.copyWith(color: const Color(0xFF94A3B8)),
               ),
               const SizedBox(height: 8),
               Text(
                 word.examples.first,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   fontStyle: FontStyle.italic,
-                  color: Color(0xFF789262),
+                  color: const Color(0xFF65A30D),
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -874,8 +874,8 @@ class _FlashcardsGameScreenState extends State<FlashcardsGameScreen>
                     icon: const Icon(Icons.close),
                     label: const Text('Incorrect'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: pastelRed,
-                      foregroundColor: Color(0xFFD32F2F),
+                      backgroundColor: modernRed,
+                      foregroundColor: const Color(0xFFDC2626),
                       padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
                   ),
@@ -887,8 +887,8 @@ class _FlashcardsGameScreenState extends State<FlashcardsGameScreen>
                     icon: const Icon(Icons.check),
                     label: const Text('Correct'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: pastelGreen,
-                      foregroundColor: Color(0xFF388E3C),
+                      backgroundColor: modernGreen,
+                      foregroundColor: const Color(0xFF059669),
                       padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
                   ),

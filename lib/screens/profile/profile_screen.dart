@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:vocab_learner/widgets/toast_notification.dart';
+import 'package:vocab_learner/widgets/blur_dialog.dart';
 import '../../providers/auth_provider.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -8,8 +9,14 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    
     return Scaffold(
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         title: const Text('Profile'),
         actions: [
           IconButton(
@@ -20,17 +27,50 @@ class ProfileScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: Consumer<AuthProvider>(
-        builder: (context, authProvider, _) {
-          final user = authProvider.appUser;
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              colorScheme.primary.withOpacity(0.05),
+              colorScheme.surface.withOpacity(0.8),
+              colorScheme.secondary.withOpacity(0.05),
+            ],
+          ),
+        ),
+        child: Consumer<AuthProvider>(
+          builder: (context, authProvider, _) {
+            final user = authProvider.appUser;
 
-          return Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
+            return Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
               children: [
                 // Profile Header
                 Card(
-                  child: Padding(
+                  color: colorScheme.surface.withOpacity(0.9),
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    side: BorderSide(
+                      color: colorScheme.primary.withOpacity(0.2),
+                      width: 1,
+                    ),
+                  ),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          colorScheme.primary.withOpacity(0.05),
+                          Colors.transparent,
+                        ],
+                      ),
+                    ),
+                    child: Padding(
                     padding: const EdgeInsets.all(20.0),
                     child: Row(
                       children: [
@@ -71,6 +111,7 @@ class ProfileScreen extends StatelessWidget {
                         ),
                       ],
                     ),
+                    ),
                   ),
                 ),
 
@@ -89,9 +130,10 @@ class ProfileScreen extends StatelessWidget {
                   ),
                 ),
               ],
-            ),
-          );
-        },
+              ),
+            );
+          },
+        ),
       ),
     );
   }
@@ -100,9 +142,19 @@ class ProfileScreen extends StatelessWidget {
     BuildContext context,
     AuthProvider authProvider,
   ) {
+    final colorScheme = Theme.of(context).colorScheme;
     final currentLanguage = authProvider.appUser?.language ?? 'English';
 
     return Card(
+      color: colorScheme.surface.withOpacity(0.9),
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
+          color: colorScheme.primary.withOpacity(0.2),
+          width: 1,
+        ),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -176,7 +228,18 @@ class ProfileScreen extends StatelessWidget {
   }
 
   Widget _buildStatsCard(BuildContext context, dynamic user) {
+    final colorScheme = Theme.of(context).colorScheme;
+    
     return Card(
+      color: colorScheme.surface.withOpacity(0.9),
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
+          color: colorScheme.primary.withOpacity(0.2),
+          width: 1,
+        ),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -248,6 +311,7 @@ class ProfileScreen extends StatelessWidget {
   }
 
   Widget _buildAISettingsCard(BuildContext context, AuthProvider authProvider) {
+    final colorScheme = Theme.of(context).colorScheme;
     final user = authProvider.appUser;
     if (user == null) return const SizedBox.shrink();
     String? modelName = user.modelName;
@@ -255,6 +319,15 @@ class ProfileScreen extends StatelessWidget {
     String apiKey = user.apiKey ?? '';
 
     return Card(
+      color: colorScheme.surface.withOpacity(0.9),
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
+          color: colorScheme.primary.withOpacity(0.2),
+          width: 1,
+        ),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: StatefulBuilder(
@@ -502,10 +575,11 @@ class ProfileScreen extends StatelessWidget {
 
     try {
       // Show loading indicator
-      showDialog(
+      showBlurDialog(
         context: context,
         barrierDismissible: false,
-        builder: (context) => const AlertDialog(
+        blurStrength: 8.0,
+        child: const AlertDialog(
           content: Row(
             children: [
               CircularProgressIndicator(),
@@ -545,9 +619,10 @@ class ProfileScreen extends StatelessWidget {
   }
 
   void _showSignOutDialog(BuildContext context) {
-    showDialog(
+    showBlurDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      blurStrength: 6.0,
+      child: AlertDialog(
         title: const Text('Sign Out'),
         content: const Text('Are you sure you want to sign out?'),
         actions: [

@@ -128,6 +128,59 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
+  Future<bool> pinQuickAction(String actionName) async {
+    if (_appUser == null) return false;
+    
+    try {
+      List<String> pinnedActions = List<String>.from(_appUser!.pinnedQuickActions ?? []);
+      
+      // Don't add if already pinned
+      if (pinnedActions.contains(actionName)) return false;
+      
+      // Limit to 2 pinned actions
+      if (pinnedActions.length >= 2) {
+        return false;
+      }
+      
+      pinnedActions.add(actionName);
+      
+      AppUser updatedUser = _appUser!.copyWith(
+        pinnedQuickActions: pinnedActions,
+      );
+      
+      await updateUserProfile(updatedUser);
+      return true;
+    } catch (e) {
+      _errorMessage = 'Failed to pin action: $e';
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<void> unpinQuickAction(String actionName) async {
+    if (_appUser == null) return;
+    
+    try {
+      List<String> pinnedActions = List<String>.from(_appUser!.pinnedQuickActions ?? []);
+      
+      // Remove the action from pinned list
+      pinnedActions.remove(actionName);
+      
+      AppUser updatedUser = _appUser!.copyWith(
+        pinnedQuickActions: pinnedActions,
+      );
+      
+      await updateUserProfile(updatedUser);
+    } catch (e) {
+      _errorMessage = 'Failed to unpin action: $e';
+      notifyListeners();
+    }
+  }
+
+  bool isActionPinned(String actionName) {
+    return _appUser?.pinnedQuickActions?.contains(actionName) ?? false;
+  }
+
   void _setLoading(bool value) {
     _isLoading = value;
     notifyListeners();

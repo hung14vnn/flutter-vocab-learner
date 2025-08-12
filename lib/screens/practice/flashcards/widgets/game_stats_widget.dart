@@ -40,21 +40,21 @@ class GameStatsWidget extends StatelessWidget {
                 'Progress',
                 '${currentIndex + 1}/$totalWords',
                 Icons.auto_stories,
-                Color(0xFF3D74B6),
+                const Color(0xFF3B82F6),
               ),
               _buildStatItem(
                 context,
                 'Score',
                 '$correctAnswers/$totalAnswers',
                 Icons.score,
-                Color(0xFF8ABB6C),
+                const Color(0xFF10B981),
               ),
               _buildStatItem(
                 context,
                 'Accuracy',
                 '${(accuracy * 100).toStringAsFixed(0)}%',
                 Icons.trending_up,
-                Color(0xFFFFBC4C),
+                const Color(0xFFF59E0B),
               ),
             ],
           ),
@@ -106,8 +106,8 @@ class GameStatsWidget extends StatelessWidget {
   }
 
   Color _getProgressColor() {
-    if (accuracy >= 0.8) return Color(0xFF8ABB6C);
-    if (accuracy >= 0.6) return Color(0xFFFFBC4C);
-    return Color(0xFFFB4141);
+    if (accuracy >= 0.8) return const Color(0xFF10B981);
+    if (accuracy >= 0.6) return const Color(0xFFF59E0B);
+    return const Color(0xFFEF4444);
   }
 }

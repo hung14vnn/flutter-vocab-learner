@@ -38,7 +38,7 @@ class StatCard extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             title,
-            style: TextStyle(fontSize: 12, color: pastelGrey),
+            style: TextStyle(fontSize: 12, color: modernGrey),
             textAlign: TextAlign.center,
           ),
         ],

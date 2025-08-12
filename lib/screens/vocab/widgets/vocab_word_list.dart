@@ -54,53 +54,51 @@ class _VocabWordsListState extends State<VocabWordsList> {
         final showLoadingIndicator = !vocabProvider.isPaginationEnabled && vocabProvider.isLoadingMore;
         final itemCount = vocabProvider.filteredWords.length + (showLoadingIndicator ? 1 : 0);
         
-        return Expanded(
-          child: ListView.builder(
-            controller: widget.scrollController,
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            itemCount: itemCount,
-            itemBuilder: (context, index) {
-              // Show loading indicator at the end when loading more (infinite scroll only)
-              if (showLoadingIndicator && index == vocabProvider.filteredWords.length) {
-                return _buildLoadingIndicator();
-              }
-              
-              final word = vocabProvider.filteredWords[index];
-              return VocabWordCard(
-                word: word,
-                isSelectionMode: vocabProvider.isSelectionMode,
-                isSelected: vocabProvider.isWordSelected(word.id),
-                isCompactMode: vocabProvider.isCompactMode,
-                onSelectionToggle: () {
-                  if (!vocabProvider.isSelectionMode) {
-                    vocabProvider.toggleSelectionMode();
-                  }
+        return ListView.builder(
+          controller: widget.scrollController,
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          itemCount: itemCount,
+          itemBuilder: (context, index) {
+            // Show loading indicator at the end when loading more (infinite scroll only)
+            if (showLoadingIndicator && index == vocabProvider.filteredWords.length) {
+              return _buildLoadingIndicator();
+            }
+            
+            final word = vocabProvider.filteredWords[index];
+            return VocabWordCard(
+              word: word,
+              isSelectionMode: vocabProvider.isSelectionMode,
+              isSelected: vocabProvider.isWordSelected(word.id),
+              isCompactMode: vocabProvider.isCompactMode,
+              onSelectionToggle: () {
+                if (!vocabProvider.isSelectionMode) {
+                  vocabProvider.toggleSelectionMode();
+                }
+                vocabProvider.toggleWordSelection(word.id);
+              },
+              onLongPress: () {
+                if (!vocabProvider.isSelectionMode) {
+                  vocabProvider.toggleSelectionMode();
                   vocabProvider.toggleWordSelection(word.id);
-                },
-                onLongPress: () {
-                  if (!vocabProvider.isSelectionMode) {
-                    vocabProvider.toggleSelectionMode();
-                    vocabProvider.toggleWordSelection(word.id);
-                  }
-                },
-                onEdit: (VocabWord updatedWord) async {
-                  final success = await vocabProvider.updateWord(updatedWord);
-                  if (success) {
-                    ToastNotification.showSuccess(
-                      context,
-                      message:
-                          'Word "${updatedWord.word}" updated successfully!',
-                    );
-                  } else {
-                    ToastNotification.showError(
-                      context,
-                      message: 'Failed to update word "${updatedWord.word}"',
-                    );
-                  }
-                },
-              );
-            },
-          ),
+                }
+              },
+              onEdit: (VocabWord updatedWord) async {
+                final success = await vocabProvider.updateWord(updatedWord);
+                if (success) {
+                  ToastNotification.showSuccess(
+                    context,
+                    message:
+                        'Word "${updatedWord.word}" updated successfully!',
+                  );
+                } else {
+                  ToastNotification.showError(
+                    context,
+                    message: 'Failed to update word "${updatedWord.word}"',
+                  );
+                }
+              },
+            );
+          },
         );
       },
     );

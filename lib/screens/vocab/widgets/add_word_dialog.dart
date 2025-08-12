@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:vocab_learner/widgets/toast_notification.dart';
+import 'package:vocab_learner/widgets/blur_dialog.dart';
 import '../../../providers/vocab_provider.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../models/vocab_word.dart';
@@ -31,8 +32,37 @@ class _AddWordDialogState extends State<AddWordDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    
     return AlertDialog(
-      title: const Text('Add New Word'),
+      backgroundColor: colorScheme.surface.withOpacity(0.95),
+      surfaceTintColor: Colors.transparent,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: BorderSide(
+          color: colorScheme.primary.withOpacity(0.2),
+          width: 1,
+        ),
+      ),
+      title: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              colorScheme.primary.withOpacity(0.1),
+              Colors.transparent,
+            ],
+          ),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: const Row(
+          children: [
+            Icon(Icons.add_circle_outline, size: 24),
+            SizedBox(width: 8),
+            Text('Add New Word'),
+          ],
+        ),
+      ),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -69,13 +99,35 @@ class _AddWordDialogState extends State<AddWordDialog> {
         ),
       ),
       actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
-        ),
-        ElevatedButton(
-          onPressed: _handleAddWord,
-          child: const Text('Add Word'),
+        Container(
+          decoration: BoxDecoration(
+            color: colorScheme.surface.withOpacity(0.8),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          padding: const EdgeInsets.all(8),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                style: TextButton.styleFrom(
+                  backgroundColor: Colors.transparent,
+                  foregroundColor: colorScheme.onSurface.withOpacity(0.7),
+                ),
+                child: const Text('Cancel'),
+              ),
+              const SizedBox(width: 8),
+              ElevatedButton(
+                onPressed: _handleAddWord,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: colorScheme.primary.withOpacity(0.9),
+                  foregroundColor: colorScheme.onPrimary,
+                  elevation: 0,
+                ),
+                child: const Text('Add Word'),
+              ),
+            ],
+          ),
         ),
       ],
     );
@@ -256,9 +308,10 @@ class _AddWordDialogState extends State<AddWordDialog> {
   }
 
   void _showPropertiesInfo() {
-    showDialog(
+    showBlurDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      blurStrength: 6.0,
+      child: AlertDialog(
         title: const Text('Properties Info'),
         content: const Text(
           'You can fill these fields manually or use the AI Generate button to auto-generate all properties for your word.',
@@ -305,10 +358,11 @@ class _AddWordDialogState extends State<AddWordDialog> {
   }
 
   void _showAILoadingDialog() {
-    showDialog(
+    showBlurDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => const AlertDialog(
+      blurStrength: 8.0,
+      child: const AlertDialog(
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -343,9 +397,10 @@ class _AddWordDialogState extends State<AddWordDialog> {
   }
 
   void _showAISuccessDialog() {
-    showDialog(
+    showBlurDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      blurStrength: 6.0,
+      child: AlertDialog(
         title: const Text('AI Analysis Complete'),
         content: Text(
           'Generated definition, examples, and synonyms for "${wordController.text}"',
@@ -361,9 +416,10 @@ class _AddWordDialogState extends State<AddWordDialog> {
   }
 
   void _showAIErrorDialog(String error) {
-    showDialog(
+    showBlurDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      blurStrength: 6.0,
+      child: AlertDialog(
         title: const Text('Error'),
         content: Text('Error analyzing word: $error'),
         actions: [

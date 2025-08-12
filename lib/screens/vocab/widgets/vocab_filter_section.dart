@@ -5,7 +5,7 @@ import '../../../providers/vocab_provider.dart';
 
 class VocabFilterSection extends StatefulWidget {
   final VoidCallback? onClose;
-  
+
   const VocabFilterSection({super.key, this.onClose});
 
   @override
@@ -50,57 +50,61 @@ class _VocabFilterSectionState extends State<VocabFilterSection> {
   }) {
     // Handle empty items list
     if (items.isEmpty) {
-      return SizedBox(
-        height: 40,
-        child: Container(
-          decoration: BoxDecoration(
-            border: Border.all(color: theme.colorScheme.outline),
-            borderRadius: BorderRadius.circular(4),
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          child: Text(
-            'No options available',
-            style: TextStyle(
-              fontSize: 13,
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
+      return Container(
+        decoration: BoxDecoration(
+          border: Border.all(color: theme.colorScheme.outline),
+          borderRadius: BorderRadius.circular(4),
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        child: Text(
+          'No options available',
+          style: TextStyle(
+            fontSize: 13,
+            color: theme.colorScheme.onSurfaceVariant,
           ),
         ),
       );
     }
-    
+
     // Ensure the value exists in items, fallback to first item if not
     final validValue = items.contains(value) ? value : items.first;
-    
-    return SizedBox(
-      height: 40,
-      child: DropdownButtonFormField<String>(
-        value: validValue,
-        decoration: InputDecoration(
-          labelText: label,
-          border: const OutlineInputBorder(),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          labelStyle: TextStyle(fontSize: 11, color: theme.colorScheme.onSurfaceVariant),
-          isDense: true,
+
+    return DropdownButtonFormField<String>(
+      value: validValue,
+      decoration: InputDecoration(
+        labelText: label,
+        border: const OutlineInputBorder(),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 8,
+          vertical: 4,
         ),
-        style: TextStyle(fontSize: 13, color: theme.colorScheme.onSurface),
-        items: items.map((item) => DropdownMenuItem(
-          value: item,
-          child: Text(_formatDropdownText(item)),
-        )).toList(),
-        onChanged: (newValue) {
-          if (newValue != null) {
-            onChanged(newValue);
-          }
-        },
+        labelStyle: TextStyle(
+          fontSize: 11,
+          color: theme.colorScheme.onSurfaceVariant,
+        ),
+        isDense: true,
       ),
+      style: TextStyle(fontSize: 13, color: theme.colorScheme.onSurface),
+      items: items
+          .map(
+            (item) => DropdownMenuItem(
+              value: item,
+              child: Text(_formatDropdownText(item)),
+            ),
+          )
+          .toList(),
+      onChanged: (newValue) {
+        if (newValue != null) {
+          onChanged(newValue);
+        }
+      },
     );
   }
 
   String _formatDropdownText(String item) {
     if (item == 'all') return 'All';
     if (item.isEmpty) return item;
-    
+
     // Handle special cases
     switch (item.toLowerCase()) {
       case 'new':
@@ -116,16 +120,19 @@ class _VocabFilterSectionState extends State<VocabFilterSection> {
     }
   }
 
-  Future<void> _selectDateRange(BuildContext context, VocabProvider vocabProvider) async {
+  Future<void> _selectDateRange(
+    BuildContext context,
+    VocabProvider vocabProvider,
+  ) async {
     final DateTimeRange? picked = await showDateRangePicker(
       context: context,
       firstDate: DateTime(2020),
       lastDate: DateTime.now(),
-      initialDateRange: _startDate != null && _endDate != null 
+      initialDateRange: _startDate != null && _endDate != null
           ? DateTimeRange(start: _startDate!, end: _endDate!)
           : null,
     );
-    
+
     if (picked != null) {
       setState(() {
         _startDate = picked.start;
@@ -138,19 +145,26 @@ class _VocabFilterSectionState extends State<VocabFilterSection> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Consumer<VocabProvider>(
       builder: (context, vocabProvider, child) {
         return Container(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
-            color: theme.colorScheme.surface,
+            color: theme.colorScheme.surface.withOpacity(0.9),
             border: Border(
-              bottom: BorderSide(color: theme.colorScheme.outline.withOpacity(0.2)),
+              bottom: BorderSide(
+                color: theme.colorScheme.primary.withOpacity(0.2),
+              ),
+            ),
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(16),
+              topRight: Radius.circular(16),
             ),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
               // Header with close button
               Row(
@@ -189,108 +203,80 @@ class _VocabFilterSectionState extends State<VocabFilterSection> {
                 ],
               ),
               const SizedBox(height: 16),
-              
+
               // Search field
-              SizedBox(
-                height: 40,
-                child: TextField(
-                  controller: _searchController,
-                  decoration: InputDecoration(
-                    labelText: 'Search words...',
-                    border: const OutlineInputBorder(),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                    prefixIcon: const Icon(Icons.search, size: 18),
-                    suffixIcon: _searchController.text.isNotEmpty
-                        ? IconButton(
-                            icon: const Icon(Icons.clear, size: 18),
-                            onPressed: () {
-                              _debounceTimer?.cancel();
-                              _searchController.clear();
-                              vocabProvider.setSearchQuery('');
-                            },
-                          )
-                        : null,
-                    labelStyle: TextStyle(fontSize: 11, color: theme.colorScheme.onSurfaceVariant),
-                    isDense: true,
+              TextField(
+                controller: _searchController,
+                decoration: InputDecoration(
+                  labelText: 'Search words...',
+                  border: const OutlineInputBorder(),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
                   ),
-                  style: const TextStyle(fontSize: 13),
-                  onChanged: (value) {
-                    _onSearchChanged(value, vocabProvider);
-                  },
+                  prefixIcon: const Icon(Icons.search, size: 20),
+                  suffixIcon: _searchController.text.isNotEmpty
+                      ? IconButton(
+                          icon: const Icon(Icons.clear, size: 20),
+                          onPressed: () {
+                            _debounceTimer?.cancel();
+                            _searchController.clear();
+                            vocabProvider.setSearchQuery('');
+                          },
+                        )
+                      : null,
+                  labelStyle: TextStyle(
+                    fontSize: 14,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                  isDense: true,
                 ),
+                style: const TextStyle(fontSize: 14),
+                onChanged: (value) {
+                  _onSearchChanged(value, vocabProvider);
+                },
               ),
-              const SizedBox(height: 12),
-              
-              // Filter dropdowns in a grid
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildCompactDropdown(
-                      value: vocabProvider.selectedDifficulty,
-                      label: 'Difficulty',
-                      items: vocabProvider.availableDifficulties.isNotEmpty 
-                          ? vocabProvider.availableDifficulties 
-                          : ['all'],
-                      onChanged: (value) {
-                        if (value != null) vocabProvider.setDifficultyFilter(value);
-                      },
-                      theme: theme,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: _buildCompactDropdown(
-                      value: vocabProvider.selectedPartOfSpeech,
-                      label: 'Part of Speech',
-                      items: vocabProvider.availablePartsOfSpeech.isNotEmpty 
-                          ? vocabProvider.availablePartsOfSpeech 
-                          : ['all'],
-                      onChanged: (value) {
-                        if (value != null) vocabProvider.setPartOfSpeechFilter(value);
-                      },
-                      theme: theme,
-                    ),
-                  ),
-                ],
+              const SizedBox(height: 16),
+
+              // Filter dropdowns - simplified layout
+              _buildCompactDropdown(
+                value: vocabProvider.selectedDifficulty,
+                label: 'Difficulty',
+                items: vocabProvider.availableDifficulties.isNotEmpty
+                    ? vocabProvider.availableDifficulties
+                    : ['all'],
+                onChanged: (value) {
+                  if (value != null) vocabProvider.setDifficultyFilter(value);
+                },
+                theme: theme,
               ),
               const SizedBox(height: 8),
-              
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildCompactDropdown(
-                      value: vocabProvider.selectedState,
-                      label: 'Mastery Level',
-                      items: vocabProvider.availableStates.isNotEmpty 
-                          ? vocabProvider.availableStates 
-                          : ['all'],
-                      onChanged: (value) {
-                        if (value != null) vocabProvider.setStateFilter(value);
-                      },
-                      theme: theme,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: _buildCompactDropdown(
-                      value: vocabProvider.selectedTag,
-                      label: 'Tag',
-                      items: vocabProvider.availableTags.isNotEmpty 
-                          ? vocabProvider.availableTags 
-                          : ['all'],
-                      onChanged: (value) {
-                        if (value != null) vocabProvider.setTagFilter(value);
-                      },
-                      theme: theme,
-                    ),
-                  ),
-                ],
+              _buildCompactDropdown(
+                value: vocabProvider.selectedPartOfSpeech,
+                label: 'Part of Speech',
+                items: vocabProvider.availablePartsOfSpeech.isNotEmpty
+                    ? vocabProvider.availablePartsOfSpeech
+                    : ['all'],
+                onChanged: (value) {
+                  if (value != null) vocabProvider.setPartOfSpeechFilter(value);
+                },
+                theme: theme,
               ),
-              const SizedBox(height: 12),
-              
-              // Date range selector
+              const SizedBox(height: 8),
+              _buildCompactDropdown(
+                value: vocabProvider.selectedState,
+                label: 'Mastery Level',
+                items: vocabProvider.availableStates.isNotEmpty
+                    ? vocabProvider.availableStates
+                    : ['all'],
+                onChanged: (value) {
+                  if (value != null) vocabProvider.setStateFilter(value);
+                },
+                theme: theme,
+              ),
+              const SizedBox(height: 8),
               SizedBox(
-                height: 40,
+                width: double.infinity,
                 child: OutlinedButton.icon(
                   onPressed: () => _selectDateRange(context, vocabProvider),
                   icon: const Icon(Icons.date_range, size: 16),
@@ -299,9 +285,13 @@ class _VocabFilterSectionState extends State<VocabFilterSection> {
                         ? '${_startDate!.day}/${_startDate!.month}/${_startDate!.year} - ${_endDate!.day}/${_endDate!.month}/${_endDate!.year}'
                         : 'Select date range',
                     style: const TextStyle(fontSize: 12),
+                    overflow: TextOverflow.ellipsis,
                   ),
                   style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 8,
+                    ),
                     alignment: Alignment.centerLeft,
                   ),
                 ),

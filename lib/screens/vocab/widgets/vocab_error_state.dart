@@ -22,20 +22,20 @@ class VocabErrorState extends StatelessWidget {
           Icon(
             Icons.error_outline,
             size: 64,
-            color: pastelRed,
+            color: modernRed,
           ),
           const SizedBox(height: 16),
           Text(
             'Error loading vocabulary',
             style: theme.textTheme.headlineSmall?.copyWith(
-              color: const Color(0xFFD32F2F),
+              color: const Color(0xFFDC2626),
             ),
           ),
           const SizedBox(height: 8),
           Text(
             errorMessage,
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: const Color(0xFFB71C1C),
+              color: const Color(0xFFB91C1C),
             ),
             textAlign: TextAlign.center,
           ),

@@ -15,20 +15,20 @@ class VocabEmptyState extends StatelessWidget {
           Icon(
             Icons.book_outlined,
             size: 64,
-            color: pastelBlue,
+            color: modernBlue,
           ),
           const SizedBox(height: 16),
           Text(
             'No vocabulary words yet',
             style: theme.textTheme.headlineSmall?.copyWith(
-              color: const Color(0xFF0288D1),
+              color: const Color(0xFF0EA5E9),
             ),
           ),
           const SizedBox(height: 8),
           Text(
             'Words will appear here once you add them',
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: const Color(0xFF4FC3F7),
+              color: const Color(0xFF38BDF8),
             ),
           ),
         ],

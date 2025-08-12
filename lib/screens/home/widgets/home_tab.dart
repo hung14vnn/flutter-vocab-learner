@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:vocab_learner/consts/shortcut_consts.dart';
 import 'package:vocab_learner/providers/auth_provider.dart';
 import 'package:vocab_learner/providers/progress_provider.dart';
 import 'package:vocab_learner/consts/app_consts.dart';
@@ -8,27 +9,137 @@ import 'package:vocab_learner/screens/home/widgets/action_card.dart';
 import 'package:vocab_learner/screens/home/widgets/progress_dialog.dart';
 import 'package:vocab_learner/screens/home/widgets/stat_card.dart';
 import 'package:vocab_learner/widgets/toast_notification.dart';
+import 'package:vocab_learner/widgets/blur_dialog.dart';
 
 class HomeTab extends StatelessWidget {
   const HomeTab({super.key});
 
+  void _showActionSelectionDialog(BuildContext context, AuthProvider authProvider) {
+    final user = authProvider.appUser;
+    final unpinnedActions = kShortcuts
+        .where((shortcut) => !(user?.pinnedQuickActions?.contains(shortcut.name) ?? false))
+        .toList();
+
+    if (unpinnedActions.isEmpty) {
+      ToastNotification.showInfo(
+        context,
+        message: 'All actions are already pinned',
+      );
+      return;
+    }
+
+    showBlurDialog(
+      context: context,
+      blurStrength: 6.0,
+      child: AlertDialog(
+        title: const Text('Select Action to Pin'),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemCount: unpinnedActions.length,
+            itemBuilder: (context, index) {
+              final shortcut = unpinnedActions[index];
+              return ListTile(
+                leading: Icon(shortcut.icon),
+                title: Text(shortcut.name),
+                subtitle: Text(shortcut.description),
+                onTap: () async {
+                  final success = await authProvider.pinQuickAction(shortcut.name);
+                  if (context.mounted) {
+                    if (success) {
+                      Navigator.of(context).pop();
+                    } else {
+                      ToastNotification.showError(
+                        context,
+                        message: 'Cannot pin more than 2 actions',
+                      );
+                    }
+                  }
+                },
+              );
+            },
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  List<Widget> _buildQuickActionCards(BuildContext context, AuthProvider authProvider, dynamic user, ThemeData theme) {
+    List<Widget> cards = [];
+    final pinnedActions = user?.pinnedQuickActions ?? <String>[];
+    
+    // Add pinned action cards
+    for (final action in pinnedActions.take(2)) {
+      final shortcut = kShortcuts.firstWhere(
+        (shortcut) => shortcut.name == action,
+        orElse: () => kShortcuts.first,
+      );
+      
+      cards.add(
+        ActionCard(
+          title: shortcut.name,
+          subtitle: shortcut.description,
+          icon: shortcut.icon,
+          color: theme.colorScheme.primary,
+          onTap: shortcut.onTap,
+          isPinned: true,
+          showPinButton: true,
+          onUnpin: () => authProvider.unpinQuickAction(shortcut.name),
+        ),
+      );
+    }
+    
+    // Fill remaining slots with empty cards
+    while (cards.length < 2) {
+      cards.add(
+        ActionCard.empty(
+          onTap: () => _showActionSelectionDialog(context, authProvider),
+        ),
+      );
+    }
+    
+    return cards;
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final userName =
-        Provider.of<AuthProvider>(context).appUser?.displayName ?? 'User';
+    final authProvider = Provider.of<AuthProvider>(context);
+    final user = authProvider.appUser;
 
     return Scaffold(
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         title: Text(
-          '${renderGreetingBasedOnTime()}, ${userName.split(" ").first}!',
+          '${renderGreetingBasedOnTime()}, ${user?.displayName.split(" ").first}!',
         ),
       ),
-      body: Consumer<ProgressProvider>(
-        builder: (context, progressProvider, _) {
-          return Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              theme.colorScheme.primary.withOpacity(0.05),
+              theme.colorScheme.surface.withOpacity(0.8),
+              theme.colorScheme.secondary.withOpacity(0.05),
+            ],
+          ),
+        ),
+        child: Consumer<ProgressProvider>(
+          builder: (context, progressProvider, _) {
+            return Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 // Progress Overview Card
@@ -52,16 +163,16 @@ class HomeTab extends StatelessWidget {
                                 title: 'Days Practiced',
                                 value: '${progressProvider.progressLearned}',
                                 icon: Icons.check_circle,
-                                color: pastelGreen,
+                                color: modernGreen,
                               ),
-                            ), 
+                            ),
                             const SizedBox(width: 10),
                             Expanded(
                               child: StatCard(
                                 title: 'Words Learned',
                                 value: '${progressProvider.learnedWords}',
                                 icon: Icons.trending_up,
-                                color: pastelOrange,
+                                color: modernOrange,
                               ),
                             ),
                           ],
@@ -74,7 +185,7 @@ class HomeTab extends StatelessWidget {
                                 title: 'To Review',
                                 value: '${progressProvider.wordsToReview}',
                                 icon: Icons.schedule,
-                                color: pastelBlue,
+                                color: modernBlue,
                               ),
                             ),
                             const SizedBox(width: 10),
@@ -84,7 +195,7 @@ class HomeTab extends StatelessWidget {
                                 value:
                                     '${(progressProvider.averageAccuracy * 100).toStringAsFixed(1)}%',
                                 icon: Icons.track_changes,
-                                color: pastelPurple,
+                                color: modernPurple,
                               ),
                             ),
                           ],
@@ -105,38 +216,10 @@ class HomeTab extends StatelessWidget {
                 ),
                 const SizedBox(height: 12),
 
-                Row(
-                  children: [
-                    Expanded(
-                      child: ActionCard(
-                        title: 'Start Practice',
-                        subtitle: 'Review words due today',
-                        icon: Icons.quiz,
-                        color: theme.colorScheme.primary,
-                        onTap: () {
-                          ToastNotification.showInfo(
-                            context,
-                            message: 'Navigate to Practice tab to start!',
-                          );
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: ActionCard(
-                        title: 'Browse Words',
-                        subtitle: 'Explore vocabulary',
-                        icon: Icons.book,
-                        color: theme.colorScheme.primary,
-                        onTap: () {
-                          ToastNotification.showInfo(
-                            context,
-                            message: 'Navigate to Vocabulary tab to explore!',
-                          );
-                        },
-                      ),
-                    ),
-                  ],
+                Wrap(
+                  spacing: 16,
+                  runSpacing: 16,
+                  children: _buildQuickActionCards(context, authProvider, user, theme),
                 ),
 
                 const SizedBox(height: 20),
@@ -152,6 +235,15 @@ class HomeTab extends StatelessWidget {
 
                 Expanded(
                   child: Card(
+                    color: theme.colorScheme.surface.withOpacity(0.9),
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      side: BorderSide(
+                        color: theme.colorScheme.primary.withOpacity(0.2),
+                        width: 1,
+                      ),
+                    ),
                     child: progressProvider.userProgress.isEmpty
                         ? Center(
                             child: Padding(
@@ -162,14 +254,14 @@ class HomeTab extends StatelessWidget {
                                   Icon(
                                     Icons.emoji_events,
                                     size: 48,
-                                    color: pastelGrey,
+                                    color: modernGrey,
                                   ),
                                   const SizedBox(height: 10),
                                   Text(
                                     'Start learning to see your progress here!',
                                     style: TextStyle(
                                       fontSize: 12,
-                                      color: pastelGrey,
+                                      color: modernGrey,
                                     ),
                                     textAlign: TextAlign.center,
                                   ),
@@ -199,17 +291,14 @@ class HomeTab extends StatelessWidget {
                                 ),
                                 clipBehavior: Clip.antiAlias,
                                 child: ListTile(
-                                  leading: CircleAvatar(
-                                    backgroundColor: progress.isLearned
+                                  leading: Icon(
+                                    progress.isLearned
+                                        ? Icons.check
+                                        : Icons.schedule,
+                                    color: progress.isLearned
                                         ? Colors.lightGreen[800]
                                         : Colors.orangeAccent[800],
-                                    child: Icon(
-                                      progress.isLearned
-                                          ? Icons.check
-                                          : Icons.schedule,
-                                      color: Colors.white,
-                                      size: 20,
-                                    ),
+                                    size: 20,
                                   ),
                                   title: renderTextDate(
                                     progress.due,
@@ -224,23 +313,20 @@ class HomeTab extends StatelessWidget {
                                         : 'In Progress',
                                     style: TextStyle(
                                       color: progress.isLearned
-                                          ? pastelGreen
-                                          : pastelOrange,
+                                          ? modernGreen
+                                          : modernOrange,
                                       fontWeight: FontWeight.w500,
                                     ),
                                   ),
                                   onTap: () {
-                                    showDialog(
+                                    showBlurDialog(
                                       context: context,
-                                      builder: (context) {
-                                        return ProgressDialog(
-                                          progress: progress,
-                                        );
-                                      },
+                                      blurStrength: 6.0,
+                                      child: ProgressDialog(
+                                        progress: progress,
+                                      ),
                                     );
                                   },
-                                  // Here you can implement navigation to a detailed view
-                                  // For example, Navigator.push(context, MaterialPageRoute(builder: (context) => ProgressDetailScreen(progress: progress))
                                 ),
                               );
                             },
@@ -248,9 +334,10 @@ class HomeTab extends StatelessWidget {
                   ),
                 ),
               ],
-            ),
-          );
-        },
+              ),
+            );
+          },
+        ),
       ),
     );
   }
@@ -258,25 +345,25 @@ class HomeTab extends StatelessWidget {
   static String renderGreetingBasedOnTime() {
     final hour = DateTime.now().hour;
     if (hour < 12) {
-      return 'Good Morning';
+      return 'Good morning';
     } else if (hour < 17) {
-      return 'Good Afternoon';
+      return 'Good afternoon';
     } else {
-      return 'Good Evening';
+      return 'Good evening';
     }
   }
 
   static Widget renderTextDate(DateTime due, bool isLearned) {
-      final now = DateTime.now();
-      final today = DateTime(now.year, now.month, now.day);
-      final yesterday = today.subtract(Duration(days: 1));
-      final dateOnly = DateTime(due.year, due.month, due.day);
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final yesterday = today.subtract(Duration(days: 1));
+    final dateOnly = DateTime(due.year, due.month, due.day);
     if (dateOnly == today) {
       return Text(
         "Today",
         style: TextStyle(
           fontWeight: FontWeight.bold,
-          color: isLearned ? pastelGreen : pastelOrange,
+          color: isLearned ? modernGreen : modernOrange,
         ),
       );
     }
@@ -285,7 +372,7 @@ class HomeTab extends StatelessWidget {
         "Yesterday",
         style: TextStyle(
           fontWeight: FontWeight.bold,
-          color: isLearned ? pastelGreen : pastelOrange,
+          color: isLearned ? modernPurple : modernOrange,
         ),
       );
     }
@@ -294,7 +381,7 @@ class HomeTab extends StatelessWidget {
         "Last ${DateFormat('EEEE').format(due)}",
         style: TextStyle(
           fontWeight: FontWeight.bold,
-          color: isLearned ? pastelGreen : pastelOrange,
+          color: isLearned ? modernGreen : modernOrange,
         ),
       );
     }
@@ -302,7 +389,7 @@ class HomeTab extends StatelessWidget {
       DateFormat('yMd').format(due),
       style: TextStyle(
         fontWeight: FontWeight.bold,
-        color: isLearned ? pastelGreen : pastelOrange,
+        color: isLearned ? modernGreen : modernOrange,
       ),
     );
   }

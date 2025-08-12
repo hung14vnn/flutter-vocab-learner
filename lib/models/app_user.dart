@@ -14,6 +14,7 @@ class AppUser {
   final String? modelVersion;
   final String? modelName;
   final String? apiKey;
+  final List<String>? pinnedQuickActions;
 
   AppUser({
     required this.id,
@@ -31,6 +32,7 @@ class AppUser {
     this.modelVersion,
     this.modelName,
     this.apiKey,
+    this.pinnedQuickActions,
   });
 
   factory AppUser.fromFirestore(Object? data, String id) {
@@ -53,6 +55,9 @@ class AppUser {
       modelVersion: map['modelVersion'],
       modelName: map['modelName'],
       apiKey: map['apiKey'],
+      pinnedQuickActions: map['pinnedQuickActions'] != null
+          ? List<String>.from(map['pinnedQuickActions'])
+          : null,
     );
   }
 
@@ -72,6 +77,7 @@ class AppUser {
       'modelVersion': modelVersion,
       'modelName': modelName,
       'apiKey': apiKey,
+      'pinnedQuickActions': pinnedQuickActions,
     };
   }
 
@@ -91,6 +97,7 @@ class AppUser {
     String? modelVersion,
     String? modelName,
     String? apiKey,
+    List<String>? pinnedQuickActions,
   }) {
     return AppUser(
       id: id ?? this.id,
@@ -108,6 +115,7 @@ class AppUser {
       modelVersion: modelVersion ?? this.modelVersion,
       modelName: modelName ?? this.modelName,
       apiKey: apiKey ?? this.apiKey,
+      pinnedQuickActions: pinnedQuickActions ?? this.pinnedQuickActions,
     );
   }
 }

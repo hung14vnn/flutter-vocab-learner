@@ -33,13 +33,36 @@ class _FlashcardSettingsDialogState extends State<FlashcardSettingsDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    
     return AlertDialog(
-      title: const Row(
-        children: [
-          Icon(Icons.settings, size: 24),
-          SizedBox(width: 8),
-          Text('Game Settings'),
-        ],
+      backgroundColor: colorScheme.surface.withOpacity(0.95),
+      surfaceTintColor: Colors.transparent,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: BorderSide(
+          color: colorScheme.primary.withOpacity(0.2),
+          width: 1,
+        ),
+      ),
+      title: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              colorScheme.primary.withOpacity(0.1),
+              Colors.transparent,
+            ],
+          ),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: const Row(
+          children: [
+            Icon(Icons.settings, size: 24),
+            SizedBox(width: 8),
+            Text('Game Settings'),
+          ],
+        ),
       ),
       content: SingleChildScrollView(
         child: Column(
@@ -57,11 +80,7 @@ class _FlashcardSettingsDialogState extends State<FlashcardSettingsDialog> {
               max: 50,
               divisions: 9,
               label: _numberOfCards.toString(),
-              onChanged: (value) {
-                setState(() {
-                  _numberOfCards = value.round();
-                });
-              },
+              onChanged: null
             ),
             Text(
               '$_numberOfCards cards',
@@ -85,11 +104,7 @@ class _FlashcardSettingsDialogState extends State<FlashcardSettingsDialog> {
                 DropdownMenuItem(value: 'intermediate', child: Text('Intermediate')),
                 DropdownMenuItem(value: 'advanced', child: Text('Advanced')),
               ],
-              onChanged: (value) {
-                setState(() {
-                  _difficulty = value!;
-                });
-              },
+              onChanged: null
             ),
             const SizedBox(height: 24),
             Row(
@@ -119,10 +134,17 @@ class _FlashcardSettingsDialogState extends State<FlashcardSettingsDialog> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surface,
-                borderRadius: BorderRadius.circular(8),
+                color: colorScheme.primary.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+                  color: colorScheme.primary.withOpacity(0.3),
+                  width: 1,
+                ),
+                gradient: LinearGradient(
+                  colors: [
+                    colorScheme.primary.withOpacity(0.05),
+                    Colors.transparent,
+                  ],
                 ),
               ),
               child: Column(
@@ -158,16 +180,38 @@ class _FlashcardSettingsDialogState extends State<FlashcardSettingsDialog> {
         ),
       ),
       actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
-        ),
-        ElevatedButton(
-          onPressed: () {
-            widget.onSettingsChanged(_numberOfCards, _difficulty, _enableSound);
-            Navigator.of(context).pop();
-          },
-          child: const Text('Apply'),
+        Container(
+          decoration: BoxDecoration(
+            color: colorScheme.surface.withOpacity(0.8),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          padding: const EdgeInsets.all(8),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                style: TextButton.styleFrom(
+                  backgroundColor: Colors.transparent,
+                  foregroundColor: colorScheme.onSurface.withOpacity(0.7),
+                ),
+                child: const Text('Cancel'),
+              ),
+              const SizedBox(width: 8),
+              ElevatedButton(
+                onPressed: () {
+                  widget.onSettingsChanged(_numberOfCards, _difficulty, _enableSound);
+                  Navigator.of(context).pop();
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: colorScheme.primary.withOpacity(0.9),
+                  foregroundColor: colorScheme.onPrimary,
+                  elevation: 0,
+                ),
+                child: const Text('Apply'),
+              ),
+            ],
+          ),
         ),
       ],
     );

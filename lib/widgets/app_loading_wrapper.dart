@@ -11,24 +11,60 @@ class AppLoadingWrapper extends StatefulWidget {
   State<AppLoadingWrapper> createState() => _AppLoadingWrapperState();
 }
 
-class _AppLoadingWrapperState extends State<AppLoadingWrapper> {
+class _AppLoadingWrapperState extends State<AppLoadingWrapper>
+    with TickerProviderStateMixin {
   bool _isInitialized = false;
+  bool _showMainApp = false;
+  late AnimationController _fadeController;
+  late AnimationController _scaleController;
+  late Animation<double> _fadeAnimation;
+  late Animation<double> _scaleAnimation;
 
   @override
   void initState() {
     super.initState();
+    _fadeController = AnimationController(
+      duration: const Duration(milliseconds: 600),
+      vsync: this,
+    );
+    _scaleController = AnimationController(
+      duration: const Duration(milliseconds: 800),
+      vsync: this,
+    );
+    
+    _fadeAnimation = Tween<double>(
+      begin: 1.0,
+      end: 0.0,
+    ).animate(CurvedAnimation(
+      parent: _fadeController,
+      curve: Curves.easeInOut,
+    ));
+
+    _scaleAnimation = Tween<double>(
+      begin: 0.8,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _scaleController,
+      curve: Curves.easeOutCubic,
+    ));
+    
     _initializeApp();
+  }
+
+  @override
+  void dispose() {
+    _fadeController.dispose();
+    _scaleController.dispose();
+    super.dispose();
   }
 
   Future<void> _initializeApp() async {
     // Initialize auth provider
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     
-    // Add a minimum loading time to show the loading screen
     final initializationFuture = authProvider.initialize();
     final minimumLoadingTime = Future.delayed(const Duration(milliseconds: 2000));
     
-    // Wait for both initialization and minimum loading time
     await Future.wait([
       initializationFuture,
       minimumLoadingTime,
@@ -37,16 +73,41 @@ class _AppLoadingWrapperState extends State<AppLoadingWrapper> {
     if (mounted) {
       setState(() {
         _isInitialized = true;
+        _showMainApp = true;
       });
+      
+      _scaleController.forward();
+      
+      await Future.delayed(const Duration(milliseconds: 200));
+      if (mounted) {
+        await _fadeController.forward();
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    if (!_isInitialized) {
-      return const LoadingScreen();
-    }
-    
-    return const AuthWrapper();
+    return Scaffold(
+      body: Stack(
+        children: [
+          if (_showMainApp)
+            ScaleTransition(
+              scale: _scaleAnimation,
+              child: const AuthWrapper(),
+            ),
+          
+          if (!_isInitialized || _fadeController.isAnimating)
+            AnimatedBuilder(
+              animation: _fadeAnimation,
+              builder: (context, child) {
+                return Opacity(
+                  opacity: _fadeAnimation.value,
+                  child: const LoadingScreen(),
+                );
+              },
+            ),
+        ],
+      ),
+    );
   }
 }

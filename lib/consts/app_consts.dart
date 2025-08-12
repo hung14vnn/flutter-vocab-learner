@@ -1,25 +1,27 @@
-import 'dart:ui';
-
-import 'package:vocab_learner/widgets/lottie_icon.dart';
+import 'package:flutter/material.dart';
 
 final List<PracticeGame> kPracticeGames = [
   PracticeGame(
     name: 'Flashcards',
     description: 'Use flashcards to memorize vocabulary words and their meanings.',
-    icon: LottieIcon(
-      animationPath: 'assets/animations/note.json',
-      darkAnimationPath: 'assets/animations/note_dark.json',
-      size: 50.0,
-      isNetwork: false,
-      autoPlay: true,
-      repeat: true,
+    icon: Icon(
+      Icons.web_stories,
+      size: 40.0,
+    ),
+  ),
+  PracticeGame(
+    name: "Word Scramble",
+    description: "Test your vocabulary skills by scrambling words and solving them.",
+    icon: Icon(
+      Icons.shuffle,
+      size: 40.0,
     ),
   ),
 ];
 class PracticeGame {  
   final String name;
   final String description;
-  final LottieIcon icon;
+  final Icon icon;
 
   PracticeGame({
     required this.name,
@@ -28,12 +30,12 @@ class PracticeGame {
   });
 } 
 
-  // Pastel color palette
-  final Color pastelPurple = const Color(0xFFD1C4E9);
-  final Color pastelGreen = const Color(0xFFC8E6C9);
-  final Color pastelBlue = const Color(0xFFB3E5FC);
-  final Color pastelYellow = const Color(0xFFFFF9C4);
-  final Color pastelPink = const Color(0xFFF8BBD0);
-  final Color pastelRed = const Color(0xFFFFCDD2);
-  final Color pastelGrey = const Color(0xFFF5F5F5);
-  final Color pastelOrange = const Color(0xFFFFE0B2);
+  // Modern color palette
+  final Color modernPurple = const Color(0xFFEDE9FE); // Soft violet
+  final Color modernGreen = const Color(0xFFD1FAE5); // Soft emerald
+  final Color modernBlue = const Color(0xFFDBEAFE); // Soft sky blue
+  final Color modernYellow = const Color(0xFFFEF3C7); // Soft amber
+  final Color modernPink = const Color(0xFFFCE7F3); // Soft pink
+  final Color modernRed = const Color(0xFFFEE2E2); // Soft rose
+  final Color modernGrey = const Color(0xFFF8FAFC); // Clean slate
+  final Color modernOrange = const Color(0xFFFED7AA); // Soft orange

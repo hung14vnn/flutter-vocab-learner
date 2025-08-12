@@ -31,19 +31,19 @@ class DifficultyChip extends StatelessWidget {
     
     switch (difficulty.toLowerCase()) {
       case 'beginner':
-        color = Color(0xFF8ABB6C); // Green
+        color = const Color(0xFF10B981); // Modern emerald
         icon = Icons.looks_one;
         break;
       case 'intermediate':
-        color = Color(0xFFFFBC4C); // Orange
+        color = const Color(0xFFF59E0B); // Modern amber
         icon = Icons.looks_two;
         break;
       case 'advanced':
-        color = Color(0xFFFB4141); // Red
+        color = const Color(0xFFEF4444); // Modern red
         icon = Icons.looks_3;
         break;
       default:
-        color = Color(0xFFF3E9DC); // Grey
+        color = const Color(0xFFF1F5F9); // Modern slate
         icon = Icons.help;
     }
 
@@ -70,19 +70,19 @@ class DifficultyChip extends StatelessWidget {
     IconData icon;
     
     if (state == WordState.newWordState) {
-      color = Color(0xFF3D74B6); 
+      color = const Color(0xFF3B82F6); 
       text = 'NEW';
       icon = Icons.fiber_new;
     } else if (state == WordState.learningState) {
-      color = Color(0xFFFB9E3A);
+      color = const Color(0xFFF59E0B);
       text = 'LEARNING';
       icon = Icons.school;
     } else if (state == WordState.masteredState) {
-      color = Color(0xFF8ABB6C);
+      color = const Color(0xFF10B981);
       text = 'MASTERED';
       icon = Icons.check_circle;
     } else {
-      color = Color(0xFFF3E9DC);
+      color = const Color(0xFFF1F5F9);
       text = 'UNKNOWN';
       icon = Icons.help;
     }

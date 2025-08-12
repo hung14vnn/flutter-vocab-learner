@@ -1,5 +1,4 @@
-# Vocab Learner
-
+# Vocabulary
 A Flutter vocabulary learning application with Firebase backend integration that helps users learn and memorize vocabulary using spaced repetition techniques.
 
 ## Features
@@ -100,30 +99,6 @@ This app uses OpenAI's GPT model for intelligent word analysis. To enable AI fea
 1. Get an API key from [OpenAI Platform](https://platform.openai.com/account/api-keys)
 2. Set up the API key using one of these methods:
 
-### Method 1: Environment Variable (Recommended)
-Set the environment variable before running the app:
-```bash
-# Windows (PowerShell)
-$env:OPENAI_API_KEY="your_api_key_here"
-flutter run
-
-# Windows (Command Prompt)
-set OPENAI_API_KEY=your_api_key_here
-flutter run
-
-# macOS/Linux
-export OPENAI_API_KEY="your_api_key_here"
-flutter run
-```
-
-### Method 2: Hardcode in Development
-For development only, update `lib/services/ai_service.dart`:
-```dart
-static const String _hardcodedApiKey = 'your_api_key_here';
-```
-
-⚠️ **Warning**: Never commit API keys to version control. Use environment variables for production.
-
 ### Security Rules
 Example Firestore security rules:
 ```javascript
@@ -150,15 +125,6 @@ service cloud.firestore {
 }
 ```
 
-## Development
-
-### Code Style
-- Follow Dart conventions and Flutter best practices
-- Use Provider pattern for state management
-- Implement proper error handling for Firebase operations
-- Use async/await for asynchronous operations
-- Follow Material Design 3 principles
-
 ### Testing
 ```bash
 flutter test
@@ -173,14 +139,6 @@ flutter build appbundle --release
 # iOS
 flutter build ios --release
 ```
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
 
 ## License
 

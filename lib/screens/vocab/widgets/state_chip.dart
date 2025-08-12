@@ -10,16 +10,16 @@ class StateChip extends StatelessWidget {
     Color color;
     String text;
     if (state == WordState.newWordState) {
-      color = Color(0xFF3D74B6);
+      color = const Color(0xFF3B82F6);
       text = 'NEW';
     } else if (state == WordState.learningState) {
-      color = Color(0xFFFFC107);
+      color = const Color(0xFFF59E0B);
       text = 'LEARNING';
     } else if (state == WordState.masteredState) {
-      color = Color(0xFF8ABB6C);
+      color = const Color(0xFF10B981);
       text = 'MASTERED';
     } else if (state == WordState.reviewedState) {
-      color = Color(0xFF6C757D);
+      color = const Color(0xFF64748B);
       text = 'REVIEWED';
     }
     else {

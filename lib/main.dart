@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
+import 'dart:ui';
 
 import 'firebase_options.dart';
 import 'providers/auth_provider.dart';
@@ -9,6 +10,9 @@ import 'providers/vocab_provider.dart';
 import 'providers/progress_provider.dart';
 import 'widgets/app_loading_wrapper.dart';
 import 'package:vocab_learner/screens/practice/flashcards/flashcards_game_screen.dart';
+import 'package:vocab_learner/screens/practice/word_scramble/word_scramble_game_screen.dart';
+import 'package:vocab_learner/screens/practice/flashcards/flashcards_home_screen.dart';
+import 'package:vocab_learner/screens/practice/word_scramble/word_scramble_home_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,7 +22,7 @@ void main() async {
   await windowManager.ensureInitialized();
 
   WindowOptions windowOptions = const WindowOptions(
-    size: Size(578.25, 1028), // Mimic phone aspect ratio
+    size: Size(578.25, 1028),
     center: true,
   );
   windowManager.waitUntilReadyToShow(windowOptions, () async {
@@ -51,16 +55,40 @@ class VocabLearnerApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(
-            seedColor: Colors.indigo,
+            seedColor: const Color(0xFF6366F1),
             brightness: Brightness.light,
           ),
           useMaterial3: true,
-          appBarTheme: const AppBarTheme(centerTitle: true, elevation: 0),
+          appBarTheme: AppBarTheme(
+            centerTitle: true, 
+            elevation: 0,
+            backgroundColor: Colors.transparent,
+            surfaceTintColor: Colors.transparent,
+          ),
           cardTheme: CardThemeData(
-            elevation: 1,
+            elevation: 0,
+            color: Colors.white.withOpacity(0.85),
+            surfaceTintColor: Colors.transparent,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
+          ),
+          dialogTheme: DialogThemeData(
+            backgroundColor: Colors.white.withOpacity(0.95),
+            surfaceTintColor: Colors.transparent,
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+          ),
+          bottomNavigationBarTheme: BottomNavigationBarThemeData(
+            backgroundColor: Colors.white.withOpacity(0.9),
+            elevation: 0,
+          ),
+          navigationBarTheme: NavigationBarThemeData(
+            backgroundColor: Colors.white.withOpacity(0.9),
+            surfaceTintColor: Colors.transparent,
+            elevation: 0,
           ),
           filledButtonTheme: FilledButtonThemeData(
             style: FilledButton.styleFrom(
@@ -80,16 +108,40 @@ class VocabLearnerApp extends StatelessWidget {
         ),
         darkTheme: ThemeData(
           colorScheme: ColorScheme.fromSeed(
-            seedColor: Colors.indigo,
+            seedColor: const Color(0xFF6366F1),
             brightness: Brightness.dark,
           ),
           useMaterial3: true,
-          appBarTheme: const AppBarTheme(centerTitle: true, elevation: 0),
+          appBarTheme: AppBarTheme(
+            centerTitle: true, 
+            elevation: 0,
+            backgroundColor: Colors.transparent,
+            surfaceTintColor: Colors.transparent,
+          ),
           cardTheme: CardThemeData(
-            elevation: 1,
+            elevation: 0,
+            color: const Color(0xFF30302E).withOpacity(0.7),
+            surfaceTintColor: Colors.transparent,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
+          ),
+          dialogTheme: DialogThemeData(
+            backgroundColor: const Color(0xFF30302E).withOpacity(0.85),
+            surfaceTintColor: Colors.transparent,
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+          ),
+          bottomNavigationBarTheme: BottomNavigationBarThemeData(
+            backgroundColor: const Color(0xFF30302E).withOpacity(0.8),
+            elevation: 0,
+          ),
+          navigationBarTheme: NavigationBarThemeData(
+            backgroundColor: const Color(0xFF30302E).withOpacity(0.8),
+            surfaceTintColor: Colors.transparent,
+            elevation: 0,
           ),
           filledButtonTheme: FilledButtonThemeData(
             style: FilledButton.styleFrom(
@@ -110,7 +162,10 @@ class VocabLearnerApp extends StatelessWidget {
         themeMode: ThemeMode.system,
         home: const AppLoadingWrapper(),
         routes: {
-          '/flashcards': (context) => const FlashcardsGameScreen(),
+          '/flashcards': (context) => const FlashcardsHomeScreen(),
+          '/word_scramble': (context) => const WordScrambleHomeScreen(),
+          '/flashcards_game': (context) => const FlashcardsGameScreen(),
+          '/word_scramble_game': (context) => const WordScrambleGameScreen(),
           // ...other routes...
         },
       ),

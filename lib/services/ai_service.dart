@@ -330,7 +330,7 @@ class AIService {
     - Part of Speech: Specify the main part of speech (noun, verb, adjective, adverb, conjunction, preposition)
     - Analysis Successful: Always set to true unless there's an error
 
-    Focus on making this educational and useful for vocabulary learning. Process ALL words in the input list.
+    Focus on making this educational and useful for vocabulary learning. Process ALL words in the input list, remove from list if the word is not english or it was a whole phrase.
     ''';
   }
 }

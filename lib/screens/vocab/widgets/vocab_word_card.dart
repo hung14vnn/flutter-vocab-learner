@@ -406,11 +406,11 @@ class _WordDetailsDialogState extends State<WordDetailsDialog> {
                 const SizedBox(height: 4),
                 Row(
                   children: [
+                    _buildPartOfSpeech(theme),
+                    const SizedBox(width: 8),
                     DifficultyChip(difficulty: currentWord.difficulty),
                     const SizedBox(width: 8),
                     StateChip(state: currentWord.state),
-                    const SizedBox(width: 8),
-                    _buildPartOfSpeech(theme),
                   ],
                 ),
               ],
@@ -427,20 +427,17 @@ class _WordDetailsDialogState extends State<WordDetailsDialog> {
   }
 
   Widget _buildPartOfSpeech(ThemeData theme) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.tertiaryContainer.withValues(alpha: 0.8),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        currentWord.partOfSpeech,
-        style: theme.textTheme.bodySmall?.copyWith(
-          color: theme.colorScheme.onSecondaryContainer,
-          fontWeight: FontWeight.w600,
-          letterSpacing: 0.5,
+    return Chip(
+      label: Text(
+        currentWord.partOfSpeech.toUpperCase(),
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 10,
+          fontWeight: FontWeight.bold,
         ),
       ),
+      backgroundColor: Color.fromARGB(255, 206, 128, 38),
+      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
     );
   }
 
@@ -896,24 +893,6 @@ class _WordDetailsDialogState extends State<WordDetailsDialog> {
                   ? Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.visibility,
-                              size: 16,
-                              color: theme.colorScheme.primary,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              'Definition in your language:',
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: theme.colorScheme.primary,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
                         Text(
                           currentWord.definitionInUserLanguage!,
                           style: theme.textTheme.bodyMedium?.copyWith(
