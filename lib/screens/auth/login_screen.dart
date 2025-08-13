@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:vocab_learner/widgets/blur_dialog.dart';
 import 'package:vocab_learner/widgets/toast_notification.dart';
 import '../../providers/auth_provider.dart';
 import 'register_screen.dart';
@@ -202,7 +203,7 @@ class _LoginScreenState extends State<LoginScreen> {
   void _showForgotPasswordDialog() {
     final emailController = TextEditingController();
 
-    showDialog(
+    showBlurDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Reset Password'),

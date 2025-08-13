@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:vocab_learner/widgets/blur_dialog.dart';
 
 class WordScrambleSettingsScreen extends StatefulWidget {
   const WordScrambleSettingsScreen({super.key});
@@ -234,7 +235,7 @@ class _WordScrambleSettingsScreenState extends State<WordScrambleSettingsScreen>
   }
 
   void _resetSettings() {
-    showDialog(
+    showBlurDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Reset Settings'),

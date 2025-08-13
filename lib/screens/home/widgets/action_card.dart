@@ -58,15 +58,15 @@ class _ActionCardState extends State<ActionCard> {
         duration: const Duration(milliseconds: 150),
         child: Card(
           color: widget.isEmpty
-              ? Colors.grey.withOpacity(0.1)
-              : widget.color.withOpacity(0.1),
+              ? Colors.grey.withValues(alpha: 0.1)
+              : widget.color.withValues(alpha: 0.1),
           elevation: 0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
             side: BorderSide(
               color: widget.isEmpty
-                  ? Colors.grey.withOpacity(0.3)
-                  : widget.color.withOpacity(0.3),
+                  ? Colors.grey.withValues(alpha: 0.3)
+                  : widget.color.withValues(alpha: 0.3),
               width: 1,
             ),
           ),
@@ -78,20 +78,24 @@ class _ActionCardState extends State<ActionCard> {
                 end: Alignment.bottomRight,
                 colors: [
                   widget.isEmpty
-                      ? Colors.grey.withOpacity(0.05)
-                      : widget.color.withOpacity(0.05),
+                      ? Colors.grey.withValues(alpha: 0.05)
+                      : widget.color.withValues(alpha: 0.05),
                   widget.isEmpty
-                      ? Colors.grey.withOpacity(0.15)
-                      : widget.color.withOpacity(0.15),
+                      ? Colors.grey.withValues(alpha: 0.15)
+                      : widget.color.withValues(alpha: 0.15),
                 ],
               ),
             ),
             child: InkWell(
               onTap: () {
-                ToastNotification.showInfo(
-                  context,
-                  message: 'Not implemented yet',
-                );
+                if (widget.isEmpty) {
+                  widget.onTap!();
+                } else {
+                  ToastNotification.showInfo(
+                    context,
+                    message: 'Action not implemented yet',
+                  );
+                }
               },
               onLongPress: widget.showPinButton && !widget.isEmpty
                   ? () {
@@ -193,15 +197,15 @@ class _ActionCardState extends State<ActionCard> {
                         child: Container(
                           padding: const EdgeInsets.all(4),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.95),
+                            color: Colors.white.withValues(alpha: 0.95),
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                              color: widget.color.withOpacity(0.2),
+                              color: widget.color.withValues(alpha: 0.2),
                               width: 1,
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color: widget.color.withOpacity(0.1),
+                                color: widget.color.withValues(alpha: 0.1),
                                 blurRadius: 8,
                                 offset: const Offset(0, 2),
                               ),

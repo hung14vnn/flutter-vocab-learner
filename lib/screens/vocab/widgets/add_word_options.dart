@@ -1,5 +1,6 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:vocab_learner/widgets/blur_dialog.dart';
 import 'package:vocab_learner/widgets/toast_notification.dart';
 import '../../../providers/vocab_provider.dart';
 import 'add_word_dialog.dart';
@@ -55,7 +56,7 @@ class AddWordOptionsDialog extends StatelessWidget {
   }
 
   void _handleImportWords(BuildContext rootContext) {
-    showDialog(
+    showBlurDialog(
       context: rootContext,
       builder: (dialogContext) => AlertDialog(
         title: const Text('Import Words'),
@@ -110,7 +111,7 @@ class AddWordOptionsDialog extends StatelessWidget {
   }
 
   void _handleManualAdd(BuildContext rootContext) {
-    showDialog(
+    showBlurDialog(
       context: rootContext,
       builder: (dialogContext) => AlertDialog(
         title: const Text('Manual Add'),
@@ -154,7 +155,7 @@ class AddWordOptionsDialog extends StatelessWidget {
   }
 
   void _showAddSingleWordForm(BuildContext rootContext) {
-    showDialog(
+    showBlurDialog(
       context: rootContext,
       builder: (context) => AddWordDialog(vocabProvider: vocabProvider),
     );

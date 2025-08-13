@@ -11,6 +11,7 @@ import 'package:vocab_learner/providers/vocab_provider.dart';
 import 'package:vocab_learner/services/ai_service.dart';
 import 'package:vocab_learner/models/vocab_word.dart';
 import 'package:vocab_learner/utils/guid_generator.dart';
+import 'package:vocab_learner/widgets/blur_dialog.dart';
 import 'package:vocab_learner/widgets/toast_notification.dart';
 
 class ImportFromGoogleTranslateDialog extends StatefulWidget {
@@ -204,7 +205,7 @@ class _ImportFromGoogleTranslateDialogState
     
     try {
       // Show loading dialog
-      showDialog(
+      showBlurDialog(
         context: currentContext,
         barrierDismissible: false,
         builder: (context) => const AlertDialog(

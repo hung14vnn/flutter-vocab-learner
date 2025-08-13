@@ -36,12 +36,12 @@ class _FlashcardSettingsDialogState extends State<FlashcardSettingsDialog> {
     final colorScheme = Theme.of(context).colorScheme;
     
     return AlertDialog(
-      backgroundColor: colorScheme.surface.withOpacity(0.95),
+      backgroundColor: colorScheme.surface.withValues(alpha: 0.95),
       surfaceTintColor: Colors.transparent,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
         side: BorderSide(
-          color: colorScheme.primary.withOpacity(0.2),
+          color: colorScheme.primary.withValues(alpha: 0.2),
           width: 1,
         ),
       ),
@@ -50,7 +50,7 @@ class _FlashcardSettingsDialogState extends State<FlashcardSettingsDialog> {
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              colorScheme.primary.withOpacity(0.1),
+              colorScheme.primary.withValues(alpha: 0.1),
               Colors.transparent,
             ],
           ),
@@ -134,15 +134,15 @@ class _FlashcardSettingsDialogState extends State<FlashcardSettingsDialog> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: colorScheme.primary.withOpacity(0.1),
+                color: colorScheme.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: colorScheme.primary.withOpacity(0.3),
+                  color: colorScheme.primary.withValues(alpha: 0.3),
                   width: 1,
                 ),
                 gradient: LinearGradient(
                   colors: [
-                    colorScheme.primary.withOpacity(0.05),
+                    colorScheme.primary.withValues(alpha: 0.05),
                     Colors.transparent,
                   ],
                 ),
@@ -182,7 +182,7 @@ class _FlashcardSettingsDialogState extends State<FlashcardSettingsDialog> {
       actions: [
         Container(
           decoration: BoxDecoration(
-            color: colorScheme.surface.withOpacity(0.8),
+            color: colorScheme.surface.withValues(alpha: 0.8),
             borderRadius: BorderRadius.circular(12),
           ),
           padding: const EdgeInsets.all(8),
@@ -193,7 +193,7 @@ class _FlashcardSettingsDialogState extends State<FlashcardSettingsDialog> {
                 onPressed: () => Navigator.of(context).pop(),
                 style: TextButton.styleFrom(
                   backgroundColor: Colors.transparent,
-                  foregroundColor: colorScheme.onSurface.withOpacity(0.7),
+                  foregroundColor: colorScheme.onSurface.withValues(alpha: 0.7),
                 ),
                 child: const Text('Cancel'),
               ),
@@ -204,7 +204,7 @@ class _FlashcardSettingsDialogState extends State<FlashcardSettingsDialog> {
                   Navigator.of(context).pop();
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: colorScheme.primary.withOpacity(0.9),
+                  backgroundColor: colorScheme.primary.withValues(alpha: 0.9),
                   foregroundColor: colorScheme.onPrimary,
                   elevation: 0,
                 ),

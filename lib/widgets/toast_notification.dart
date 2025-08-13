@@ -281,15 +281,15 @@ class _ToastWidgetState extends State<_ToastWidget>
   Color _getBackgroundColor() {
     switch (widget.type) {
       case ToastType.success:
-        return Colors.green.shade600;
+        return Colors.green.shade600.withValues(alpha: 0.15);
       case ToastType.error:
-        return Colors.red.shade600;
+        return Colors.red.shade600.withValues(alpha: 0.15);
       case ToastType.warning:
-        return Colors.orange.shade600;
+        return Colors.orange.shade600.withValues(alpha: 0.15);
       case ToastType.info:
-        return Colors.grey.shade800;
+        return Colors.grey.shade600.withValues(alpha: 0.15);
       case ToastType.loading:
-        return Colors.blue.shade600;
+        return Colors.blue.shade600.withValues(alpha: 0.15);
     }
   }
 

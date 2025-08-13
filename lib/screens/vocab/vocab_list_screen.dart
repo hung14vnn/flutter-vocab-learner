@@ -9,6 +9,7 @@ import 'package:vocab_learner/screens/vocab/widgets/vocab_word_list.dart';
 import 'package:vocab_learner/screens/vocab/widgets/pagination_controls.dart';
 import 'package:vocab_learner/widgets/toast_notification.dart';
 import 'package:vocab_learner/widgets/blur_dialog.dart';
+import 'package:vocab_learner/widgets/shimmer_effect.dart';
 import '../../providers/vocab_provider.dart';
 import '../../providers/auth_provider.dart';
 import 'widgets/vocab_filter_section.dart';
@@ -63,7 +64,7 @@ class _VocabListScreenState extends State<VocabListScreen> {
     showBlurDialog(
       context: context,
       blurStrength: 6.0,
-      child: AddWordOptionsDialog(
+      builder: (dialogContext) => AddWordOptionsDialog(
         vocabProvider: vocabProvider,
         onFileSelected: (result) {
           // Show the import dialog immediately
@@ -81,11 +82,11 @@ class _VocabListScreenState extends State<VocabListScreen> {
     // Use SchedulerBinding to ensure the operation happens after the frame
     SchedulerBinding.instance.addPostFrameCallback((_) {
       if (mounted && context.mounted) {
-                showBlurDialog(
+        showBlurDialog(
           context: context,
           blurStrength: 6.0,
-          child: ImportFromGoogleTranslateDialog(
-            vocabProvider: vocabProvider, 
+          builder: (dialogContext) => ImportFromGoogleTranslateDialog(
+            vocabProvider: vocabProvider,
             filePickerResult: result,
           ),
         );
@@ -105,51 +106,51 @@ class _VocabListScreenState extends State<VocabListScreen> {
     showBlurDialog(
       context: context,
       blurStrength: 6.0,
-      child: AlertDialog(
-          title: const Text('Delete Words'),
-          content: Text(
-            'Are you sure you want to delete $selectedCount selected word${selectedCount > 1 ? 's' : ''}? This action cannot be undone.',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () async {
-                Navigator.of(context).pop();
-
-                ToastNotification.showLoading(
-                  context,
-                  message:
-                      'Deleting $selectedCount word${selectedCount > 1 ? 's' : ''}...',
-                );
-
-                final success = await vocabProvider.deleteSelectedWords();
-
-                if (mounted) {
-                  ToastNotification.hide(context);
-                  if (success) {
-                    ToastNotification.showSuccess(
-                      context,
-                      message:
-                          '$selectedCount word${selectedCount > 1 ? 's' : ''} deleted successfully!',
-                    );
-                  } else {
-                    ToastNotification.showError(
-                      context,
-                      message: 'Failed to delete selected words',
-                    );
-                  }
-                }
-              },
-              style: TextButton.styleFrom(foregroundColor: Colors.red),
-              child: const Text('Delete'),
-            ),
-          ],
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Delete Words'),
+        content: Text(
+          'Are you sure you want to delete $selectedCount selected word${selectedCount > 1 ? 's' : ''}? This action cannot be undone.',
         ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.of(context).pop();
+
+              ToastNotification.showLoading(
+                context,
+                message:
+                    'Deleting $selectedCount word${selectedCount > 1 ? 's' : ''}...',
+              );
+
+              final success = await vocabProvider.deleteSelectedWords();
+
+              if (mounted) {
+                ToastNotification.hide(context);
+                if (success) {
+                  ToastNotification.showSuccess(
+                    context,
+                    message:
+                        '$selectedCount word${selectedCount > 1 ? 's' : ''} deleted successfully!',
+                  );
+                } else {
+                  ToastNotification.showError(
+                    context,
+                    message: 'Failed to delete selected words',
+                  );
+                }
+              }
+            },
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
     );
   }
 
@@ -160,100 +161,98 @@ class _VocabListScreenState extends State<VocabListScreen> {
         final theme = Theme.of(context);
         final colorScheme = theme.colorScheme;
 
-        return Scaffold(
-          backgroundColor: Colors.transparent,
-          appBar: AppBar(
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            title: vocabProvider.isSelectionMode
-                ? Text('${vocabProvider.selectedCount} selected')
-                : const Text('Vocabulary'),
-            leading: vocabProvider.isSelectionMode
-                ? IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: () {
-                      vocabProvider.clearSelection();
-                    },
-                  )
-                : null,
-            actions: vocabProvider.isSelectionMode
-                ? [
-                    IconButton(
-                      icon: const Icon(Icons.select_all),
-                      onPressed: () {
-                        vocabProvider.selectAllWords();
-                      },
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.delete, color: Colors.red),
-                      onPressed: vocabProvider.selectedCount > 0
-                          ? () =>
-                                _showDeleteConfirmation(context, vocabProvider)
-                          : null,
-                    ),
-                  ]
-                : [
-                    IconButton(
-                      icon: Icon(
-                        vocabProvider.isPaginationEnabled
-                            ? Icons.format_list_numbered
-                            : Icons.all_inclusive,
-                      ),
-                      tooltip: vocabProvider.isPaginationEnabled
-                          ? 'Switch to infinite scroll mode'
-                          : 'Switch to page navigation mode',
-                      onPressed: () {
-                        vocabProvider.togglePaginationMode();
-                      },
-                    ),
-                    IconButton(
-                      icon: Icon(
-                        vocabProvider.isCompactMode
-                            ? Icons.view_agenda
-                            : Icons.view_list,
-                      ),
-                      tooltip: vocabProvider.isCompactMode
-                          ? 'Switch to detailed view'
-                          : 'Switch to compact view',
-                      onPressed: () {
-                        vocabProvider.toggleCompactMode();
-                      },
-                    ),
-                    IconButton(
-                      icon: Icon(
-                        _isFilterExpanded
-                            ? Icons.filter_list_off
-                            : Icons.filter_list,
-                      ),
-                      tooltip: _isFilterExpanded
-                          ? 'Hide filters'
-                          : 'Show filters',
-                      onPressed: () {
-                        setState(() {
-                          _isFilterExpanded = !_isFilterExpanded;
-                        });
-                      },
-                    ),
-                  ],
-          ),
-          body: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  colorScheme.primary.withOpacity(0.05),
-                  colorScheme.surface.withOpacity(0.8),
-                  colorScheme.secondary.withOpacity(0.05),
-                ],
-              ),
+        return Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                colorScheme.primary.withValues(alpha: 0.1),
+                colorScheme.surface.withValues(alpha: 0.6),
+                colorScheme.secondary.withValues(alpha: 0.05),
+              ],
             ),
-            child: Consumer<VocabProvider>(
+          ),
+          child: Scaffold(
+            backgroundColor: Colors.transparent,
+            appBar: AppBar(
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              title: vocabProvider.isSelectionMode
+                  ? Text('${vocabProvider.selectedCount} selected')
+                  : const Text('Vocabulary'),
+              leading: vocabProvider.isSelectionMode
+                  ? IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () {
+                        vocabProvider.clearSelection();
+                      },
+                    )
+                  : null,
+              actions: vocabProvider.isSelectionMode
+                  ? [
+                      IconButton(
+                        icon: const Icon(Icons.select_all),
+                        onPressed: () {
+                          vocabProvider.selectAllWords();
+                        },
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.delete, color: Colors.red),
+                        onPressed: vocabProvider.selectedCount > 0
+                            ? () => _showDeleteConfirmation(
+                                context,
+                                vocabProvider,
+                              )
+                            : null,
+                      ),
+                    ]
+                  : [
+                      IconButton(
+                        icon: Icon(
+                          vocabProvider.isPaginationEnabled
+                              ? Icons.format_list_numbered
+                              : Icons.all_inclusive,
+                        ),
+                        tooltip: vocabProvider.isPaginationEnabled
+                            ? 'Switch to infinite scroll mode'
+                            : 'Switch to page navigation mode',
+                        onPressed: () {
+                          vocabProvider.togglePaginationMode();
+                        },
+                      ),
+                      IconButton(
+                        icon: Icon(
+                          vocabProvider.isCompactMode
+                              ? Icons.view_agenda
+                              : Icons.view_list,
+                        ),
+                        tooltip: vocabProvider.isCompactMode
+                            ? 'Switch to detailed view'
+                            : 'Switch to compact view',
+                        onPressed: () {
+                          vocabProvider.toggleCompactMode();
+                        },
+                      ),
+                      IconButton(
+                        icon: Icon(
+                          _isFilterExpanded
+                              ? Icons.filter_list_off
+                              : Icons.filter_list,
+                        ),
+                        tooltip: _isFilterExpanded
+                            ? 'Hide filters'
+                            : 'Show filters',
+                        onPressed: () {
+                          setState(() {
+                            _isFilterExpanded = !_isFilterExpanded;
+                          });
+                        },
+                      ),
+                    ],
+            ),
+            body: Consumer<VocabProvider>(
               builder: (context, vocabProvider, child) {
-                if (vocabProvider.isLoading) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-
                 if (vocabProvider.errorMessage != null) {
                   print(vocabProvider.errorMessage);
                   return VocabErrorState(
@@ -267,8 +266,47 @@ class _VocabListScreenState extends State<VocabListScreen> {
                   );
                 }
 
+                if (vocabProvider.isFirstLoading) {
+                  return Column(
+                    children: [
+                      if (_isFilterExpanded) ...[
+                        VocabFilterSection(
+                          onClose: () {
+                            setState(() {
+                              _isFilterExpanded = false;
+                            });
+                          },
+                        ),
+                      ],
+                      const VocabWordCount(),
+                      const PaginationControls(),
+                      Expanded(
+                        child: VocabWordsShimmerList(
+                          isCompactMode: vocabProvider.isCompactMode,
+                          itemCount: 10,
+                        ),
+                      ),
+                    ],
+                  );
+                }
+
                 if (vocabProvider.allWords.isEmpty) {
-                  return const VocabEmptyState();
+                  return Column(
+                    children: [
+                      if (_isFilterExpanded) ...[
+                        VocabFilterSection(
+                          onClose: () {
+                            setState(() {
+                              _isFilterExpanded = false;
+                            });
+                          },
+                        ),
+                      ],
+                      const Expanded(
+                        child: VocabEmptyState(),
+                      ),
+                    ],
+                  );
                 }
 
                 return Column(
@@ -284,28 +322,44 @@ class _VocabListScreenState extends State<VocabListScreen> {
                     ],
                     const VocabWordCount(),
                     const PaginationControls(),
-                    if (vocabProvider.isPaginationEnabled) ...[
-                      const SizedBox(height: 16),
-                    ],
-                    Expanded(
-                      child: VocabWordsList(
-                        scrollController: _scrollController,
+                    if (vocabProvider.isSearching) ...[
+                      Expanded(
+                        child: SearchLoadingOverlay(
+                          isCompactMode: vocabProvider.isCompactMode,
+                          child: VocabWordsList(
+                            scrollController: _scrollController,
+                          ),
+                        ),
                       ),
-                    ),
+                    ] else if (vocabProvider.isLoading &&
+                        !vocabProvider.isFirstLoading) ...[
+                      Expanded(
+                        child: VocabWordsShimmerList(
+                          isCompactMode: vocabProvider.isCompactMode,
+                          itemCount: 5,
+                        ),
+                      ),
+                    ] else ...[
+                      Expanded(
+                        child: VocabWordsList(
+                          scrollController: _scrollController,
+                        ),
+                      ),
+                    ],
                   ],
                 );
               },
             ),
+            floatingActionButton:
+                vocabProvider.isSelectionMode || !_isAddButtonVisible
+                ? null
+                : FloatingActionButton(
+                    onPressed: () {
+                      _showAddWordOptions(context, vocabProvider);
+                    },
+                    child: const Icon(Icons.add),
+                  ),
           ),
-          floatingActionButton:
-              vocabProvider.isSelectionMode || !_isAddButtonVisible
-              ? null
-              : FloatingActionButton(
-                  onPressed: () {
-                    _showAddWordOptions(context, vocabProvider);
-                  },
-                  child: const Icon(Icons.add),
-                ),
         );
       },
     );

@@ -151,10 +151,10 @@ class _VocabFilterSectionState extends State<VocabFilterSection> {
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
-            color: theme.colorScheme.surface.withOpacity(0.9),
+            color: theme.colorScheme.surface.withValues(alpha: 0.35),
             border: Border(
               bottom: BorderSide(
-                color: theme.colorScheme.primary.withOpacity(0.2),
+                color: theme.colorScheme.primary.withValues(alpha: 0.2),
               ),
             ),
             borderRadius: const BorderRadius.only(
@@ -215,16 +215,27 @@ class _VocabFilterSectionState extends State<VocabFilterSection> {
                     vertical: 8,
                   ),
                   prefixIcon: const Icon(Icons.search, size: 20),
-                  suffixIcon: _searchController.text.isNotEmpty
-                      ? IconButton(
-                          icon: const Icon(Icons.clear, size: 20),
-                          onPressed: () {
-                            _debounceTimer?.cancel();
-                            _searchController.clear();
-                            vocabProvider.setSearchQuery('');
-                          },
+                  suffixIcon: vocabProvider.isSearching
+                      ? const Padding(
+                          padding: EdgeInsets.all(12.0),
+                          child: SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                            ),
+                          ),
                         )
-                      : null,
+                      : _searchController.text.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.clear, size: 20),
+                              onPressed: () {
+                                _debounceTimer?.cancel();
+                                _searchController.clear();
+                                vocabProvider.setSearchQuery('');
+                              },
+                            )
+                          : null,
                   labelStyle: TextStyle(
                     fontSize: 14,
                     color: theme.colorScheme.onSurfaceVariant,

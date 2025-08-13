@@ -27,7 +27,8 @@ class BlurDialog extends StatelessWidget {
 /// Helper function to show a dialog with blur background
 Future<T?> showBlurDialog<T>({
   required BuildContext context,
-  required Widget child,
+  required WidgetBuilder builder,
+
   double blurStrength = 5.0,
   bool barrierDismissible = true,
   Color? barrierColor,
@@ -35,10 +36,10 @@ Future<T?> showBlurDialog<T>({
   return showDialog<T>(
     context: context,
     barrierDismissible: barrierDismissible,
-    barrierColor: barrierColor ?? Colors.black.withOpacity(0.3),
+    barrierColor: barrierColor ?? Colors.black.withValues(alpha: 0.3),
     builder: (context) => BlurDialog(
       blurStrength: blurStrength,
-      child: child,
+      child: builder(context),
     ),
   );
 }
@@ -61,7 +62,7 @@ class BlurDialogRoute<T> extends PageRoute<T> {
   bool get barrierDismissible => true;
 
   @override
-  Color? get barrierColor => Colors.black.withOpacity(0.3);
+  Color? get barrierColor => Colors.black.withValues(alpha: 0.3);
 
   @override
   String? get barrierLabel => null;

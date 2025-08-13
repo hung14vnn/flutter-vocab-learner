@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:vocab_learner/widgets/blur_dialog.dart';
 
 class FlashcardsSettingsScreen extends StatefulWidget {
   const FlashcardsSettingsScreen({super.key});
@@ -390,7 +391,7 @@ class _FlashcardsSettingsScreenState extends State<FlashcardsSettingsScreen> {
   }
 
   void _resetSettings() {
-    showDialog(
+    showBlurDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Reset Settings'),

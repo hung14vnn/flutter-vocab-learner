@@ -18,7 +18,7 @@ class FlashcardsHomeScreen extends StatelessWidget {
           'Flashcards',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
-        backgroundColor: colorScheme.primary.withOpacity(0.9),
+        backgroundColor: colorScheme.primary.withValues(alpha: 0.9),
         foregroundColor: colorScheme.onPrimary,
         elevation: 0,
       ),
@@ -28,9 +28,9 @@ class FlashcardsHomeScreen extends StatelessWidget {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              colorScheme.primary.withOpacity(0.1),
-              colorScheme.surface.withOpacity(0.8),
-              colorScheme.primary.withOpacity(0.05),
+              colorScheme.primary.withValues(alpha: 0.1),
+              colorScheme.surface.withValues(alpha: 0.6),
+              colorScheme.primary.withValues(alpha: 0.05),
             ],
           ),
         ),
@@ -44,20 +44,20 @@ class FlashcardsHomeScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: colorScheme.primary.withOpacity(0.9),
+                  color: colorScheme.primary.withValues(alpha: 0.9),
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: colorScheme.primary.withOpacity(0.3),
+                    color: colorScheme.primary.withValues(alpha: 0.3),
                     width: 2,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: colorScheme.primary.withOpacity(0.4),
+                      color: colorScheme.primary.withValues(alpha: 0.4),
                       blurRadius: 30,
                       offset: const Offset(0, 10),
                     ),
                     BoxShadow(
-                      color: Colors.white.withOpacity(0.1),
+                      color: Colors.white.withValues(alpha: 0.1),
                       blurRadius: 10,
                       offset: const Offset(-5, -5),
                     ),
@@ -86,7 +86,7 @@ class FlashcardsHomeScreen extends StatelessWidget {
                 'Practice vocabulary with interactive flashcards!\nFlip cards to reveal definitions and test your knowledge.',
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodyLarge?.copyWith(
-                  color: colorScheme.onSurface.withOpacity(0.7),
+                  color: colorScheme.onSurface.withValues(alpha: 0.7),
                   height: 1.5,
                 ),
               ),
@@ -106,14 +106,14 @@ class FlashcardsHomeScreen extends StatelessWidget {
                     );
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: colorScheme.primary.withOpacity(0.9),
+                    backgroundColor: colorScheme.primary.withValues(alpha: 0.9),
                     foregroundColor: colorScheme.onPrimary,
                     elevation: 0,
                     side: BorderSide(
-                      color: colorScheme.primary.withOpacity(0.3),
+                      color: colorScheme.primary.withValues(alpha: 0.3),
                       width: 1,
                     ),
-                    shadowColor: colorScheme.primary.withOpacity(0.4),
+                    shadowColor: colorScheme.primary.withValues(alpha: 0.4),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),
@@ -150,9 +150,9 @@ class FlashcardsHomeScreen extends StatelessWidget {
                     );
                   },
                   style: OutlinedButton.styleFrom(
-                    backgroundColor: colorScheme.surface.withOpacity(0.8),
+                    backgroundColor: colorScheme.surface.withValues(alpha: 0.8),
                     foregroundColor: colorScheme.primary,
-                    side: BorderSide(color: colorScheme.primary.withOpacity(0.6), width: 1.5),
+                    side: BorderSide(color: colorScheme.primary.withValues(alpha: 0.6), width: 1.5),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),
@@ -177,12 +177,12 @@ class FlashcardsHomeScreen extends StatelessWidget {
               
               // Game Features
               Card(
-                color: colorScheme.surface.withOpacity(0.8),
+                color: colorScheme.surface.withValues(alpha: 0.8),
                 elevation: 0,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                   side: BorderSide(
-                    color: colorScheme.primary.withOpacity(0.2),
+                    color: colorScheme.primary.withValues(alpha: 0.2),
                     width: 1,
                   ),
                 ),
@@ -227,7 +227,7 @@ class FlashcardsHomeScreen extends StatelessWidget {
           text,
           style: TextStyle(
             fontSize: 14,
-            color: colorScheme.onSurface.withOpacity(0.6),
+            color: colorScheme.onSurface.withValues(alpha: 0.6),
           ),
         ),
       ],

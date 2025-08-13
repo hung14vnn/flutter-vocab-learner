@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:vocab_learner/widgets/blur_dialog.dart';
 import 'package:vocab_learner/widgets/toast_notification.dart';
 import '../../../models/vocab_word.dart';
 import '../../../providers/vocab_provider.dart';
@@ -40,15 +41,15 @@ class _WordScrambleGameScreenState extends State<WordScrambleGameScreen>
 
   // Game state
   List<String> _scrambledLetters = [];
-  List<String> _selectedLetters = [];
+  final List<String> _selectedLetters = [];
   String _userAnswer = '';
   bool _showHint = false;
   bool _gameCompleted = false;
 
   // Settings
-  int _numberOfWords = 15;
-  GameDifficulty _difficulty = GameDifficulty.medium;
-  String _difficultyFilter = 'all';
+  final int _numberOfWords = 15;
+  final GameDifficulty _difficulty = GameDifficulty.medium;
+  final String _difficultyFilter = 'all';
   bool _enableSound = true;
   bool _showDefinition = true;
 
@@ -338,7 +339,7 @@ class _WordScrambleGameScreenState extends State<WordScrambleGameScreen>
       SoundFeedbackWidget.playCompletionSound();
     }
 
-    showDialog(
+    showBlurDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
@@ -386,7 +387,7 @@ class _WordScrambleGameScreenState extends State<WordScrambleGameScreen>
   }
 
   void _showSettings() {
-    showDialog(
+    showBlurDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Game Settings'),
@@ -622,7 +623,7 @@ class _WordScrambleGameScreenState extends State<WordScrambleGameScreen>
   }
 
   Widget _buildSelectedLetters() {
-    return Container(
+    return SizedBox(
       height: 60,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -698,7 +699,7 @@ class _WordScrambleGameScreenState extends State<WordScrambleGameScreen>
                       border: Border.all(color: Colors.grey),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
+                          color: Colors.black.withValues(alpha: 0.1),
                           blurRadius: 4,
                           offset: const Offset(0, 2),
                         ),

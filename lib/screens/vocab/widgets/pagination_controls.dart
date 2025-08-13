@@ -18,7 +18,7 @@ class PaginationControls extends StatelessWidget {
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
           decoration: BoxDecoration(
-            color: theme.colorScheme.surface,
+            color: theme.colorScheme.surface.withValues(alpha: 0.35),
             border: Border(
               top: BorderSide(
                 color: theme.colorScheme.outline.withValues(alpha: 0.2),

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
-import 'dart:ui';
 
 import 'firebase_options.dart';
 import 'providers/auth_provider.dart';
@@ -67,28 +66,19 @@ class VocabLearnerApp extends StatelessWidget {
           ),
           cardTheme: CardThemeData(
             elevation: 0,
-            color: Colors.white.withOpacity(0.85),
+            color: Colors.white.withValues(alpha: 0.85),
             surfaceTintColor: Colors.transparent,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
           ),
           dialogTheme: DialogThemeData(
-            backgroundColor: Colors.white.withOpacity(0.95),
+            backgroundColor: Colors.white.withValues(alpha: 0.95),
             surfaceTintColor: Colors.transparent,
             elevation: 0,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
             ),
-          ),
-          bottomNavigationBarTheme: BottomNavigationBarThemeData(
-            backgroundColor: Colors.white.withOpacity(0.9),
-            elevation: 0,
-          ),
-          navigationBarTheme: NavigationBarThemeData(
-            backgroundColor: Colors.white.withOpacity(0.9),
-            surfaceTintColor: Colors.transparent,
-            elevation: 0,
           ),
           filledButtonTheme: FilledButtonThemeData(
             style: FilledButton.styleFrom(
@@ -108,7 +98,7 @@ class VocabLearnerApp extends StatelessWidget {
         ),
         darkTheme: ThemeData(
           colorScheme: ColorScheme.fromSeed(
-            seedColor: const Color(0xFF6366F1),
+            seedColor: const Color(0xFF27548A),
             brightness: Brightness.dark,
           ),
           useMaterial3: true,
@@ -120,28 +110,19 @@ class VocabLearnerApp extends StatelessWidget {
           ),
           cardTheme: CardThemeData(
             elevation: 0,
-            color: const Color(0xFF30302E).withOpacity(0.7),
+            color: const Color(0xFF30302E).withValues(alpha: 0.25),
             surfaceTintColor: Colors.transparent,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
           ),
           dialogTheme: DialogThemeData(
-            backgroundColor: const Color(0xFF30302E).withOpacity(0.85),
+            backgroundColor: const Color(0xFF30302E).withValues(alpha: 0.85),
             surfaceTintColor: Colors.transparent,
             elevation: 0,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
             ),
-          ),
-          bottomNavigationBarTheme: BottomNavigationBarThemeData(
-            backgroundColor: const Color(0xFF30302E).withOpacity(0.8),
-            elevation: 0,
-          ),
-          navigationBarTheme: NavigationBarThemeData(
-            backgroundColor: const Color(0xFF30302E).withOpacity(0.8),
-            surfaceTintColor: Colors.transparent,
-            elevation: 0,
           ),
           filledButtonTheme: FilledButtonThemeData(
             style: FilledButton.styleFrom(

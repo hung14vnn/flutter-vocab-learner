@@ -48,6 +48,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _currentIndex,
+        backgroundColor: Theme.of(context).colorScheme.surface.withValues(alpha: 0.2),
         onDestinationSelected: (index) {
           setState(() {
             _currentIndex = index;
@@ -55,7 +56,7 @@ class _HomeScreenState extends State<HomeScreen> {
           _pageController.animateToPage(
             index,
             duration: const Duration(milliseconds: 300),
-            curve: Curves.easeInOutSine,
+            curve: Curves.easeInOutQuad,
           );
         },
         destinations: const [

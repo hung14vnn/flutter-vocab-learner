@@ -118,7 +118,7 @@ class _ProgressDialogState extends State<ProgressDialog>
             width: 64,
             height: 64,
             decoration: BoxDecoration(
-              color: statusColor.withOpacity(0.2),
+              color: statusColor.withValues(alpha: 0.2),
               shape: BoxShape.circle,
             ),
             child: Icon(statusIcon, size: 32, color: statusColor),
@@ -241,7 +241,7 @@ class _ProgressDialogState extends State<ProgressDialog>
                     final word = _words[index];
                     final isLearned = word.state == WordState.masteredState;
                     return Card(
-                      color: modernBlue.withOpacity(0.1),
+                      color: modernBlue.withValues(alpha: 0.1),
                       child: ListTile(
                         title: Text(
                           word.word,
@@ -391,9 +391,9 @@ class _ProgressDialogState extends State<ProgressDialog>
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.3), width: 1),
+        border: Border.all(color: color.withValues(alpha: 0.3), width: 1),
       ),
       child: Row(
         children: [
@@ -401,7 +401,7 @@ class _ProgressDialogState extends State<ProgressDialog>
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: color.withOpacity(0.2),
+              color: color.withValues(alpha: 0.2),
               shape: BoxShape.circle,
             ),
             child: Icon(icon, size: 20, color: color),

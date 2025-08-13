@@ -3,6 +3,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:vocab_learner/widgets/blur_dialog.dart';
 import 'package:vocab_learner/widgets/toast_notification.dart';
 import '../../../models/vocab_word.dart';
 import '../../../widgets/difficulty_chip.dart';
@@ -266,10 +267,9 @@ class _VocabWordCardState extends State<VocabWordCard> {
   }
 
   void _showWordDetails(BuildContext context, VocabWord word) {
-    showDialog(
+    showBlurDialog(
       context: context,
-      builder: (context) =>
-          WordDetailsDialog(word: word, onEdit: widget.onEdit),
+      builder: (dialogContext) => WordDetailsDialog(word: word, onEdit: widget.onEdit),
     );
   }
 }
@@ -381,7 +381,7 @@ class _WordDetailsDialogState extends State<WordDetailsDialog> {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            theme.colorScheme.primaryContainer,
+            theme.colorScheme.primaryContainer.withValues(alpha: 0.35),
             theme.colorScheme.primaryContainer.withValues(alpha: 0.7),
           ],
         ),
@@ -784,7 +784,7 @@ class _WordDetailsDialogState extends State<WordDetailsDialog> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
+        color: theme.colorScheme.surface.withValues(alpha: 0.2),
         borderRadius: const BorderRadius.only(
           bottomLeft: Radius.circular(20),
           bottomRight: Radius.circular(20),
@@ -825,7 +825,7 @@ class _WordDetailsDialogState extends State<WordDetailsDialog> {
   }
 
   void _showEditDialog(BuildContext context) async {
-    final result = await showDialog<VocabWord>(
+    final result = await showBlurDialog<VocabWord>(
       context: context,
       builder: (context) => EditWordDialog(
         word: currentWord,

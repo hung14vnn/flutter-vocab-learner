@@ -35,12 +35,12 @@ class _AddWordDialogState extends State<AddWordDialog> {
     final colorScheme = Theme.of(context).colorScheme;
     
     return AlertDialog(
-      backgroundColor: colorScheme.surface.withOpacity(0.95),
+      backgroundColor: colorScheme.surface.withValues(alpha: 0.95),
       surfaceTintColor: Colors.transparent,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
         side: BorderSide(
-          color: colorScheme.primary.withOpacity(0.2),
+          color: colorScheme.primary.withValues(alpha: 0.2),
           width: 1,
         ),
       ),
@@ -49,7 +49,7 @@ class _AddWordDialogState extends State<AddWordDialog> {
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              colorScheme.primary.withOpacity(0.1),
+              colorScheme.primary.withValues(alpha: 0.1),
               Colors.transparent,
             ],
           ),
@@ -101,7 +101,7 @@ class _AddWordDialogState extends State<AddWordDialog> {
       actions: [
         Container(
           decoration: BoxDecoration(
-            color: colorScheme.surface.withOpacity(0.8),
+            color: colorScheme.surface.withValues(alpha: 0.8),
             borderRadius: BorderRadius.circular(12),
           ),
           padding: const EdgeInsets.all(8),
@@ -112,7 +112,7 @@ class _AddWordDialogState extends State<AddWordDialog> {
                 onPressed: () => Navigator.of(context).pop(),
                 style: TextButton.styleFrom(
                   backgroundColor: Colors.transparent,
-                  foregroundColor: colorScheme.onSurface.withOpacity(0.7),
+                  foregroundColor: colorScheme.onSurface.withValues(alpha: 0.7),
                 ),
                 child: const Text('Cancel'),
               ),
@@ -120,7 +120,7 @@ class _AddWordDialogState extends State<AddWordDialog> {
               ElevatedButton(
                 onPressed: _handleAddWord,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: colorScheme.primary.withOpacity(0.9),
+                  backgroundColor: colorScheme.primary.withValues(alpha: 0.9),
                   foregroundColor: colorScheme.onPrimary,
                   elevation: 0,
                 ),
@@ -311,7 +311,7 @@ class _AddWordDialogState extends State<AddWordDialog> {
     showBlurDialog(
       context: context,
       blurStrength: 6.0,
-      child: AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: const Text('Properties Info'),
         content: const Text(
           'You can fill these fields manually or use the AI Generate button to auto-generate all properties for your word.',
@@ -362,7 +362,7 @@ class _AddWordDialogState extends State<AddWordDialog> {
       context: context,
       barrierDismissible: false,
       blurStrength: 8.0,
-      child: const AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -400,14 +400,14 @@ class _AddWordDialogState extends State<AddWordDialog> {
     showBlurDialog(
       context: context,
       blurStrength: 6.0,
-      child: AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: const Text('AI Analysis Complete'),
         content: Text(
           'Generated definition, examples, and synonyms for "${wordController.text}"',
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => Navigator.of(dialogContext).pop(),
             child: const Text('OK'),
           ),
         ],
@@ -419,12 +419,12 @@ class _AddWordDialogState extends State<AddWordDialog> {
     showBlurDialog(
       context: context,
       blurStrength: 6.0,
-      child: AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: const Text('Error'),
         content: Text('Error analyzing word: $error'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => Navigator.of(dialogContext).pop(),
             child: const Text('OK'),
           ),
         ],
@@ -509,10 +509,10 @@ class _AddWordDialogState extends State<AddWordDialog> {
   }
 
   void _showAddingWordDialog() {
-    showDialog(
+    showBlurDialog(
       context: context,
-      barrierDismissible: false,
-      builder: (context) => const Center(child: CircularProgressIndicator()),
+      blurStrength: 6.0,
+      builder: (dialogContext) => const Center(child: CircularProgressIndicator()),
     );
   }
 

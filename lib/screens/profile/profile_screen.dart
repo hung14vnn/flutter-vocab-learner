@@ -11,125 +11,129 @@ class ProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: const Text('Profile'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () {
-              _showSignOutDialog(context);
-            },
-          ),
-        ],
-      ),
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              colorScheme.primary.withOpacity(0.05),
-              colorScheme.surface.withOpacity(0.8),
-              colorScheme.secondary.withOpacity(0.05),
-            ],
-          ),
+
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            colorScheme.primary.withValues(alpha: 0.1),
+            colorScheme.surface.withValues(alpha: 0.6),
+            colorScheme.secondary.withValues(alpha: 0.05),
+          ],
         ),
-        child: Consumer<AuthProvider>(
+      ),
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          title: const Text('Profile'),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.logout),
+              onPressed: () {
+                _showSignOutDialog(context);
+              },
+            ),
+          ],
+        ),
+        body: Consumer<AuthProvider>(
           builder: (context, authProvider, _) {
             final user = authProvider.appUser;
 
             return Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
-              children: [
-                // Profile Header
-                Card(
-                  color: colorScheme.surface.withOpacity(0.9),
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    side: BorderSide(
-                      color: colorScheme.primary.withOpacity(0.2),
-                      width: 1,
-                    ),
-                  ),
-                  child: Container(
-                    decoration: BoxDecoration(
+                children: [
+                  // Profile Header
+                  Card(
+                    color: colorScheme.surface.withValues(alpha: 0.35),
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          colorScheme.primary.withOpacity(0.05),
-                          Colors.transparent,
-                        ],
+                      side: BorderSide(
+                        color: colorScheme.primary.withValues(alpha: 0.2),
+                        width: 1,
                       ),
                     ),
-                    child: Padding(
-                    padding: const EdgeInsets.all(20.0),
-                    child: Row(
-                      children: [
-                        CircleAvatar(
-                          radius: 30,
-                          backgroundColor: Theme.of(
-                            context,
-                          ).colorScheme.primary,
-                          child: Text(
-                            user?.displayName.isNotEmpty == true
-                                ? user!.displayName[0].toUpperCase()
-                                : 'U',
-                            style: const TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            colorScheme.primary.withValues(alpha: 0.05),
+                            Colors.transparent,
+                          ],
+                        ),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(20.0),
+                        child: Row(
+                          children: [
+                            CircleAvatar(
+                              radius: 30,
+                              backgroundColor: Theme.of(
+                                context,
+                              ).colorScheme.primary,
+                              child: Text(
+                                user?.displayName.isNotEmpty == true
+                                    ? user!.displayName[0].toUpperCase()
+                                    : 'U',
+                                style: const TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
                             ),
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                user?.displayName ?? 'Unknown User',
-                                style: Theme.of(context).textTheme.headlineSmall
-                                    ?.copyWith(fontWeight: FontWeight.bold),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    user?.displayName ?? 'Unknown User',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .headlineSmall
+                                        ?.copyWith(fontWeight: FontWeight.bold),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    user?.email ?? 'No email',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium
+                                        ?.copyWith(color: Colors.grey[600]),
+                                  ),
+                                ],
                               ),
-                              const SizedBox(height: 4),
-                              Text(
-                                user?.email ?? 'No email',
-                                style: Theme.of(context).textTheme.bodyMedium
-                                    ?.copyWith(color: Colors.grey[600]),
-                              ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  // Profile Options
+                  Expanded(
+                    child: ListView(
+                      children: [
+                        _buildLanguageSettingsCard(context, authProvider),
+                        const SizedBox(height: 16),
+                        _buildStatsCard(context, user),
+                        const SizedBox(height: 16),
+                        _buildAISettingsCard(context, authProvider),
                       ],
                     ),
-                    ),
                   ),
-                ),
-
-                const SizedBox(height: 20),
-
-                // Profile Options
-                Expanded(
-                  child: ListView(
-                    children: [
-                      _buildLanguageSettingsCard(context, authProvider),
-                      const SizedBox(height: 16),
-                      _buildStatsCard(context, user),
-                      const SizedBox(height: 16),
-                      _buildAISettingsCard(context, authProvider),
-                    ],
-                  ),
-                ),
-              ],
+                ],
               ),
             );
           },
@@ -146,12 +150,12 @@ class ProfileScreen extends StatelessWidget {
     final currentLanguage = authProvider.appUser?.language ?? 'English';
 
     return Card(
-      color: colorScheme.surface.withOpacity(0.9),
+      color: colorScheme.surface.withValues(alpha: 0.35),
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
         side: BorderSide(
-          color: colorScheme.primary.withOpacity(0.2),
+          color: colorScheme.primary.withValues(alpha: 0.2),
           width: 1,
         ),
       ),
@@ -229,14 +233,14 @@ class ProfileScreen extends StatelessWidget {
 
   Widget _buildStatsCard(BuildContext context, dynamic user) {
     final colorScheme = Theme.of(context).colorScheme;
-    
+
     return Card(
-      color: colorScheme.surface.withOpacity(0.9),
+      color: colorScheme.surface.withValues(alpha: 0.35),
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
         side: BorderSide(
-          color: colorScheme.primary.withOpacity(0.2),
+          color: colorScheme.primary.withValues(alpha: 0.2),
           width: 1,
         ),
       ),
@@ -319,12 +323,12 @@ class ProfileScreen extends StatelessWidget {
     String apiKey = user.apiKey ?? '';
 
     return Card(
-      color: colorScheme.surface.withOpacity(0.9),
+      color: colorScheme.surface.withValues(alpha: 0.35),
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
         side: BorderSide(
-          color: colorScheme.primary.withOpacity(0.2),
+          color: colorScheme.primary.withValues(alpha: 0.2),
           width: 1,
         ),
       ),
@@ -340,7 +344,8 @@ class ProfileScreen extends StatelessWidget {
                     Expanded(
                       child: Text(
                         'AI Generative Settings',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.bold),
                       ),
                     ),
                     IconButton(
@@ -366,7 +371,9 @@ class ProfileScreen extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   'Configure your AI model, version, and API key for vocabulary generation and analysis.',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
                 ),
                 const SizedBox(height: 12),
                 Padding(
@@ -579,7 +586,7 @@ class ProfileScreen extends StatelessWidget {
         context: context,
         barrierDismissible: false,
         blurStrength: 8.0,
-        child: const AlertDialog(
+        builder: (dialogContext) => const AlertDialog(
           content: Row(
             children: [
               CircularProgressIndicator(),
@@ -622,12 +629,12 @@ class ProfileScreen extends StatelessWidget {
     showBlurDialog(
       context: context,
       blurStrength: 6.0,
-      child: AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: const Text('Sign Out'),
         content: const Text('Are you sure you want to sign out?'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => Navigator.of(dialogContext).pop(),
             child: const Text('Cancel'),
           ),
           ElevatedButton(

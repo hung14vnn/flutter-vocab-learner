@@ -9,6 +9,8 @@ class VocabProvider with ChangeNotifier {
   List<VocabWord> _allWords = [];
   List<VocabWord> _filteredWords = [];
   bool _isLoading = false;
+  bool _isFirstLoading = true;
+  bool _isSearching = false;
   String? _errorMessage;
   String _selectedDifficulty = 'all';
   String _selectedPartOfSpeech = 'all';
@@ -23,7 +25,7 @@ class VocabProvider with ChangeNotifier {
   bool _isCompactMode = false;
   
   // Pagination state
-  bool _isPaginationEnabled = true;
+  bool _isPaginationEnabled = false;
   bool _isLoadingMore = false;
   bool _hasMoreData = true;
   DocumentSnapshot? _lastDocument;
@@ -37,6 +39,8 @@ class VocabProvider with ChangeNotifier {
   List<VocabWord> get allWords => _allWords;
   List<VocabWord> get filteredWords => _filteredWords;
   bool get isLoading => _isLoading;
+  bool get isFirstLoading => _isFirstLoading;
+  bool get isSearching => _isSearching;
   String? get errorMessage => _errorMessage;
   String get selectedDifficulty => _selectedDifficulty;
   String get selectedPartOfSpeech => _selectedPartOfSpeech;
@@ -95,7 +99,10 @@ class VocabProvider with ChangeNotifier {
       _resetPaginationState();
       _allWords = [];
       _filteredWords = [];
-      _setLoading(true);
+      // Don't show loading for infinite mode
+      if (_isPaginationEnabled) {
+        _setLoading(true);
+      }
     } else {
       if (_isLoadingMore || !_hasMoreData) return;
       _isLoadingMore = true;
@@ -126,7 +133,15 @@ class VocabProvider with ChangeNotifier {
       _filteredWords = List.from(_allWords);
       
       if (reset) {
-        _setLoading(false);
+        if (_isPaginationEnabled) {
+          _setLoading(false);
+        } else {
+          // For infinite mode, just set first loading to false without showing loading
+          if (_isFirstLoading) {
+            _isFirstLoading = false;
+          }
+        }
+        _setSearching(false);
       } else {
         _isLoadingMore = false;
       }
@@ -135,7 +150,15 @@ class VocabProvider with ChangeNotifier {
     } catch (error) {
       _errorMessage = 'Failed to load vocabulary: $error';
       if (reset) {
-        _setLoading(false);
+        if (_isPaginationEnabled) {
+          _setLoading(false);
+        } else {
+          // For infinite mode, just set first loading to false without showing loading
+          if (_isFirstLoading) {
+            _isFirstLoading = false;
+          }
+        }
+        _setSearching(false);
       } else {
         _isLoadingMore = false;
       }
@@ -164,10 +187,12 @@ class VocabProvider with ChangeNotifier {
       _totalItems = result.totalCount;
       
       _setLoading(false);
+      _setSearching(false);
       notifyListeners();
     } catch (error) {
       _errorMessage = 'Failed to load vocabulary: $error';
       _setLoading(false);
+      _setSearching(false);
       notifyListeners();
     }
   }
@@ -175,6 +200,7 @@ class VocabProvider with ChangeNotifier {
   void setDifficultyFilter(String difficulty) {
     _selectedDifficulty = difficulty;
     _currentPage = 1; // Reset to first page when filtering
+    _setSearching(true);
     if (_isPaginationEnabled) {
       _loadWordsPageBased();
     } else {
@@ -185,6 +211,7 @@ class VocabProvider with ChangeNotifier {
   void setPartOfSpeechFilter(String partOfSpeech) {
     _selectedPartOfSpeech = partOfSpeech;
     _currentPage = 1; // Reset to first page when filtering
+    _setSearching(true);
     if (_isPaginationEnabled) {
       _loadWordsPageBased();
     } else {
@@ -195,6 +222,7 @@ class VocabProvider with ChangeNotifier {
   void setSearchQuery(String query) {
     _searchQuery = query;
     _currentPage = 1; // Reset to first page when searching
+    _setSearching(true);
     if (_isPaginationEnabled) {
       _loadWordsPageBased();
     } else {
@@ -205,6 +233,7 @@ class VocabProvider with ChangeNotifier {
   void setStateFilter(String state) {
     _selectedState = state;
     _currentPage = 1; // Reset to first page when filtering
+    _setSearching(true);
     if (_isPaginationEnabled) {
       _loadWordsPageBased();
     } else {
@@ -215,6 +244,7 @@ class VocabProvider with ChangeNotifier {
   void setTagFilter(String tag) {
     _selectedTag = tag;
     _currentPage = 1; // Reset to first page when filtering
+    _setSearching(true);
     if (_isPaginationEnabled) {
       _loadWordsPageBased();
     } else {
@@ -329,6 +359,14 @@ class VocabProvider with ChangeNotifier {
 
   void _setLoading(bool value) {
     _isLoading = value;
+    if (!value && _isFirstLoading) {
+      _isFirstLoading = false;
+    }
+    notifyListeners();
+  }
+
+  void _setSearching(bool value) {
+    _isSearching = value;
     notifyListeners();
   }
 
@@ -423,6 +461,7 @@ class VocabProvider with ChangeNotifier {
       if (_isPaginationEnabled) {
         _loadWordsPageBased();
       } else {
+        // For infinite mode, load without showing loading
         _loadWordsPaginated(reset: true);
       }
     }

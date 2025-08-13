@@ -128,8 +128,8 @@ class _FeedbackOverlayState extends State<_FeedbackOverlay>
                     height: 120,
                     decoration: BoxDecoration(
                       color: widget.isCorrect 
-                          ? Colors.green.withOpacity(0.2)
-                          : Colors.red.withOpacity(0.2),
+                          ? Colors.green.withValues(alpha: 0.2)
+                          : Colors.red.withValues(alpha: 0.2),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(

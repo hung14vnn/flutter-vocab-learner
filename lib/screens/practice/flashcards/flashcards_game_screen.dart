@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:vocab_learner/consts/app_consts.dart';
 import 'package:vocab_learner/utils/guid_generator.dart';
+import 'package:vocab_learner/widgets/blur_dialog.dart';
 import 'package:vocab_learner/widgets/toast_notification.dart';
 import '../../../models/vocab_word.dart';
 import '../../../providers/vocab_provider.dart';
@@ -223,10 +224,10 @@ class _FlashcardsGameScreenState extends State<FlashcardsGameScreen>
       isContinueProgress,
     );
     _progressRecorded = true; // Mark as recorded to prevent double recording
-    showDialog(
+    showBlurDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         contentPadding: EdgeInsets.zero,
         content: Container(
@@ -449,9 +450,9 @@ class _FlashcardsGameScreenState extends State<FlashcardsGameScreen>
   }
 
   void _showSettings() {
-    showDialog(
+    showBlurDialog(
       context: context,
-      builder: (context) => FlashcardSettingsDialog(
+      builder: (dialogContext) => FlashcardSettingsDialog(
         numberOfCards: _numberOfCards,
         difficulty: _difficultyFilter,
         enableSound: _enableSound,
@@ -496,7 +497,7 @@ class _FlashcardsGameScreenState extends State<FlashcardsGameScreen>
       return;
     }
 
-    final result = await showDialog<bool>(
+    final result = await showBlurDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Save Progress?'),
@@ -579,7 +580,7 @@ class _FlashcardsGameScreenState extends State<FlashcardsGameScreen>
       ),
       body: _isLoading
           ? const Center(
-              child: CircularProgressIndicator(color: const Color(0xFF8B5CF6)),
+              child: CircularProgressIndicator(color: Color(0xFF8B5CF6)),
             )
           : _gameWords.isEmpty
           ? _buildEmptyState()
@@ -655,7 +656,7 @@ class _FlashcardsGameScreenState extends State<FlashcardsGameScreen>
         children: [
           Chip(
             label: Text(modeText),
-            backgroundColor: Theme.of(context).primaryColor.withOpacity(0.1),
+            backgroundColor: Theme.of(context).primaryColor.withValues(alpha: 0.1),
           ),
           DifficultyChip(
             difficulty: currentWord.difficulty,
