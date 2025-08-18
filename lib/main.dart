@@ -8,6 +8,7 @@ import 'providers/auth_provider.dart';
 import 'providers/vocab_provider.dart';
 import 'providers/progress_provider.dart';
 import 'widgets/app_loading_wrapper.dart';
+import 'consts/app_theme.dart';
 import 'package:vocab_learner/screens/practice/flashcards/flashcards_game_screen.dart';
 import 'package:vocab_learner/screens/practice/word_scramble/word_scramble_game_screen.dart';
 import 'package:vocab_learner/screens/practice/flashcards/flashcards_home_screen.dart';
@@ -52,94 +53,8 @@ class VocabLearnerApp extends StatelessWidget {
       child: MaterialApp(
         title: 'Vocabulary',
         debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: const Color(0xFF6366F1),
-            brightness: Brightness.light,
-          ),
-          useMaterial3: true,
-          appBarTheme: AppBarTheme(
-            centerTitle: true, 
-            elevation: 0,
-            backgroundColor: Colors.transparent,
-            surfaceTintColor: Colors.transparent,
-          ),
-          cardTheme: CardThemeData(
-            elevation: 0,
-            color: Colors.white.withValues(alpha: 0.85),
-            surfaceTintColor: Colors.transparent,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-          ),
-          dialogTheme: DialogThemeData(
-            backgroundColor: Colors.white.withValues(alpha: 0.95),
-            surfaceTintColor: Colors.transparent,
-            elevation: 0,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-          ),
-          filledButtonTheme: FilledButtonThemeData(
-            style: FilledButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-              ),
-            ),
-          ),
-          pageTransitionsTheme: PageTransitionsTheme(
-            builders: {
-              TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
-              TargetPlatform.iOS: FadeUpwardsPageTransitionsBuilder(),
-              TargetPlatform.windows: FadeUpwardsPageTransitionsBuilder(),
-            },
-          ),
-        ),
-        darkTheme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: Color(0xFF121927),
-            brightness: Brightness.dark,
-          ),
-          useMaterial3: true,
-          appBarTheme: AppBarTheme(
-            centerTitle: true, 
-            elevation: 0,
-            backgroundColor: Colors.transparent,
-            surfaceTintColor: Colors.transparent,
-          ),
-          cardTheme: CardThemeData(
-            elevation: 0,
-            color: const Color(0xFF121927).withValues(alpha: 0.2),
-            surfaceTintColor: Colors.transparent,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-          ),
-          dialogTheme: DialogThemeData(
-            backgroundColor: const Color(0xFF30302E).withValues(alpha: 0.85),
-            surfaceTintColor: Colors.transparent,
-            elevation: 0,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-          ),
-          filledButtonTheme: FilledButtonThemeData(
-            style: FilledButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-              ),
-            ),
-          ),
-          pageTransitionsTheme: PageTransitionsTheme(
-            builders: {
-              TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
-              TargetPlatform.iOS: FadeUpwardsPageTransitionsBuilder(),
-              TargetPlatform.windows: FadeUpwardsPageTransitionsBuilder(),
-            },
-          ),
-        ),
+        theme: AppTheme.lightTheme,
+        darkTheme: AppTheme.darkTheme,
         themeMode: ThemeMode.system,
         home: const AppLoadingWrapper(),
         routes: {
