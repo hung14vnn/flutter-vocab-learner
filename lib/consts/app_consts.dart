@@ -39,3 +39,14 @@ class PracticeGame {
   final Color modernRed = const Color(0xFFFEE2E2); // Soft rose
   final Color modernGrey = const Color(0xFFF8FAFC); // Clean slate
   final Color modernOrange = const Color(0xFFFED7AA); // Soft orange
+
+final List<String> listNamesApp = [
+  'Vocabulary',
+  'Từ vựng',
+  'Vocabulario',
+  'Vocabulaire',
+  'Vokabeln',
+  '词汇',
+  '語彙',
+  '어휘',
+];

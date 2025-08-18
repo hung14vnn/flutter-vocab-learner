@@ -18,7 +18,7 @@ class PaginationControls extends StatelessWidget {
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
           decoration: BoxDecoration(
-            color: theme.colorScheme.surface.withValues(alpha: 0.35),
+            color: theme.colorScheme.surface.withValues(alpha: 0.15),
             border: Border(
               top: BorderSide(
                 color: theme.colorScheme.outline.withValues(alpha: 0.2),
@@ -67,10 +67,9 @@ class PaginationControls extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(width: 64),
               Expanded(
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     const SizedBox(width: 32), // Push navigation slightly to the left
@@ -123,10 +122,10 @@ class PaginationControls extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: 96),
               // Total items info (compact)
               Text(
-                '',
+                '${vocabProvider.totalItems} words',
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: Colors.grey.shade600,
                 ),

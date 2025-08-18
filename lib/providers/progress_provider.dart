@@ -73,7 +73,6 @@ class ProgressProvider with ChangeNotifier {
     _setLoading(true);
     try {
       await _progressService.recordPracticeSession(sessionId, userId, wordIds, listOfWords, isContinueProgress);
-      // Refresh stats after recording session
       await _loadUserStats(userId);
       return true;
     } catch (e) {

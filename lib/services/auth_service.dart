@@ -139,7 +139,7 @@ class AuthService {
       case 'too-many-requests':
         return 'Too many failed attempts. Please try again later.';
       default:
-        return 'Authentication error: ${e.message}';
+        return 'Authentication error: incorrect credentials.';
     }
   }
 }

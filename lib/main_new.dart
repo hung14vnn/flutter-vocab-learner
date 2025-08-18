@@ -56,7 +56,7 @@ class VocabLearnerApp extends StatelessWidget {
         ),
         darkTheme: ThemeData(
           colorScheme: ColorScheme.fromSeed(
-            seedColor: Color(0xFF3D74B6),
+            seedColor: Color(0xFF121927),
             brightness: Brightness.dark,
           ),
           textTheme: GoogleFonts.interTextTheme(ThemeData.dark().textTheme),

@@ -98,7 +98,7 @@ class VocabLearnerApp extends StatelessWidget {
         ),
         darkTheme: ThemeData(
           colorScheme: ColorScheme.fromSeed(
-            seedColor: const Color(0xFF27548A),
+            seedColor: Color(0xFF121927),
             brightness: Brightness.dark,
           ),
           useMaterial3: true,
@@ -110,7 +110,7 @@ class VocabLearnerApp extends StatelessWidget {
           ),
           cardTheme: CardThemeData(
             elevation: 0,
-            color: const Color(0xFF30302E).withValues(alpha: 0.25),
+            color: const Color(0xFF121927).withValues(alpha: 0.2),
             surfaceTintColor: Colors.transparent,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),

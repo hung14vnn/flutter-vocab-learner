@@ -464,7 +464,7 @@ class ProfileScreen extends StatelessWidget {
                               horizontal: 12,
                               vertical: 8,
                             ),
-                          ),
+                          ),                          
                           onChanged: (value) {
                             setState(() {
                               apiKey = value;

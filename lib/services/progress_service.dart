@@ -205,7 +205,7 @@ class ProgressService {
           .map((doc) => UserProgress.fromFirestore(doc.data(), doc.id))
           .toList();
 
-      int totalWords = allProgress.fold(0, (total, p) => total + p.wordIds.length);
+      int totalWrong = allProgress.fold(0, (total, p) => total + p.wrongAnswers.length);
       int totalProgressLearned = allProgress.where((p) => p.isLearned).length;
 
       int totalWordsDistinct = allProgress
@@ -224,7 +224,7 @@ class ProgressService {
       );
       double averageAccuracy = allProgress.isEmpty
           ? 0.0
-          : totalCorrect / totalWords;
+          : totalCorrect / (totalCorrect + totalWrong);
 
       return {
         'totalWords': totalWordsDistinct,
@@ -237,14 +237,11 @@ class ProgressService {
     }
   }
 
-  // Calculate next review time using spaced repetition
   DateTime _calculateNextReview(int repetitionLevel, bool isCorrect) {
     if (!isCorrect) {
-      // If incorrect, review again in 1 hour
       return DateTime.now().add(const Duration(hours: 1));
     }
 
-    // Spaced repetition intervals (in days)
     List<int> intervals = [1, 2, 3, 5, 7, 14, 30, 60];
 
     int intervalIndex = repetitionLevel.clamp(0, intervals.length - 1);
@@ -253,7 +250,6 @@ class ProgressService {
     return DateTime.now().add(Duration(days: daysToAdd));
   }
 
-  // Reset word progress (admin function)
   Future<void> resetWordProgress(String userId, String wordId) async {
     try {
       QuerySnapshot snapshot = await _firestore

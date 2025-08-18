@@ -258,9 +258,9 @@ class _VocabListScreenState extends State<VocabListScreen> {
                   return VocabErrorState(
                     errorMessage: vocabProvider.errorMessage!,
                     onRetry: () {
-                      // TODO: Implement retry functionality
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Retry coming soon!')),
+                      ToastNotification.showWarning(
+                        context,
+                        message: "Retry coming soon!",
                       );
                     },
                   );
@@ -302,9 +302,7 @@ class _VocabListScreenState extends State<VocabListScreen> {
                           },
                         ),
                       ],
-                      const Expanded(
-                        child: VocabEmptyState(),
-                      ),
+                      const Expanded(child: VocabEmptyState()),
                     ],
                   );
                 }
@@ -320,8 +318,12 @@ class _VocabListScreenState extends State<VocabListScreen> {
                         },
                       ),
                     ],
-                    const VocabWordCount(),
-                    const PaginationControls(),
+                    if (vocabProvider.isPaginationEnabled) ...[
+                      PaginationControls(),
+                    ],
+                    if (!vocabProvider.isPaginationEnabled) ...[
+                      VocabWordCount(),
+                    ],
                     if (vocabProvider.isSearching) ...[
                       Expanded(
                         child: SearchLoadingOverlay(
