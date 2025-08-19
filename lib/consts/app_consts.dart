@@ -31,14 +31,22 @@ class PracticeGame {
 } 
 
   // Modern color palette
-  final Color modernPurple = const Color(0xFFEDE9FE); // Soft violet
-  final Color modernGreen = const Color(0xFFD1FAE5); // Soft emerald
-  final Color modernBlue = const Color(0xFFDBEAFE); // Soft sky blue
-  final Color modernYellow = const Color(0xFFFEF3C7); // Soft amber
-  final Color modernPink = const Color(0xFFFCE7F3); // Soft pink
-  final Color modernRed = const Color(0xFFFEE2E2); // Soft rose
-  final Color modernGrey = const Color(0xFFF8FAFC); // Clean slate
-  final Color modernOrange = const Color(0xFFFED7AA); // Soft orange
+  final Color modernPurpleDarkMode = const Color(0xFFEDE9FE);
+  final Color modernGreenDarkMode = const Color(0xFFD1FAE5);
+  final Color modernBlueDarkMode = const Color(0xFFDBEAFE);
+  final Color modernYellowDarkMode = const Color(0xFFFEF3C7);
+  final Color modernPinkDarkMode = const Color(0xFFFCE7F3);
+  final Color modernRedDarkMode = const Color(0xFFFEE2E2);
+  final Color modernGreyDarkMode = const Color(0xFFF8FAFC);
+  final Color modernOrangeDarkMode = const Color(0xFFFED7AA);
+  final Color modernPurpleLightMode = const Color(0xFF7C3AED);
+  final Color modernGreenLightMode = const Color(0xFF6EE7B7);
+  final Color modernBlueLightMode = const Color(0xFF60A5FA);
+  final Color modernYellowLightMode = const Color(0xFFFBBF24);
+  final Color modernPinkLightMode = const Color(0xFFFBCFE8);
+  final Color modernRedLightMode = const Color(0xFFF87171);
+  final Color modernGreyLightMode = const Color.fromARGB(255, 98, 100, 105);
+  final Color modernOrangeLightMode = const Color.fromARGB(255, 228, 162, 48);
 
 final List<String> listNamesApp = [
   'Vocabulary',

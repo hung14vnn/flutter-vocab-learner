@@ -126,6 +126,7 @@ class HomeTab extends StatelessWidget {
     final theme = Theme.of(context);
     final authProvider = Provider.of<AuthProvider>(context);
     final user = authProvider.appUser;
+    final isDarkMode = theme.brightness == Brightness.dark;
 
     return Container(
       decoration: BoxDecoration(
@@ -133,9 +134,9 @@ class HomeTab extends StatelessWidget {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            theme.colorScheme.primary.withValues(alpha: 0.1),
-            theme.colorScheme.surface.withValues(alpha: 0.6),
-            theme.colorScheme.secondary.withValues(alpha: 0.05),
+            theme.colorScheme.surface.withValues(alpha: 0.3),
+            theme.colorScheme.surface.withValues(alpha: 0.8),
+            theme.colorScheme.surface.withValues(alpha: 0.25),
           ],
         ),
       ),
@@ -185,7 +186,8 @@ class HomeTab extends StatelessWidget {
                                   title: 'Days Practiced',
                                   value: '${progressProvider.progressLearned}',
                                   icon: Icons.check_circle,
-                                  color: modernGreen,
+                                  color: isDarkMode ? modernGreenDarkMode : modernGreenLightMode,
+                                  isDarkMode: isDarkMode,
                                 ),
                               ),
                               const SizedBox(width: 10),
@@ -194,7 +196,8 @@ class HomeTab extends StatelessWidget {
                                   title: 'Words Learned',
                                   value: '${progressProvider.learnedWords}',
                                   icon: Icons.trending_up,
-                                  color: modernOrange,
+                                  color: isDarkMode ? modernGreenDarkMode : modernGreenLightMode,
+                                  isDarkMode: isDarkMode,
                                 ),
                               ),
                             ],
@@ -207,7 +210,8 @@ class HomeTab extends StatelessWidget {
                                   title: 'To Review',
                                   value: '${progressProvider.wordsToReview}',
                                   icon: Icons.schedule,
-                                  color: modernBlue,
+                                  color: isDarkMode ? modernGreenDarkMode : modernGreenLightMode,
+                                  isDarkMode: isDarkMode,
                                 ),
                               ),
                               const SizedBox(width: 10),
@@ -217,7 +221,8 @@ class HomeTab extends StatelessWidget {
                                   value:
                                       '${(progressProvider.averageAccuracy * 100).toStringAsFixed(1)}%',
                                   icon: Icons.track_changes,
-                                  color: modernPurple,
+                                  color: isDarkMode ? modernPurpleDarkMode : modernPurpleLightMode,
+                                  isDarkMode: isDarkMode,
                                 ),
                               ),
                             ],
@@ -282,14 +287,14 @@ class HomeTab extends StatelessWidget {
                                     Icon(
                                       Icons.emoji_events,
                                       size: 48,
-                                      color: modernGrey,
+                                      color: isDarkMode ? modernGreyDarkMode : modernGreyLightMode,
                                     ),
                                     const SizedBox(height: 10),
                                     Text(
                                       'Start learning to see your progress here!',
                                       style: TextStyle(
                                         fontSize: 12,
-                                        color: modernGrey,
+                                        color: isDarkMode ? modernGreyDarkMode : modernGreyLightMode,
                                       ),
                                       textAlign: TextAlign.center,
                                     ),
@@ -333,6 +338,7 @@ class HomeTab extends StatelessWidget {
                                     title: renderTextDate(
                                       progress.due,
                                       progress.isLearned,
+                                      isDarkMode,
                                     ),
                                     subtitle: Text(
                                       'Accuracy: ${(progress.accuracy * 100).toStringAsFixed(1)}%',
@@ -343,8 +349,8 @@ class HomeTab extends StatelessWidget {
                                           : 'In Progress',
                                       style: TextStyle(
                                         color: progress.isLearned
-                                            ? modernGreen
-                                            : modernOrange,
+                                            ? (isDarkMode ? modernGreenDarkMode : modernGreenLightMode)
+                                            : (isDarkMode ? modernOrangeDarkMode : modernOrangeLightMode),
                                         fontWeight: FontWeight.w500,
                                       ),
                                     ),
@@ -383,7 +389,7 @@ class HomeTab extends StatelessWidget {
     }
   }
 
-  static Widget renderTextDate(DateTime due, bool isLearned) {
+  static Widget renderTextDate(DateTime due, bool isLearned, bool isDarkMode) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final yesterday = today.subtract(Duration(days: 1));
@@ -393,7 +399,7 @@ class HomeTab extends StatelessWidget {
         "Today",
         style: TextStyle(
           fontWeight: FontWeight.bold,
-          color: isLearned ? modernGreen : modernOrange,
+          color: isLearned ? (isDarkMode ? modernGreenDarkMode : modernGreenLightMode) : (isDarkMode ? modernOrangeDarkMode : modernOrangeLightMode),
         ),
       );
     }
@@ -402,7 +408,7 @@ class HomeTab extends StatelessWidget {
         "Yesterday",
         style: TextStyle(
           fontWeight: FontWeight.bold,
-          color: isLearned ? modernPurple : modernOrange,
+          color: isLearned ? (isDarkMode ? modernPurpleDarkMode : modernPurpleLightMode) : (isDarkMode ? modernOrangeDarkMode : modernOrangeLightMode),
         ),
       );
     }
@@ -411,7 +417,7 @@ class HomeTab extends StatelessWidget {
         "Last ${DateFormat('EEEE').format(due)}",
         style: TextStyle(
           fontWeight: FontWeight.bold,
-          color: isLearned ? modernGreen : modernOrange,
+          color: isLearned ? (isDarkMode ? modernGreenDarkMode : modernGreenLightMode) : (isDarkMode ? modernOrangeDarkMode : modernOrangeLightMode),
         ),
       );
     }
@@ -419,7 +425,7 @@ class HomeTab extends StatelessWidget {
       DateFormat('yMd').format(due),
       style: TextStyle(
         fontWeight: FontWeight.bold,
-        color: isLearned ? modernGreen : modernOrange,
+        color: isLearned ? (isDarkMode ? modernGreenDarkMode : modernGreenLightMode) : (isDarkMode ? modernOrangeDarkMode : modernOrangeLightMode),
       ),
     );
   }

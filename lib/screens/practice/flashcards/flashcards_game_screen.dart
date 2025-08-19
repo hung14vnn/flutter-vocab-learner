@@ -145,13 +145,13 @@ class _FlashcardsGameScreenState extends State<FlashcardsGameScreen>
     }
   }
 
-  Future<void> _nextCard({required bool isCorrect}) async {
+  Future<void> _nextCard({required bool isCorrect, required bool isDarkMode}) async {
     if (_currentIndex >= _gameWords.length - 1) {
       // Play completion sound
       if (_enableSound) {
         SoundFeedbackWidget.playCompletionSound();
       }
-      _showGameComplete();
+      _showGameComplete(isDarkMode);
       return;
     }
 
@@ -208,7 +208,7 @@ class _FlashcardsGameScreenState extends State<FlashcardsGameScreen>
     }
   }
 
-  Future<void> _showGameComplete() async {
+  Future<void> _showGameComplete(bool isDarkMode) async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final listWords = _gameWords.map((word) => word.id).toList();
     final userId = authProvider.user?.uid;
@@ -331,7 +331,7 @@ class _FlashcardsGameScreenState extends State<FlashcardsGameScreen>
                             style: Theme.of(context).textTheme.titleLarge
                                 ?.copyWith(
                                   fontWeight: FontWeight.bold,
-                                  color: _getAccuracyColor(accuracy),
+                                  color: _getAccuracyColor(accuracy, isDarkMode),
                                 ),
                           ),
                         ],
@@ -343,7 +343,7 @@ class _FlashcardsGameScreenState extends State<FlashcardsGameScreen>
                         value: accuracy / 100,
                         backgroundColor: Colors.grey.shade200,
                         valueColor: AlwaysStoppedAnimation<Color>(
-                          _getAccuracyColor(accuracy),
+                          _getAccuracyColor(accuracy, isDarkMode),
                         ),
                         minHeight: 8,
                       ),
@@ -415,15 +415,15 @@ class _FlashcardsGameScreenState extends State<FlashcardsGameScreen>
   }
 
   // Helper method to get accuracy color
-  Color _getAccuracyColor(double accuracy) {
+  Color _getAccuracyColor(double accuracy, bool isDarkMode) {
     if (accuracy >= 90) {
-      return modernGreen;
+      return isDarkMode ? modernGreenDarkMode : modernGreenLightMode;
     } else if (accuracy >= 80) {
-      return modernBlue;
+      return isDarkMode ? modernBlueDarkMode : modernBlueLightMode;
     } else if (accuracy >= 70) {
-      return modernOrange;
+      return isDarkMode ? modernOrangeDarkMode : modernOrangeLightMode;
     } else {
-      return modernRed;
+      return isDarkMode ? modernRedDarkMode : modernRedLightMode;
     }
   }
 
@@ -535,6 +535,9 @@ class _FlashcardsGameScreenState extends State<FlashcardsGameScreen>
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
+
     return PopScope(
       canPop: false, // Always handle the back button manually
       onPopInvoked: (didPop) async {
@@ -583,18 +586,18 @@ class _FlashcardsGameScreenState extends State<FlashcardsGameScreen>
               child: CircularProgressIndicator(color: Color(0xFF8B5CF6)),
             )
           : _gameWords.isEmpty
-          ? _buildEmptyState()
-          : _buildGameContent(),
+          ? _buildEmptyState(isDarkMode)
+          : _buildGameContent(isDarkMode),
       ),
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(bool isDarkMode) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.quiz, size: 64, color: modernBlue),
+          Icon(Icons.quiz, size: 64, color: isDarkMode ? modernBlueDarkMode : modernBlueLightMode),
           const SizedBox(height: 16),
           const Text(
             'No words available for practice',
@@ -610,13 +613,13 @@ class _FlashcardsGameScreenState extends State<FlashcardsGameScreen>
     );
   }
 
-  Widget _buildGameContent() {
+  Widget _buildGameContent(bool isDarkMode) {
     return Column(
       children: [
         _buildProgressIndicator(),
         _buildGameModeIndicator(),
-        Expanded(child: _buildFlashcard()),
-        _buildControls(),
+        Expanded(child: _buildFlashcard(isDarkMode)),
+        _buildControls(isDarkMode),
       ],
     );
   }
@@ -667,7 +670,7 @@ class _FlashcardsGameScreenState extends State<FlashcardsGameScreen>
     );
   }
 
-  Widget _buildFlashcard() {
+  Widget _buildFlashcard(bool isDarkMode) {
     return Padding(
       padding: const EdgeInsets.all(24),
       child: SlideTransition(
@@ -685,8 +688,8 @@ class _FlashcardsGameScreenState extends State<FlashcardsGameScreen>
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: _showAnswer
-                      ? [modernGreen, const Color(0xFFA7F3D0)]
-                      : [modernBlue, const Color(0xFF93C5FD)],
+                      ? [isDarkMode ? modernGreenDarkMode : modernGreenLightMode, const Color(0xFFA7F3D0)]
+                      : [isDarkMode ? modernBlueDarkMode : modernBlueLightMode, const Color(0xFF93C5FD)],
                 ),
               ),
               child: Stack(
@@ -860,7 +863,7 @@ class _FlashcardsGameScreenState extends State<FlashcardsGameScreen>
     );
   }
 
-  Widget _buildControls() {
+  Widget _buildControls(bool isDarkMode) {
     return Container(
       height: 80,
       padding: const EdgeInsets.all(20),
@@ -871,11 +874,11 @@ class _FlashcardsGameScreenState extends State<FlashcardsGameScreen>
               children: [
                 Expanded(
                   child: ElevatedButton.icon(
-                    onPressed: () => _nextCard(isCorrect: false),
+                    onPressed: () => _nextCard(isCorrect: false, isDarkMode: isDarkMode),
                     icon: const Icon(Icons.close),
                     label: const Text('Incorrect'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: modernRed,
+                      backgroundColor: isDarkMode ? modernRedDarkMode : modernRedLightMode,
                       foregroundColor: const Color(0xFFDC2626),
                       padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
@@ -884,11 +887,11 @@ class _FlashcardsGameScreenState extends State<FlashcardsGameScreen>
                 const SizedBox(width: 16),
                 Expanded(
                   child: ElevatedButton.icon(
-                    onPressed: () => _nextCard(isCorrect: true),
+                    onPressed: () => _nextCard(isCorrect: true, isDarkMode: isDarkMode),
                     icon: const Icon(Icons.check),
                     label: const Text('Correct'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: modernGreen,
+                      backgroundColor: isDarkMode ? modernGreenDarkMode : modernGreenLightMode,
                       foregroundColor: const Color(0xFF059669),
                       padding: const EdgeInsets.symmetric(vertical: 16),
                     ),

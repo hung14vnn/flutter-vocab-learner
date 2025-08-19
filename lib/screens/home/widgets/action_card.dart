@@ -50,6 +50,8 @@ class _ActionCardState extends State<ActionCard> {
   @override
   Widget build(BuildContext context) {
     final cardWidth = MediaQuery.of(context).size.width * 0.455;
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
 
     return SizedBox(
       width: cardWidth,
@@ -163,7 +165,9 @@ class _ActionCardState extends State<ActionCard> {
                           style: TextStyle(
                             color: widget.isEmpty
                                 ? Colors.grey[500]
-                                : modernGrey,
+                                : isDarkMode
+                                ? modernGreyDarkMode
+                                : modernGreyLightMode,
                             fontSize: 12,
                           ),
                           textAlign: TextAlign.center,

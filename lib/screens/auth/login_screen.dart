@@ -65,9 +65,9 @@ class _LoginScreenState extends State<LoginScreen> {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            theme.colorScheme.primary.withValues(alpha: 0.1),
-            theme.colorScheme.surface.withValues(alpha: 0.6),
-            theme.colorScheme.secondary.withValues(alpha: 0.05),
+            theme.colorScheme.surface.withValues(alpha: 0.3),
+            theme.colorScheme.surface.withValues(alpha: 0.8),
+            theme.colorScheme.surface.withValues(alpha: 0.25),
           ],
         ),
       ),

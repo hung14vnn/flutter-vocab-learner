@@ -160,6 +160,7 @@ class _VocabListScreenState extends State<VocabListScreen> {
       builder: (context, vocabProvider, child) {
         final theme = Theme.of(context);
         final colorScheme = theme.colorScheme;
+        final isDarkMode = theme.brightness == Brightness.dark;
 
         return Container(
           decoration: BoxDecoration(
@@ -167,9 +168,9 @@ class _VocabListScreenState extends State<VocabListScreen> {
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                colorScheme.primary.withValues(alpha: 0.1),
-                colorScheme.surface.withValues(alpha: 0.6),
-                colorScheme.secondary.withValues(alpha: 0.05),
+                colorScheme.surface.withValues(alpha: 0.3),
+                colorScheme.surface.withValues(alpha: 0.8),
+                colorScheme.surface.withValues(alpha: 0.25),
               ],
             ),
           ),
@@ -257,6 +258,7 @@ class _VocabListScreenState extends State<VocabListScreen> {
                   print(vocabProvider.errorMessage);
                   return VocabErrorState(
                     errorMessage: vocabProvider.errorMessage!,
+                    isDarkMode: isDarkMode,
                     onRetry: () {
                       ToastNotification.showWarning(
                         context,
@@ -302,7 +304,7 @@ class _VocabListScreenState extends State<VocabListScreen> {
                           },
                         ),
                       ],
-                      const Expanded(child: VocabEmptyState()),
+                      Expanded(child: VocabEmptyState(isDarkMode: isDarkMode)),
                     ],
                   );
                 }

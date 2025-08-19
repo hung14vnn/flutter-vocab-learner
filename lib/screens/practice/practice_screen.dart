@@ -14,9 +14,9 @@ class PracticeScreen extends StatelessWidget {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            colorScheme.primary.withValues(alpha: 0.1),
-            colorScheme.surface.withValues(alpha: 0.6),
-            colorScheme.secondary.withValues(alpha: 0.05),
+            colorScheme.surface.withValues(alpha: 0.3),
+            colorScheme.surface.withValues(alpha: 0.8),
+            colorScheme.surface.withValues(alpha: 0.25),
           ],
         ),
       ),

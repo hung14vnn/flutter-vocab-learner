@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:vocab_learner/consts/app_consts.dart';
 
 class VocabEmptyState extends StatelessWidget {
-  const VocabEmptyState({super.key});
+  final bool isDarkMode;
+
+  const VocabEmptyState({super.key, required this.isDarkMode});
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +17,7 @@ class VocabEmptyState extends StatelessWidget {
           Icon(
             Icons.book_outlined,
             size: 64,
-            color: modernBlue,
+            color: isDarkMode ? modernBlueDarkMode : modernBlueLightMode,
           ),
           const SizedBox(height: 16),
           Text(

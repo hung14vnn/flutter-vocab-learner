@@ -6,12 +6,14 @@ class StatCard extends StatelessWidget {
   final String value;
   final IconData icon;
   final Color color;
+  final bool isDarkMode;
 
   const StatCard({super.key, 
     required this.title,
     required this.value,
     required this.icon,
     required this.color,
+    required this.isDarkMode,
   });
 
   @override
@@ -38,7 +40,7 @@ class StatCard extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             title,
-            style: TextStyle(fontSize: 12, color: modernGrey),
+            style: TextStyle(fontSize: 12, color: isDarkMode ? modernGreyDarkMode : modernGreyLightMode),
             textAlign: TextAlign.center,
           ),
         ],

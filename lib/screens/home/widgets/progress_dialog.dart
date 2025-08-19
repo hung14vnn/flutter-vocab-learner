@@ -50,7 +50,8 @@ class _ProgressDialogState extends State<ProgressDialog>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final statusColor = widget.progress.isLearned ? modernGreen : modernOrange;
+    final isDarkMode = theme.brightness == Brightness.dark;
+    final statusColor = widget.progress.isLearned ? (isDarkMode ? modernGreenDarkMode : modernGreenLightMode) : (isDarkMode ? modernOrangeDarkMode : modernOrangeLightMode);
     final statusIcon = widget.progress.isLearned
         ? Icons.check_circle
         : Icons.schedule;
@@ -82,6 +83,7 @@ class _ProgressDialogState extends State<ProgressDialog>
                   theme,
                   statusColor,
                   statusIcon,
+                  isDarkMode,
                 ),
               ),
               // Words list view (slides in from right)
@@ -107,6 +109,7 @@ class _ProgressDialogState extends State<ProgressDialog>
     ThemeData theme,
     Color statusColor,
     IconData statusIcon,
+    bool isDarkMode,
   ) {
     return SizedBox(
       height: 552, // Fixed height minus padding
@@ -139,7 +142,7 @@ class _ProgressDialogState extends State<ProgressDialog>
               icon: Icons.book,
               title: 'Words',
               value: '${widget.progress.wordIds.length}',
-              color: modernBlue,
+              color: isDarkMode ? modernBlueDarkMode : modernBlueLightMode,
               isClickable: true,
             ),
           ),
@@ -149,14 +152,14 @@ class _ProgressDialogState extends State<ProgressDialog>
             title: 'Accuracy',
             value:
                 '${(widget.progress.accuracy * 100).toStringAsFixed(1)}% (${widget.progress.correctAnswers.length}/${widget.progress.correctAnswers.length + widget.progress.wrongAnswers.length})',
-            color: modernPurple,
+            color: isDarkMode ? modernPurpleDarkMode : modernPurpleLightMode,
           ),
           const SizedBox(height: 12),
           _buildInfoCard(
             icon: Icons.calendar_today,
             title: 'Due Date',
             value: DateFormat('MMM dd, yyyy').format(widget.progress.due),
-            color: modernOrange,
+            color: isDarkMode ? modernOrangeDarkMode : modernOrangeLightMode,
           ),
           const SizedBox(height: 12),
           _buildInfoCard(
@@ -241,7 +244,7 @@ class _ProgressDialogState extends State<ProgressDialog>
                     final word = _words[index];
                     final isLearned = word.state == WordState.masteredState;
                     return Card(
-                      color: modernBlue.withValues(alpha: 0.1),
+                      color: theme.brightness == Brightness.dark ? modernBlueDarkMode.withValues(alpha: 0.1) : modernBlueLightMode.withValues(alpha: 0.1),
                       child: ListTile(
                         title: Text(
                           word.word,
@@ -251,8 +254,8 @@ class _ProgressDialogState extends State<ProgressDialog>
                           word.definition.isNotEmpty ? word.definition : '-',
                         ),
                         trailing: isLearned
-                            ? Icon(Icons.check_circle, color: modernGreen)
-                            : Icon(Icons.schedule, color: modernOrange),
+                            ? Icon(Icons.check_circle, color: theme.brightness ==  Brightness.dark ? modernGreenDarkMode : modernGreenLightMode)
+                            : Icon(Icons.schedule, color: theme.brightness ==  Brightness.dark ? modernOrangeDarkMode : modernOrangeLightMode),
                       ),
                     );
                   },
