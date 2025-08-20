@@ -70,7 +70,7 @@ class _VocabFilterSectionState extends State<VocabFilterSection> {
     final validValue = items.contains(value) ? value : items.first;
 
     return DropdownButtonFormField<String>(
-      value: validValue,
+      initialValue: validValue,
       decoration: InputDecoration(
         labelText: label,
         border: const OutlineInputBorder(),

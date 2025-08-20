@@ -93,7 +93,7 @@ class _FlashcardSettingsDialogState extends State<FlashcardSettingsDialog> {
             ),
             const SizedBox(height: 8),
             DropdownButtonFormField<String>(
-              value: _difficulty,
+              initialValue: _difficulty,
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
                 contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),

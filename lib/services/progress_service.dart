@@ -85,6 +85,7 @@ class ProgressService {
     String userId,
     List<Map<String, bool>> wordIds,
     List<String> listOfWords,
+    String gameId,
     bool isContinueProgress,
   ) async {
     try {
@@ -130,7 +131,7 @@ class ProgressService {
           progress = UserProgress(
             id: sessionId,
             userId: userId,
-            gameId: 'practice',
+            gameId: gameId,
             wordIds: listOfWords,
             correctAnswers: wordIds
                 .where((e) => e.values.first == true)
@@ -288,6 +289,84 @@ class ProgressService {
           .update(updatedWord.toFirestore());
     } catch (e) {
       throw Exception('Failed to update word progress: $e');
+    }
+  }
+
+  /// Check if user has today's progress for flashcards
+  Future<UserProgress?> getTodayProgress(String userId, String gameId) async {
+    try {
+      DateTime now = DateTime.now();
+      DateTime startOfDay = DateTime(now.year, now.month, now.day);
+      DateTime endOfDay = DateTime(now.year, now.month, now.day, 23, 59, 59);
+
+      QuerySnapshot snapshot = await _firestore
+          .collection(_collection)
+          .where('userId', isEqualTo: userId)
+          .where('gameId', isEqualTo: gameId)
+          .where('lastReviewedAt', isGreaterThanOrEqualTo: startOfDay.millisecondsSinceEpoch)
+          .where('lastReviewedAt', isLessThanOrEqualTo: endOfDay.millisecondsSinceEpoch)
+          .orderBy('lastReviewedAt', descending: true)
+          .limit(1)
+          .get();
+
+      if (snapshot.docs.isNotEmpty) {
+        return UserProgress.fromFirestore(
+          snapshot.docs.first.data(),
+          snapshot.docs.first.id,
+        );
+      }
+      return null;
+    } catch (e) {
+      // If the compound query fails, try a simpler approach
+      try {
+        DateTime now = DateTime.now();
+        DateTime startOfDay = DateTime(now.year, now.month, now.day);
+
+        QuerySnapshot snapshot = await _firestore
+            .collection(_collection)
+            .where('userId', isEqualTo: userId)
+            .where('gameId', isEqualTo: gameId)
+            .orderBy('lastReviewedAt', descending: true)
+            .limit(10)
+            .get();
+
+        for (QueryDocumentSnapshot doc in snapshot.docs) {
+          UserProgress progress = UserProgress.fromFirestore(doc.data(), doc.id);
+          if (progress.lastReviewedAt.isAfter(startOfDay)) {
+            return progress;
+          }
+        }
+        return null;
+      } catch (e) {
+        print('Error getting today progress: $e');
+        return null;
+      }
+    }
+  }
+
+  /// Create a new daily progress session
+  Future<String> createTodayProgress(String userId, List<String> wordIds, String gameId) async {
+    try {
+      DateTime now = DateTime.now();
+      String sessionId = 'daily_${userId}_${now.year}_${now.month}_${now.day}';
+      
+      UserProgress newProgress = UserProgress(
+        id: sessionId,
+        userId: userId,
+        gameId: gameId,
+        wordIds: wordIds,
+        correctAnswers: [],
+        wrongAnswers: [],
+        totalAttempts: 0,
+        lastReviewedAt: now,
+        due: now,
+        isLearned: false,
+      );
+
+      await _firestore.collection(_collection).doc(sessionId).set(newProgress.toFirestore());
+      return sessionId;
+    } catch (e) {
+      throw Exception('Failed to create today progress: $e');
     }
   }
 }

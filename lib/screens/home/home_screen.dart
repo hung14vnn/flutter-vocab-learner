@@ -48,7 +48,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _currentIndex,
-        backgroundColor: Theme.of(context).colorScheme.surface.withValues(alpha: 0.2),
+        backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
         onDestinationSelected: (index) {
           setState(() {
             _currentIndex = index;

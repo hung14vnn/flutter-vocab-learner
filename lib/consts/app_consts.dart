@@ -4,28 +4,32 @@ final List<PracticeGame> kPracticeGames = [
   PracticeGame(
     name: 'Flashcards',
     description: 'Use flashcards to memorize vocabulary words and their meanings.',
+    gameId: 'flash_cards',
     icon: Icon(
       Icons.web_stories,
-      size: 40.0,
+      size: 32.0,
     ),
   ),
   PracticeGame(
     name: "Word Scramble",
     description: "Test your vocabulary skills by scrambling words and solving them.",
+    gameId: 'word_scramble',
     icon: Icon(
       Icons.shuffle,
-      size: 40.0,
+      size: 32.0,
     ),
   ),
 ];
 class PracticeGame {  
   final String name;
   final String description;
+  final String gameId;
   final Icon icon;
 
   PracticeGame({
     required this.name,
     required this.description,
+    required this.gameId,
     required this.icon,
   });
 } 

@@ -68,11 +68,12 @@ class ProgressProvider with ChangeNotifier {
     String userId,
     List<Map<String, bool>> wordIds,
     List<String> listOfWords,
+    String gameId,
     bool isContinueProgress,
   ) async {
     _setLoading(true);
     try {
-      await _progressService.recordPracticeSession(sessionId, userId, wordIds, listOfWords, isContinueProgress);
+      await _progressService.recordPracticeSession(sessionId, userId, wordIds, listOfWords, gameId, isContinueProgress);
       await _loadUserStats(userId);
       return true;
     } catch (e) {

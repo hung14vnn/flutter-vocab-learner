@@ -262,7 +262,7 @@ class _AddWordDialogState extends State<AddWordDialog> {
 
   Widget _buildDifficultyDropdown() {
     return DropdownButtonFormField<String>(
-      value: selectedDifficulty,
+      initialValue: selectedDifficulty,
       decoration: const InputDecoration(
         labelText: 'Difficulty',
         border: OutlineInputBorder(),
@@ -284,7 +284,7 @@ class _AddWordDialogState extends State<AddWordDialog> {
 
   Widget _buildPartOfSpeechDropdown() {
     return DropdownButtonFormField<String>(
-      value: selectedPartOfSpeech,
+      initialValue: selectedPartOfSpeech,
       decoration: const InputDecoration(
         labelText: 'Part of Speech',
         border: OutlineInputBorder(),

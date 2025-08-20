@@ -230,7 +230,7 @@ class _FlashcardsSettingsScreenState extends State<FlashcardsSettingsScreen> {
                     title: const Text('Auto-Flip Cards'),
                     subtitle: const Text('Automatically flip cards after delay'),
                     value: _autoFlip,
-                    activeColor: Colors.purple[400],
+                    activeThumbColor: Colors.purple[400],
                     onChanged: (value) {
                       setState(() {
                         _autoFlip = value;
@@ -290,7 +290,7 @@ class _FlashcardsSettingsScreenState extends State<FlashcardsSettingsScreen> {
                     title: const Text('Enable Sound Effects'),
                     subtitle: const Text('Play sounds for interactions'),
                     value: _enableSound,
-                    activeColor: Colors.purple[400],
+                    activeThumbColor: Colors.purple[400],
                     onChanged: (value) {
                       setState(() {
                         _enableSound = value;

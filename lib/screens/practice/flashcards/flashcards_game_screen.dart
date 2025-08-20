@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:vocab_learner/consts/app_consts.dart';
 import 'package:vocab_learner/utils/guid_generator.dart';
+import 'package:vocab_learner/utils/global_state.dart';
 import 'package:vocab_learner/widgets/blur_dialog.dart';
 import 'package:vocab_learner/widgets/toast_notification.dart';
 import '../../../models/vocab_word.dart';
 import '../../../providers/vocab_provider.dart';
-import '../../../providers/auth_provider.dart';
 import '../../../services/progress_service.dart';
 import 'widgets/game_stats_widget.dart';
 import '../../../widgets/difficulty_chip.dart';
@@ -20,8 +20,13 @@ enum CardSide { front, back }
 
 class FlashcardsGameScreen extends StatefulWidget {
   final List<VocabWord>? specificWords;
+  final bool saveProgress;
   
-  const FlashcardsGameScreen({super.key, this.specificWords});
+  const FlashcardsGameScreen({
+    super.key, 
+    this.specificWords,
+    this.saveProgress = true,
+  });
 
   @override
   State<FlashcardsGameScreen> createState() => _FlashcardsGameScreenState();
@@ -209,21 +214,25 @@ class _FlashcardsGameScreenState extends State<FlashcardsGameScreen>
   }
 
   Future<void> _showGameComplete(bool isDarkMode) async {
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final listWords = _gameWords.map((word) => word.id).toList();
-    final userId = authProvider.user?.uid;
+    final userId = context.userId; // Using the new global state extension
     final accuracy = _totalAnswers > 0
         ? ((_correctAnswers / _totalAnswers) * 100)
         : 0.0;
     final isContinueProgress = widget.specificWords != null;
-    await _progressService.recordPracticeSession(
-      GuidGenerator.generateGuid(),
-      userId ?? '',
-      _answeredWords,
-      listWords,
-      isContinueProgress,
-    );
-    _progressRecorded = true; // Mark as recorded to prevent double recording
+    
+    // Only record progress if saveProgress is true and user is authenticated
+    if (widget.saveProgress && userId != null) {
+      await _progressService.recordPracticeSession(
+        GuidGenerator.generateGuid(),
+        userId,
+        _answeredWords,
+        listWords,
+        'flash_cards',
+        isContinueProgress,
+      );
+      _progressRecorded = true; // Mark as recorded to prevent double recording
+    }
     showBlurDialog(
       context: context,
       barrierDismissible: false,
@@ -469,23 +478,25 @@ class _FlashcardsGameScreenState extends State<FlashcardsGameScreen>
   }
 
   Future<void> _recordProgressOnExit() async {
-    // Only record if there are answered words, user is authenticated, and progress hasn't been recorded yet
-    if (_answeredWords.isNotEmpty && !_progressRecorded) {
-      final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      final userId = authProvider.user?.uid;
+    // Only record if there are answered words, user is authenticated, progress hasn't been recorded yet, and saveProgress is enabled
+    if (_answeredWords.isNotEmpty && !_progressRecorded && widget.saveProgress) {
+      final userId = context.userId; // Using the new global state extension
       final isContinueProgress = widget.specificWords != null;
       
-      try {
-        await _progressService.recordPracticeSession(
-          GuidGenerator.generateGuid(),
-          userId ?? '',
-          _answeredWords,
-          _gameWords.map((word) => word.id).toList(),
-          isContinueProgress,
-        );
-        _progressRecorded = true; // Mark as recorded
-      } catch (e) {
-        debugPrint('Error recording progress on exit: $e');
+      if (userId != null) {
+        try {
+          await _progressService.recordPracticeSession(
+            GuidGenerator.generateGuid(),
+            userId,
+            _answeredWords,
+            _gameWords.map((word) => word.id).toList(),
+            'flash_cards',
+            isContinueProgress,
+          );
+          _progressRecorded = true; // Mark as recorded
+        } catch (e) {
+          debugPrint('Error recording progress on exit: $e');
+        }
       }
     }
   }

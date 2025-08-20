@@ -149,7 +149,7 @@ class _WordScrambleSettingsScreenState extends State<WordScrambleSettingsScreen>
                     title: const Text('Enable Hints'),
                     subtitle: const Text('Show hints when stuck'),
                     value: _enableHints,
-                    activeColor: Colors.blue[400],
+                    activeThumbColor: Colors.blue[400],
                     onChanged: (value) {
                       setState(() {
                         _enableHints = value;
@@ -163,7 +163,7 @@ class _WordScrambleSettingsScreenState extends State<WordScrambleSettingsScreen>
                     title: const Text('Enable Timer'),
                     subtitle: const Text('Add time pressure to the game'),
                     value: _enableTimer,
-                    activeColor: Colors.blue[400],
+                    activeThumbColor: Colors.blue[400],
                     onChanged: (value) {
                       setState(() {
                         _enableTimer = value;
@@ -177,7 +177,7 @@ class _WordScrambleSettingsScreenState extends State<WordScrambleSettingsScreen>
                     title: const Text('Enable Sound Effects'),
                     subtitle: const Text('Play sounds for correct/incorrect answers'),
                     value: _enableSound,
-                    activeColor: Colors.blue[400],
+                    activeThumbColor: Colors.blue[400],
                     onChanged: (value) {
                       setState(() {
                         _enableSound = value;

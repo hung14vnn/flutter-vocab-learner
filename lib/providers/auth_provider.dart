@@ -20,6 +20,9 @@ class AuthProvider with ChangeNotifier {
   bool get isAuthenticated => _user != null;
   bool get isInitialized => _isInitialized;
   String? get userApiKey => _userApiKey;
+  
+  /// Get the current user's ID for easy access throughout the app
+  String? get userId => _user?.uid;
   void setUserApiKey(String apiKey) {
     _userApiKey = apiKey;
     notifyListeners();

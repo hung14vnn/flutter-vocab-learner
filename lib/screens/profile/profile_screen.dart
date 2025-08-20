@@ -184,7 +184,7 @@ class ProfileScreen extends StatelessWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: DropdownButtonFormField<String>(
-                    value: currentLanguage,
+                    initialValue: currentLanguage,
                     decoration: const InputDecoration(
                       labelText: 'Native Language',
                       border: OutlineInputBorder(),
@@ -384,7 +384,7 @@ class ProfileScreen extends StatelessWidget {
                       const SizedBox(width: 8),
                       Expanded(
                         child: DropdownButtonFormField<String>(
-                          value: modelName,
+                          initialValue: modelName,
                           decoration: const InputDecoration(
                             labelText: 'Model Name',
                             border: OutlineInputBorder(),
@@ -417,7 +417,7 @@ class ProfileScreen extends StatelessWidget {
                       const SizedBox(width: 8),
                       Expanded(
                         child: DropdownButtonFormField<String>(
-                          value: modelVersion,
+                          initialValue: modelVersion,
                           decoration: const InputDecoration(
                             labelText: 'Model Version',
                             border: OutlineInputBorder(),
