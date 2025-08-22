@@ -59,6 +59,14 @@ class _VocabWordsListState extends State<VocabWordsList> {
         final itemCount =
             vocabProvider.filteredWords.length + (showLoadingIndicator ? 1 : 0);
 
+        // Show skeleton loading during deck filtering or search
+        if (vocabProvider.isSearching && vocabProvider.filteredWords.isEmpty) {
+          return VocabWordsShimmerList(
+            isCompactMode: vocabProvider.isCompactMode,
+            itemCount: 8,
+          );
+        }
+
         return Column(
           children: [
             Expanded(

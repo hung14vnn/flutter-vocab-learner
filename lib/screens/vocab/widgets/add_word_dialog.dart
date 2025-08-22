@@ -4,14 +4,16 @@ import 'package:vocab_learner/widgets/toast_notification.dart';
 import 'package:vocab_learner/widgets/blur_dialog.dart';
 import '../../../providers/vocab_provider.dart';
 import '../../../providers/auth_provider.dart';
+import '../../../providers/deck_provider.dart';
 import '../../../models/vocab_word.dart';
 import '../../../services/ai_service.dart';
 import '../../../utils/guid_generator.dart';
 
 class AddWordDialog extends StatefulWidget {
   final VocabProvider vocabProvider;
+  final String deckId;
 
-  const AddWordDialog({super.key, required this.vocabProvider});
+  const AddWordDialog({super.key, required this.vocabProvider, required this.deckId});
 
   @override
   State<AddWordDialog> createState() => _AddWordDialogState();
@@ -28,6 +30,7 @@ class _AddWordDialogState extends State<AddWordDialog> {
   final tagsController = TextEditingController();
   String selectedDifficulty = 'beginner';
   String selectedPartOfSpeech = 'noun';
+  String? selectedDeckId; // For deck selection
   String? errorText;
 
   @override
@@ -88,6 +91,8 @@ class _AddWordDialogState extends State<AddWordDialog> {
             _buildDifficultyDropdown(),
             const SizedBox(height: 12),
             _buildPartOfSpeechDropdown(),
+            const SizedBox(height: 12),
+            _buildDeckDropdown(),
             if (errorText != null) ...[
               const SizedBox(height: 12),
               Text(
@@ -118,7 +123,7 @@ class _AddWordDialogState extends State<AddWordDialog> {
               ),
               const SizedBox(width: 8),
               ElevatedButton(
-                onPressed: _handleAddWord,
+                onPressed: () => _handleAddWord(widget.deckId),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: colorScheme.primary.withValues(alpha: 0.9),
                   foregroundColor: colorScheme.onPrimary,
@@ -307,6 +312,120 @@ class _AddWordDialogState extends State<AddWordDialog> {
     );
   }
 
+  Widget _buildDeckDropdown() {
+    return Consumer<DeckProvider>(
+      builder: (context, deckProvider, child) {
+        // If no decks are available, show a warning
+        if (deckProvider.decks.isEmpty) {
+          return Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.errorContainer,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: Theme.of(context).colorScheme.error,
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      Icons.warning,
+                      color: Theme.of(context).colorScheme.error,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'No decks available',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onErrorContainer,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'You need to create a deck before adding words.',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onErrorContainer,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.of(context).pop(); // Close this dialog
+                      // Navigate to deck management - you could import and show DeckManagementDialog
+                    },
+                    icon: const Icon(Icons.add),
+                    label: const Text('Create Deck'),
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+
+        // Set initial deck selection if not set
+        if (selectedDeckId == null && deckProvider.decks.isNotEmpty) {
+          // Use the currently selected deck from DeckProvider, or the first deck
+          selectedDeckId = deckProvider.selectedDeck?.id ?? deckProvider.decks.first.id;
+        }
+
+        return DropdownButtonFormField<String>(
+          value: selectedDeckId,
+          decoration: InputDecoration(
+            labelText: 'Deck *',
+            border: const OutlineInputBorder(),
+            prefixIcon: Icon(
+              Icons.folder,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+          ),
+          items: deckProvider.decks.map((deck) {
+            return DropdownMenuItem<String>(
+              value: deck.id,
+              child: Row(
+                children: [
+                  if (deck.icon != null) ...[
+                    Text(deck.icon!, style: const TextStyle(fontSize: 16)),
+                    const SizedBox(width: 8),
+                  ],
+                  Expanded(child: Text(deck.name)),
+                  Text(
+                    '(${deck.wordCount})',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }).toList(),
+          onChanged: (value) {
+            if (value != null) {
+              setState(() {
+                selectedDeckId = value;
+              });
+            }
+          },
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Please select a deck';
+            }
+            return null;
+          },
+        );
+      },
+    );
+  }
+
   void _showPropertiesInfo() {
     showBlurDialog(
       context: context,
@@ -432,18 +551,22 @@ class _AddWordDialogState extends State<AddWordDialog> {
     );
   }
 
-  void _handleAddWord() async {
+  void _handleAddWord(String deckId) async {
     if (wordController.text.trim().isEmpty ||
-        definitionController.text.trim().isEmpty) {
+        definitionController.text.trim().isEmpty ||
+        selectedDeckId == null) {
       setState(() {
-        errorText = 'Please fill in word and definition fields';
+        if (selectedDeckId == null) {
+          errorText = 'Please select a deck for this word';
+        } else {
+          errorText = 'Please fill in word and definition fields';
+        }
       });
       return;
     }
 
     final now = DateTime.now();
     final newWord = VocabWord(
-      userId: widget.vocabProvider.currentUserId ?? '',
       id: GuidGenerator.generateGuid(),
       word: wordController.text.trim(),
       definition: definitionController.text.trim(),
@@ -472,6 +595,7 @@ class _AddWordDialogState extends State<AddWordDialog> {
       tags: tagsController.text.trim().isEmpty
           ? []
           : tagsController.text.split(',').map((s) => s.trim()).toList(),
+      deckId: selectedDeckId,
     );
 
     _showAddingWordDialog();

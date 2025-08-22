@@ -315,7 +315,7 @@ class HomeTab extends StatelessWidget {
                               ),
                             )
                           : ListView.builder(
-                              padding: const EdgeInsets.all(16.0),
+                              padding: const EdgeInsets.all(20.0),
                               itemCount:
                                   progressProvider.userProgress.length > 5
                                   ? 5
@@ -323,70 +323,196 @@ class HomeTab extends StatelessWidget {
                               itemBuilder: (context, index) {
                                 final progress =
                                     progressProvider.userProgress[index];
+                                final progressPercentage = ((progress.correctAnswers.length + progress.wrongAnswers.length) / (progress.wordIds.isNotEmpty ? progress.wordIds.length : 1) * 100);
                                 return Container(
-                                  margin: const EdgeInsets.only(bottom: 8.0),
+                                  margin: const EdgeInsets.only(bottom: 12.0),
                                   decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(12),
-                                    color: theme.colorScheme.surface.withValues(
-                                      alpha: 0.15,
-                                    ),
-                                    border: Border.all(
-                                      color: theme.colorScheme.outline
-                                          .withValues(alpha: 0.2),
-                                      width: 1,
-                                    ),
-                                  ),
-                                  clipBehavior: Clip.antiAlias,
-                                  child: ListTile(
-                                    leading: Icon(
-                                      progress.isLearned
-                                          ? Icons.check
-                                          : Icons.schedule,
-                                      color: progress.isLearned
-                                          ? Colors.lightGreen[800]
-                                          : Colors.orangeAccent[800],
-                                      size: 24,
-                                    ),
-                                    title: Row(
-                                      children: [
-                                        Text(
-                                          renderNameGame(progress.gameId) ??
-                                              progress.gameId,
-                                        ),
-                                        const SizedBox(width: 8),
-                                        renderTextDate(
-                                          progress.due,
-                                          progress.isLearned,
-                                          isDarkMode,
-                                        ),
+                                    borderRadius: BorderRadius.circular(16),
+                                    gradient: LinearGradient(
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                      colors: [
+                                        progress.isLearned
+                                            ? (isDarkMode
+                                                ? modernGreenDarkMode.withValues(alpha: 0.1)
+                                                : modernGreenLightMode.withValues(alpha: 0.05))
+                                            : (isDarkMode
+                                                ? modernOrangeDarkMode.withValues(alpha: 0.1)
+                                                : modernOrangeDarkMode.withValues(alpha: 0.05)),
+                                        theme.colorScheme.surface.withValues(alpha: 0.02),
                                       ],
                                     ),
-                                    subtitle: Text(
-                                      'Accuracy: ${(progress.accuracy * 100).toStringAsFixed(1)}%',
+                                    border: Border.all(
+                                      color: progress.isLearned
+                                          ? (isDarkMode
+                                              ? modernGreenDarkMode.withValues(alpha: 0.3)
+                                              : modernGreenLightMode.withValues(alpha: 0.3))
+                                          : (isDarkMode
+                                              ? modernOrangeDarkMode.withValues(alpha: 0.3)
+                                              : modernOrangeDarkMode.withValues(alpha: 0.3)),
+                                      width: 1.5,
                                     ),
-                                    trailing: Text(
-                                      progress.isLearned
-                                          ? 'Learned'
-                                          : 'In Progress',
-                                      style: TextStyle(
-                                        color: progress.isLearned
-                                            ? (isDarkMode
-                                                  ? modernGreenDarkMode
-                                                  : modernGreenLightMode)
-                                            : (isDarkMode
-                                                  ? modernOrangeDarkMode
-                                                  : modernOrangeLightMode),
-                                        fontWeight: FontWeight.w500,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: theme.colorScheme.shadow.withValues(alpha: 0.08),
+                                        blurRadius: 8,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
+                                  ),
+                                  clipBehavior: Clip.antiAlias,
+                                  child: Material(
+                                    color: Colors.transparent,
+                                    child: InkWell(
+                                      onTap: () {
+                                        showBlurDialog(
+                                          context: context,
+                                          blurStrength: 6.0,
+                                          builder: (dialogContext) =>
+                                              ProgressDialog(progress: progress),
+                                        );
+                                      },
+                                      borderRadius: BorderRadius.circular(16),
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(16.0),
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                Container(
+                                                  padding: const EdgeInsets.all(8.0),
+                                                  decoration: BoxDecoration(
+                                                    borderRadius: BorderRadius.circular(10),
+                                                    color: progress.isLearned
+                                                        ? (isDarkMode
+                                                            ? modernGreenDarkMode.withValues(alpha: 0.2)
+                                                            : modernGreenLightMode.withValues(alpha: 0.2))
+                                                        : (isDarkMode
+                                                            ? modernOrangeDarkMode.withValues(alpha: 0.2)
+                                                            : modernOrangeDarkMode.withValues(alpha: 0.2)),
+                                                  ),
+                                                  child: Icon(
+                                                    progress.isLearned
+                                                        ? Icons.check_circle_rounded
+                                                        : Icons.schedule_rounded,
+                                                    color: progress.isLearned
+                                                        ? (isDarkMode
+                                                            ? modernGreenDarkMode
+                                                            : modernGreenLightMode)
+                                                        : (isDarkMode
+                                                            ? modernOrangeDarkMode
+                                                            : modernOrangeDarkMode),
+                                                    size: 20,
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 12),
+                                                Expanded(
+                                                  child: Column(
+                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                    children: [
+                                                      Text(
+                                                        renderNameGame(progress.gameId) ??
+                                                            progress.gameId,
+                                                        style: theme.textTheme.titleMedium?.copyWith(
+                                                          fontWeight: FontWeight.w600,
+                                                          color: theme.colorScheme.onSurface,
+                                                        ),
+                                                      ),
+                                                      const SizedBox(height: 2),
+                                                      renderTextDate(
+                                                        progress.due,
+                                                        progress.isLearned,
+                                                        isDarkMode,
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                                Container(
+                                                  padding: const EdgeInsets.symmetric(
+                                                    horizontal: 12.0,
+                                                    vertical: 6.0,
+                                                  ),
+                                                  decoration: BoxDecoration(
+                                                    borderRadius: BorderRadius.circular(12),
+                                                    color: progress.isLearned
+                                                        ? (isDarkMode
+                                                            ? modernGreenDarkMode.withValues(alpha: 0.15)
+                                                            : modernGreenLightMode.withValues(alpha: 0.15))
+                                                        : (isDarkMode
+                                                            ? modernOrangeDarkMode.withValues(alpha: 0.15)
+                                                            : modernOrangeDarkMode.withValues(alpha: 0.15)),
+                                                  ),
+                                                  child: Text(
+                                                    progress.isLearned
+                                                        ? 'Learned'
+                                                        : 'In Progress',
+                                                    style: TextStyle(
+                                                      color: progress.isLearned
+                                                          ? (isDarkMode
+                                                                ? modernGreenDarkMode
+                                                                : modernGreenLightMode)
+                                                          : (isDarkMode
+                                                                ? modernOrangeDarkMode
+                                                                : modernOrangeDarkMode),
+                                                      fontWeight: FontWeight.w600,
+                                                      fontSize: 12,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            const SizedBox(height: 12),
+                                            Row(
+                                              children: [
+                                                Icon(
+                                                  Icons.trending_up_rounded,
+                                                  size: 16,
+                                                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                                                ),
+                                                const SizedBox(width: 6),
+                                                Text(
+                                                  'Progress: ${progressPercentage.toStringAsFixed(1)}%',
+                                                  style: theme.textTheme.bodySmall?.copyWith(
+                                                    color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                                                    fontWeight: FontWeight.w500,
+                                                  ),
+                                                ),
+                                                const Spacer(),
+                                                Container(
+                                                  width: 60,
+                                                  height: 4,
+                                                  decoration: BoxDecoration(
+                                                    borderRadius: BorderRadius.circular(2),
+                                                    color: theme.colorScheme.outline.withValues(alpha: 0.2),
+                                                  ),
+                                                  child: FractionallySizedBox(
+                                                    alignment: Alignment.centerLeft,
+                                                    widthFactor: progressPercentage / 100,
+                                                    child: Container(
+                                                      decoration: BoxDecoration(
+                                                        borderRadius: BorderRadius.circular(2),
+                                                        color: progressPercentage >= 80
+                                                            ? (isDarkMode
+                                                                ? modernGreenDarkMode
+                                                                : modernGreenLightMode)
+                                                            : progressPercentage >= 60
+                                                                ? (isDarkMode
+                                                                    ? modernYellowDarkMode
+                                                                    : modernYellowLightMode)
+                                                                : (isDarkMode
+                                                                    ? modernRedDarkMode
+                                                                    : modernOrangeDarkMode),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                     ),
-                                    onTap: () {
-                                      showBlurDialog(
-                                        context: context,
-                                        blurStrength: 6.0,
-                                        builder: (dialogContext) =>
-                                            ProgressDialog(progress: progress),
-                                      );
-                                    },
                                   ),
                                 );
                               },

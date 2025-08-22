@@ -3,10 +3,13 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 import 'package:vocab_learner/widgets/blur_dialog.dart';
 import 'package:vocab_learner/widgets/toast_notification.dart';
 import '../../../models/vocab_word.dart';
 import '../../../widgets/difficulty_chip.dart';
+import '../../../widgets/deck_chip.dart';
+import '../../../providers/deck_provider.dart';
 import 'state_chip.dart';
 
 class VocabWordCard extends StatefulWidget {
@@ -86,6 +89,20 @@ class _VocabWordCardState extends State<VocabWordCard> {
                       ),
                     ),
                   ),
+                  // Show deck chip if word belongs to a deck
+                  if (widget.word.deckId != null) ...[
+                    Consumer<DeckProvider>(
+                      builder: (context, deckProvider, child) {
+                        final deck = deckProvider.getDeckById(widget.word.deckId!);
+                        return DeckChip(
+                          deckName: deck?.name,
+                          deckColor: deck?.color,
+                          deckIcon: deck?.icon,
+                        );
+                      },
+                    ),
+                    const SizedBox(width: 8),
+                  ],
                   DifficultyChip(difficulty: widget.word.difficulty),
                 ],
               ),

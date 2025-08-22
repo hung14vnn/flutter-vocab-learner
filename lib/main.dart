@@ -7,6 +7,7 @@ import 'firebase_options.dart';
 import 'providers/auth_provider.dart';
 import 'providers/vocab_provider.dart';
 import 'providers/progress_provider.dart';
+import 'providers/deck_provider.dart';
 import 'widgets/app_loading_wrapper.dart';
 import 'package:vocab_learner/screens/practice/flashcards/flashcards_game_screen.dart';
 import 'package:vocab_learner/screens/practice/word_scramble/word_scramble_game_screen.dart';
@@ -45,6 +46,17 @@ class VocabLearnerApp extends StatelessWidget {
           update: (_, authProvider, vocabProvider) {
             vocabProvider?.setUserId(authProvider.user?.uid);
             return vocabProvider!;
+          },
+        ),
+        ChangeNotifierProxyProvider<AuthProvider, DeckProvider>(
+          create: (_) => DeckProvider(),
+          update: (_, authProvider, deckProvider) {
+            if (authProvider.user?.uid != null) {
+              deckProvider?.getUserDecks(authProvider.user!.uid);
+            } else {
+              deckProvider?.clear();
+            }
+            return deckProvider!;
           },
         ),
         ChangeNotifierProvider(create: (_) => ProgressProvider()),

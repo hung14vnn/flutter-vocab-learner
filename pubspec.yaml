@@ -32,6 +32,14 @@ dependencies:
     sdk: flutter
   audioplayers: ^6.5.0
   window_manager: ^0.5.1
+  # Image processing and camera
+  image_picker: ^1.0.4
+  
+  # Google ML Kit for text recognition
+  google_mlkit_text_recognition: ^0.10.0
+  
+  # Permissions
+  permission_handler: ^11.0.1
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.

@@ -1,6 +1,5 @@
 class VocabWord {
   final String id;
-  final String userId; // The user who created this word
   final String word;
   final String definition;
   final String? definitionInUserLanguage; // Optional field for definition in user's language
@@ -18,10 +17,10 @@ class VocabWord {
   final DateTime due;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final String? deckId; // Optional deck ID for organizing words into decks
 
   VocabWord({
     required this.id,
-    required this.userId,
     required this.word,
     required this.definition,
     this.definitionInUserLanguage,
@@ -39,13 +38,13 @@ class VocabWord {
     required this.due,
     required this.createdAt,
     required this.updatedAt,
+    this.deckId, // Optional deck ID
   });
 
   factory VocabWord.fromFirestore(Object? data, String id) {
     final Map<String, dynamic> map = data as Map<String, dynamic>;
     return VocabWord(
       id: id,
-      userId: map['userId'] ?? '',
       word: map['word'] ?? '',
       definition: map['definition'] ?? '',
       definitionInUserLanguage: map['definitionInUserLanguage'],
@@ -67,12 +66,12 @@ class VocabWord {
       due: DateTime.fromMillisecondsSinceEpoch(map['due'] ?? 0),
       createdAt: DateTime.fromMillisecondsSinceEpoch(map['createdAt'] ?? 0),
       updatedAt: DateTime.fromMillisecondsSinceEpoch(map['updatedAt'] ?? 0),
+      deckId: map['deckId'], // Handle deckId
     );
   }
 
   Map<String, dynamic> toFirestore() {
     return {
-      'userId': userId,
       'word': word,
       'definition': definition,
       'definitionInUserLanguage': definitionInUserLanguage,
@@ -90,12 +89,12 @@ class VocabWord {
       'due': due.millisecondsSinceEpoch,
       'createdAt': createdAt.millisecondsSinceEpoch,
       'updatedAt': updatedAt.millisecondsSinceEpoch,
+      'deckId': deckId, // Include deckId
     };
   }
 
   VocabWord copyWith({
     String? id,
-    String? userId,
     String? word,
     String? definition,
     String? definitionInUserLanguage,
@@ -113,10 +112,10 @@ class VocabWord {
     DateTime? due,
     DateTime? createdAt,
     DateTime? updatedAt,
+    String? deckId,
   }) {
     return VocabWord(
       id: id ?? this.id,
-      userId: userId ?? this.userId,
       word: word ?? this.word,
       definition: definition ?? this.definition,
       definitionInUserLanguage: definitionInUserLanguage ?? this.definitionInUserLanguage,
@@ -134,6 +133,7 @@ class VocabWord {
       due: due ?? this.due,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      deckId: deckId ?? this.deckId,
     );
   }
 }

@@ -1,4 +1,3 @@
-// ignore_for_file: use_build_context_synchronously
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:provider/provider.dart';
@@ -7,11 +6,13 @@ import 'package:vocab_learner/screens/vocab/widgets/add_word_options.dart';
 import 'package:vocab_learner/screens/vocab/widgets/import_from_google_translate_dialog.dart';
 import 'package:vocab_learner/screens/vocab/widgets/vocab_word_list.dart';
 import 'package:vocab_learner/screens/vocab/widgets/pagination_controls.dart';
+import 'package:vocab_learner/screens/vocab/widgets/deck_selection_bar.dart';
 import 'package:vocab_learner/widgets/toast_notification.dart';
 import 'package:vocab_learner/widgets/blur_dialog.dart';
 import 'package:vocab_learner/widgets/shimmer_effect.dart';
 import '../../providers/vocab_provider.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/deck_provider.dart';
 import 'widgets/vocab_filter_section.dart';
 import 'widgets/vocab_word_count.dart';
 import 'widgets/vocab_empty_state.dart';
@@ -61,13 +62,38 @@ class _VocabListScreenState extends State<VocabListScreen> {
   }
 
   void _showAddWordOptions(BuildContext context, VocabProvider vocabProvider) {
+    // Check if there are any decks available
+    final deckProvider = Provider.of<DeckProvider>(context, listen: false);
+    
+    if (deckProvider.decks.isEmpty) {
+      // Show message to create a deck first
+      showBlurDialog(
+        context: context,
+        blurStrength: 6.0,
+        builder: (dialogContext) => AlertDialog(
+          title: const Text('No Decks Available'),
+          content: const Text(
+            'You need to create at least one deck before adding words. '
+            'Please create a deck first using the deck management options.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+
     showBlurDialog(
       context: context,
       blurStrength: 6.0,
       builder: (dialogContext) => AddWordOptionsDialog(
         vocabProvider: vocabProvider,
+        deckId: deckProvider.selectedDeck?.id ?? deckProvider.decks.first.id,
         onFileSelected: (result) {
-          // Show the import dialog immediately
           _showImportDialog(context, vocabProvider, result);
         },
       ),
@@ -82,12 +108,14 @@ class _VocabListScreenState extends State<VocabListScreen> {
     // Use SchedulerBinding to ensure the operation happens after the frame
     SchedulerBinding.instance.addPostFrameCallback((_) {
       if (mounted && context.mounted) {
+        final deckProvider = Provider.of<DeckProvider>(context, listen: false);
         showBlurDialog(
           context: context,
           blurStrength: 6.0,
           builder: (dialogContext) => ImportFromGoogleTranslateDialog(
             vocabProvider: vocabProvider,
             filePickerResult: result,
+            deckId: deckProvider.selectedDeck?.id ?? deckProvider.decks.first.id,
           ),
         );
       } else {
@@ -252,21 +280,25 @@ class _VocabListScreenState extends State<VocabListScreen> {
                       ),
                     ],
             ),
-            body: Consumer<VocabProvider>(
-              builder: (context, vocabProvider, child) {
-                if (vocabProvider.errorMessage != null) {
-                  print(vocabProvider.errorMessage);
-                  return VocabErrorState(
-                    errorMessage: vocabProvider.errorMessage!,
-                    isDarkMode: isDarkMode,
-                    onRetry: () {
-                      ToastNotification.showWarning(
-                        context,
-                        message: "Retry coming soon!",
-                      );
-                    },
-                  );
-                }
+            body: Column(
+              children: [
+                const DeckSelectionBar(),
+                Expanded(
+                  child: Consumer<VocabProvider>(
+                    builder: (context, vocabProvider, child) {
+                      if (vocabProvider.errorMessage != null) {
+                        print(vocabProvider.errorMessage);
+                        return VocabErrorState(
+                          errorMessage: vocabProvider.errorMessage!,
+                          isDarkMode: isDarkMode,
+                          onRetry: () {
+                            ToastNotification.showWarning(
+                              context,
+                              message: "Retry coming soon!",
+                            );
+                          },
+                        );
+                      }
 
                 if (vocabProvider.isFirstLoading) {
                   return Column(
@@ -352,7 +384,10 @@ class _VocabListScreenState extends State<VocabListScreen> {
                     ],
                   ],
                 );
-              },
+                    },
+                  ),
+                ),
+              ],
             ),
             floatingActionButton:
                 vocabProvider.isSelectionMode || !_isAddButtonVisible

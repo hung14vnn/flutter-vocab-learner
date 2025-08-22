@@ -55,6 +55,7 @@ class VocabService {
     String? difficulty,
     String? partOfSpeech,
     String? searchQuery,
+    String? deckId,
     int limit = 20,
     DocumentSnapshot? lastDocument,
   }) async {
@@ -69,6 +70,9 @@ class VocabService {
       }
       if (partOfSpeech != null && partOfSpeech != 'all') {
         query = query.where('partOfSpeech', isEqualTo: partOfSpeech);
+      }
+      if (deckId != null && deckId.isNotEmpty) {
+        query = query.where('deckId', isEqualTo: deckId);
       }
 
       // Order and limit
@@ -103,6 +107,7 @@ class VocabService {
     String? difficulty,
     String? partOfSpeech,
     String? searchQuery,
+    String? deckId,
     int page = 1,
     int itemsPerPage = 20,
   }) async {
@@ -117,6 +122,9 @@ class VocabService {
       }
       if (partOfSpeech != null && partOfSpeech != 'all') {
         query = query.where('partOfSpeech', isEqualTo: partOfSpeech);
+      }
+      if (deckId != null && deckId.isNotEmpty) {
+        query = query.where('deckId', isEqualTo: deckId);
       }
 
       // Get total count first for filters

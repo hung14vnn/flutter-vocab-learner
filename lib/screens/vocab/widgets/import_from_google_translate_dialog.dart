@@ -17,11 +17,13 @@ import 'package:vocab_learner/widgets/toast_notification.dart';
 class ImportFromGoogleTranslateDialog extends StatefulWidget {
   final VocabProvider vocabProvider;
   final FilePickerResult filePickerResult;
+  final String deckId;  
 
   const ImportFromGoogleTranslateDialog({
     super.key,
     required this.vocabProvider,
     required this.filePickerResult,
+    required this.deckId,
   });
 
   @override
@@ -236,15 +238,13 @@ class _ImportFromGoogleTranslateDialogState
         },
       );
 
-      // Add words to vocabulary provider
-      final userId = authProvider.appUser?.id ?? '';
       final now = DateTime.now();
       
       for (final wordAnalysis in analysis.words) {
         if (wordAnalysis.isAnalysisSuccessful) {
           final vocabWord = VocabWord(
             id: GuidGenerator.generateGuid(),
-            userId: userId,
+            deckId: widget.deckId,
             word: wordAnalysis.fixedWord ?? wordAnalysis.originalWord,
             definition: wordAnalysis.definition,
             definitionInUserLanguage: wordAnalysis.translation,

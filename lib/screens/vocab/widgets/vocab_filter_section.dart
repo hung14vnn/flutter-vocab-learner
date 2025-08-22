@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../providers/vocab_provider.dart';
+import '../../../providers/deck_provider.dart';
 
 class VocabFilterSection extends StatefulWidget {
   final VoidCallback? onClose;
@@ -284,6 +285,50 @@ class _VocabFilterSectionState extends State<VocabFilterSection> {
                   if (value != null) vocabProvider.setStateFilter(value);
                 },
                 theme: theme,
+              ),
+              const SizedBox(height: 8),
+              // Deck filter
+              Consumer<DeckProvider>(
+                builder: (context, deckProvider, child) {
+                  final deckItems = <String>['all'];
+                  final deckMap = <String, String>{'all': 'All Decks'};
+                  
+                  for (final deck in deckProvider.decks) {
+                    deckItems.add(deck.id);
+                    deckMap[deck.id] = deck.name;
+                  }
+                  
+                  return DropdownButtonFormField<String>(
+                    value: vocabProvider.selectedDeckId.isEmpty ? 'all' : vocabProvider.selectedDeckId,
+                    decoration: InputDecoration(
+                      labelText: 'Deck',
+                      border: const OutlineInputBorder(),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      labelStyle: TextStyle(
+                        fontSize: 11,
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                      isDense: true,
+                    ),
+                    style: TextStyle(fontSize: 13, color: theme.colorScheme.onSurface),
+                    items: deckItems
+                        .map(
+                          (item) => DropdownMenuItem(
+                            value: item,
+                            child: Text(deckMap[item] ?? 'Unknown'),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (newValue) {
+                      if (newValue != null) {
+                        vocabProvider.setDeckFilter(newValue == 'all' ? '' : newValue);
+                      }
+                    },
+                  );
+                },
               ),
               const SizedBox(height: 8),
               SizedBox(

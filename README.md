@@ -5,9 +5,37 @@ A Flutter vocabulary learning application with Firebase backend integration that
 
 - **User Authentication**: Secure login and registration using Firebase Auth
 - **Vocabulary Management**: Browse and search vocabulary words
+- **Image Word Extraction**: Import vocabulary from images using OCR technology
 - **Spaced Repetition**: Intelligent review system based on user performance
 - **Progress Tracking**: Monitor learning progress and statistics
 - **Material Design 3**: Modern and responsive UI
+
+### Image Word Extraction
+
+The app now includes powerful image processing capabilities to extract vocabulary words from images:
+
+#### Key Features:
+- **Dual Input Methods**: Take photos with camera or select from gallery
+- **OCR Technology**: Uses Google ML Kit for accurate text recognition
+- **Smart Word Filtering**: Automatically removes common words, punctuation, and duplicates
+- **Interactive Selection**: Tap words to select/deselect them using chip interface
+- **Batch Operations**: Select all or clear all words with one tap
+- **Cross-Platform Support**: Works on Android, iOS, and desktop platforms
+
+#### How to Use:
+1. Go to vocabulary section and tap "Add Words"
+2. Choose "Import" → "From Image"
+3. Take a photo or select from gallery
+4. Wait for automatic text processing
+5. Select the words you want to add to your vocabulary
+6. Tap "Import X Words" to add them to your collection
+
+#### Technical Implementation:
+- **Image Processing**: Optimized image compression for better OCR results
+- **Text Recognition**: Google ML Kit Text Recognition API
+- **Word Filtering**: Advanced filtering removes common words, short words, and non-alphabetic text
+- **Permission Handling**: Proper camera and storage permission management
+- **Error Handling**: Comprehensive error handling with user-friendly messages
 
 ## Project Structure
 
@@ -44,6 +72,9 @@ lib/
 - **Firebase Storage**: File storage for media assets
 - **Provider**: State management pattern
 - **Google Fonts**: Beautiful typography
+- **Image Picker**: Camera and gallery access for image selection
+- **Google ML Kit**: Text recognition and OCR processing
+- **Permission Handler**: Runtime permissions management
 
 ## Getting Started
 

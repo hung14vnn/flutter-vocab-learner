@@ -16,6 +16,7 @@ class VocabProvider with ChangeNotifier {
   String _selectedPartOfSpeech = 'all';
   String _selectedState = 'all';
   String _selectedTag = 'all';
+  String _selectedDeckId = ''; // Empty string means 'all'
   String _searchQuery = '';
   DateTime? _createdAfter;
   DateTime? _createdBefore;
@@ -46,6 +47,7 @@ class VocabProvider with ChangeNotifier {
   String get selectedPartOfSpeech => _selectedPartOfSpeech;
   String get selectedState => _selectedState;
   String get selectedTag => _selectedTag;
+  String get selectedDeckId => _selectedDeckId;
   String get searchQuery => _searchQuery;
   DateTime? get createdAfter => _createdAfter;
   DateTime? get createdBefore => _createdBefore;
@@ -115,6 +117,7 @@ class VocabProvider with ChangeNotifier {
         difficulty: _selectedDifficulty,
         partOfSpeech: _selectedPartOfSpeech,
         searchQuery: _searchQuery.isEmpty ? null : _searchQuery,
+        deckId: _selectedDeckId.isEmpty ? null : _selectedDeckId,
         limit: _itemsPerPage,
         lastDocument: _lastDocument,
       );
@@ -178,6 +181,7 @@ class VocabProvider with ChangeNotifier {
         difficulty: _selectedDifficulty,
         partOfSpeech: _selectedPartOfSpeech,
         searchQuery: _searchQuery.isEmpty ? null : _searchQuery,
+        deckId: _selectedDeckId.isEmpty ? null : _selectedDeckId,
         page: _currentPage,
         itemsPerPage: _itemsPerPage,
       );
@@ -252,6 +256,17 @@ class VocabProvider with ChangeNotifier {
     }
   }
 
+  void setDeckFilter(String deckId) {
+    _selectedDeckId = deckId;
+    _currentPage = 1; // Reset to first page when filtering
+    _setSearching(true);
+    if (_isPaginationEnabled) {
+      _loadWordsPageBased();
+    } else {
+      _loadWordsPaginated(reset: true);
+    }
+  }
+
   void setDateRangeFilter(DateTime? after, DateTime? before) {
     _createdAfter = after;
     _createdBefore = before;
@@ -268,6 +283,7 @@ class VocabProvider with ChangeNotifier {
     _selectedPartOfSpeech = 'all';
     _selectedState = 'all';
     _selectedTag = 'all';
+    _selectedDeckId = '';
     _searchQuery = '';
     _createdAfter = null;
     _createdBefore = null;

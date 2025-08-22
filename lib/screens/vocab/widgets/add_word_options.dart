@@ -4,17 +4,27 @@ import 'package:vocab_learner/widgets/blur_dialog.dart';
 import 'package:vocab_learner/widgets/toast_notification.dart';
 import '../../../providers/vocab_provider.dart';
 import 'add_word_dialog.dart';
+import 'import_from_image.dart';
 
-class AddWordOptionsDialog extends StatelessWidget {
+class AddWordOptionsDialog extends StatefulWidget {
   final VocabProvider vocabProvider;
+  final String deckId;
   final Function(FilePickerResult)? onFileSelected; // Add callback
 
-  const AddWordOptionsDialog({super.key, required this.vocabProvider, this.onFileSelected});
+  const AddWordOptionsDialog({
+    super.key,
+    required this.vocabProvider,
+    required this.deckId,
+    this.onFileSelected,
+  });
 
   @override
+  State<AddWordOptionsDialog> createState() => _AddWordOptionsDialogState();
+}
+
+class _AddWordOptionsDialogState extends State<AddWordOptionsDialog> {
+  @override
   Widget build(BuildContext context) {
-    // Use the root context for all async dialog operations
-    final rootContext = context;
     return AlertDialog(
       title: const Text('Add New Words'),
       content: const Text('How would you like to add new vocabulary words?'),
@@ -22,21 +32,35 @@ class AddWordOptionsDialog extends StatelessWidget {
         TextButton(
           onPressed: () {
             Navigator.of(context).pop();
-            _handleImportWords(rootContext);
+            _handleFileImport(context);
           },
           child: const Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(Icons.file_upload, size: 20),
               SizedBox(width: 8),
-              Text('Import'),
+              Text('Import File'),
             ],
           ),
         ),
         TextButton(
           onPressed: () {
             Navigator.of(context).pop();
-            _handleManualAdd(rootContext);
+            _handleImageImport(context);
+          },
+          child: const Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.image, size: 20),
+              SizedBox(width: 8),
+              Text('Import Image'),
+            ],
+          ),
+        ),
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+            _handleManualAdd(context);
           },
           child: const Row(
             mainAxisSize: MainAxisSize.min,
@@ -55,35 +79,40 @@ class AddWordOptionsDialog extends StatelessWidget {
     );
   }
 
-  void _handleImportWords(BuildContext rootContext) {
+  void _handleImageImport(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => Scaffold(
+          appBar: AppBar(
+            title: const Text('Import from Image'),
+            leading: IconButton(
+              icon: const Icon(Icons.close),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ),
+          body: ImportFromImage(vocabProvider: widget.vocabProvider, deckId: widget.deckId),
+        ),
+      ),
+    );
+  }
+
+  void _handleFileImport(BuildContext context) {
     showBlurDialog(
-      context: rootContext,
+      context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Import Words'),
+        title: const Text('Import from File'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Choose import method:'),
+            const Text('Choose file import method:'),
             const SizedBox(height: 16),
             ListTile(
-              leading: const Icon(Icons.file_copy),
-              title: const Text('From CSV File'),
-              subtitle: const Text('Import from comma-separated values file'),
-              onTap: () {
-                Navigator.of(dialogContext).pop();
-                ToastNotification.showInfo(
-                  rootContext,
-                  message: 'CSV import coming soon!',
-                );
-              },
-            ),
-            ListTile(
               leading: const Icon(Icons.cloud_download),
-              title: const Text('From File'),
-              subtitle: const Text('Import from TXT, CSV, or Excel file'),
+              title: const Text('From Google Translate Exported File'),
+              subtitle: const Text('Import from CSV, or Excel file'),
               onTap: () {
-                _showImportFromGoogleTranslate(rootContext, dialogContext);
+                _showImportFromGoogleTranslate(context, dialogContext);
               },
             ),
             ListTile(
@@ -93,7 +122,7 @@ class AddWordOptionsDialog extends StatelessWidget {
               onTap: () {
                 Navigator.of(dialogContext).pop();
                 ToastNotification.showInfo(
-                  rootContext,
+                  context,
                   message: 'URL import coming soon!',
                 );
               },
@@ -110,9 +139,9 @@ class AddWordOptionsDialog extends StatelessWidget {
     );
   }
 
-  void _handleManualAdd(BuildContext rootContext) {
+  void _handleManualAdd(BuildContext context) {
     showBlurDialog(
-      context: rootContext,
+      context: context,
       builder: (dialogContext) => AlertDialog(
         title: const Text('Manual Add'),
         content: Column(
@@ -122,12 +151,12 @@ class AddWordOptionsDialog extends StatelessWidget {
             const Text('Choose how to add words manually:'),
             const SizedBox(height: 16),
             ListTile(
-              leading: const Icon(Icons.add_circle),
+              leading: const Icon(Icons.add),
               title: const Text('Add Single Word'),
-              subtitle: const Text('Add one word with full details'),
+              subtitle: const Text('Add one word at a time with details'),
               onTap: () {
                 Navigator.of(dialogContext).pop();
-                _showAddSingleWordForm(rootContext);
+                _showAddSingleWordForm(context);
               },
             ),
             ListTile(
@@ -137,7 +166,7 @@ class AddWordOptionsDialog extends StatelessWidget {
               onTap: () {
                 Navigator.of(dialogContext).pop();
                 ToastNotification.showInfo(
-                  rootContext,
+                  context,
                   message: 'Quick add coming soon!',
                 );
               },
@@ -154,14 +183,14 @@ class AddWordOptionsDialog extends StatelessWidget {
     );
   }
 
-  void _showAddSingleWordForm(BuildContext rootContext) {
+  void _showAddSingleWordForm(BuildContext context) {
     showBlurDialog(
-      context: rootContext,
-      builder: (context) => AddWordDialog(vocabProvider: vocabProvider),
+      context: context,
+      builder: (context) => AddWordDialog(vocabProvider: widget.vocabProvider, deckId: widget.deckId),
     );
   }
 
-  Future<void> _showImportFromGoogleTranslate(BuildContext rootContext, BuildContext dialogContext) async {
+  Future<void> _showImportFromGoogleTranslate(BuildContext context, BuildContext dialogContext) async {
     try {
       // Close the current dialog first using the correct dialog context
       Navigator.of(dialogContext).pop();
@@ -175,40 +204,34 @@ class AddWordOptionsDialog extends StatelessWidget {
       if (result != null && result.files.isNotEmpty) {
         final filePath = result.files.single.path;
         if (filePath != null) {
-          // Use callback if provided, otherwise show error
-          if (onFileSelected != null) {
+          if (widget.onFileSelected != null) {
             debugPrint('File selected successfully, triggering callback');
-            onFileSelected!(result);
+            widget.onFileSelected!(result);
           } else {
             debugPrint('No callback provided for file selection');
-            // Show error message using root context if it's still mounted
-            if (rootContext.mounted) {
+            if (context.mounted) {
               ToastNotification.showError(
-                rootContext,
+                context,
                 message: 'Import feature not properly configured',
               );
             }
           }
         } else {
-          debugPrint('No file path available');
-          if (rootContext.mounted) {
+          if (context.mounted) {
             ToastNotification.showError(
-              rootContext,
+              context,
               message: 'Unable to access selected file',
             );
           }
         }
       } else {
         debugPrint('No file selected');
-        // User cancelled file selection, no need to show error
       }
     } catch (e) {
-      // Handle any errors that might occur during file picking
       debugPrint('Error in file picker: $e');
-      // Only show error if context is still valid
-      if (rootContext.mounted) {
+      if (context.mounted) {
         ToastNotification.showError(
-          rootContext,
+          context,
           message: 'Failed to select file: $e',
         );
       }
